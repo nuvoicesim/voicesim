@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scripts/Player/Input/PlayerInput.cs.meta
+guid: a6996464fbeb4f543bcd09bb7be4a4a8
+========
+guid: 7c1d6e52c678ac24ebea3ea047611f96
+>>>>>>>> feature_UI:Assets/Editor/SceneViewText.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

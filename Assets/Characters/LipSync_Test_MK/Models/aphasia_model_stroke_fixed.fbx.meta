@@ -1,0 +1,1546 @@
+fileFormatVersion: 2
+guid: b26b8aafa335f4f229008027ac838bd4
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects: {}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human:
+    - boneName: Humano_Hip
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Thigh
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Thigh
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Calf
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Calf
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Foot
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Foot
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_Waist
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_Spine01
+      humanName: Chest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_NeckTwist01
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_Head
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Clavicle
+      humanName: LeftShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Clavicle
+      humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Upperarm
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Upperarm
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Forearm
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Forearm
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Hand
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Hand
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_ToeBase
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_ToeBase
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Eye
+      humanName: LeftEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Eye
+      humanName: RightEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Thumb1
+      humanName: Left Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Thumb2
+      humanName: Left Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Thumb3
+      humanName: Left Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Index1
+      humanName: Left Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Index2
+      humanName: Left Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Index3
+      humanName: Left Index Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Mid1
+      humanName: Left Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Mid2
+      humanName: Left Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Mid3
+      humanName: Left Middle Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Ring1
+      humanName: Left Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Ring2
+      humanName: Left Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Ring3
+      humanName: Left Ring Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Pinky1
+      humanName: Left Little Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Pinky2
+      humanName: Left Little Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_L_Pinky3
+      humanName: Left Little Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Thumb1
+      humanName: Right Thumb Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Thumb2
+      humanName: Right Thumb Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Thumb3
+      humanName: Right Thumb Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Index1
+      humanName: Right Index Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Index2
+      humanName: Right Index Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Index3
+      humanName: Right Index Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Mid1
+      humanName: Right Middle Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Mid2
+      humanName: Right Middle Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Mid3
+      humanName: Right Middle Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Ring1
+      humanName: Right Ring Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Ring2
+      humanName: Right Ring Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Ring3
+      humanName: Right Ring Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Pinky1
+      humanName: Right Little Proximal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Pinky2
+      humanName: Right Little Intermediate
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_R_Pinky3
+      humanName: Right Little Distal
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Humano_Spine02
+      humanName: UpperChest
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    skeleton:
+    - name: aphasia_model_stroke_fixed(Clone)
+      parentName: 
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Body.001
+      parentName: aphasia_model_stroke_fixed(Clone)
+      position: {x: -9.41509e-10, y: -0.000000044878977, z: -0.000000031918788}
+      rotation: {x: -0.7071069, y: -4.3731457e-13, z: -7.717319e-14, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 99.99999}
+    - name: Head.001
+      parentName: aphasia_model_stroke_fixed(Clone)
+      position: {x: -9.41509e-10, y: -0.000000044878977, z: -0.000000031918788}
+      rotation: {x: -0.7071069, y: -4.3731457e-13, z: -7.717319e-14, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 99.99999}
+    - name: Humano_Rig_080-4620_01_T-LOD0-Skel.001
+      parentName: aphasia_model_stroke_fixed(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071069, y: 0, z: 0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Humano_BoneRoot
+      parentName: Humano_Rig_080-4620_01_T-LOD0-Skel.001
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.000000029802322, y: 8.0035517e-13, z: -5.093167e-13, w: 1}
+      scale: {x: 1, y: 0.9999998, z: 0.9999998}
+    - name: Humano_Hip
+      parentName: Humano_BoneRoot
+      position: {x: 3.914585e-13, y: 0.000000002489679, z: 0.009137106}
+      rotation: {x: 0.85743535, y: 0.00020588524, z: -0.00031475848, w: 0.5145916}
+      scale: {x: 0.99999946, y: 1.0000007, z: 1.0000005}
+    - name: Humano_Pelvis
+      parentName: Humano_Hip
+      position: {x: 2.1107957e-12, y: 0.0000000010181355, z: -2.5244468e-10}
+      rotation: {x: 0.12846324, y: -0.000000047126377, z: 0.00000036504935, w: 0.9917143}
+      scale: {x: 1.0000001, y: 0.9999995, z: 1}
+    - name: Humano_L_Thigh
+      parentName: Humano_Pelvis
+      position: {x: -0.0010197123, y: -0.00042997388, z: 0.00047849442}
+      rotation: {x: 0.00923292, y: 0.39370492, z: 0.91874105, w: -0.028743299}
+      scale: {x: 1.0000008, y: 1.0000008, z: 1.0000002}
+    - name: Humano_L_Calf
+      parentName: Humano_L_Thigh
+      position: {x: -0.00000014322832, y: 0.0039301612, z: -0.00000008734554}
+      rotation: {x: -0.07127409, y: -0.0026363782, z: -0.040354468, w: 0.9966367}
+      scale: {x: 1.0000005, y: 1.0000008, z: 1.0000002}
+    - name: Humano_L_Foot
+      parentName: Humano_L_Calf
+      position: {x: 0.00000008365831, y: 0.0035049259, z: -0.0000005061946}
+      rotation: {x: 0.5009618, y: 0.03864478, z: 0.008444798, w: 0.86456496}
+      scale: {x: 1, y: 1.0000008, z: 1.000001}
+    - name: Humano_L_ToeBase
+      parentName: Humano_L_Foot
+      position: {x: 0.00000005473499, y: 0.0014343687, z: -0.00000066063365}
+      rotation: {x: 0.17639233, y: -0.02530075, z: 0.019679515, w: 0.98379797}
+      scale: {x: 1.0000004, y: 1.0000001, z: 0.99999887}
+    - name: Humano_L_ToeBase_end
+      parentName: Humano_L_ToeBase
+      position: {x: 1.0806616e-10, y: 0.0014343689, z: 1.2951204e-11}
+      rotation: {x: 0.000000089406946, y: -0.0000004079192, z: -0.000000021420414, w: 1}
+      scale: {x: 1.0000008, y: 1.0000008, z: 1.0000004}
+    - name: Humano_L_ToeBase_end_end
+      parentName: Humano_L_ToeBase_end
+      position: {x: 4.2782628e-11, y: 0.001434369, z: -6.140908e-11}
+      rotation: {x: -0.00000004470348, y: -0.00000020116563, z: -0.00000002700831, w: 1}
+      scale: {x: 1, y: 0.9999994, z: 0.9999997}
+    - name: Humano_L_ToeBase_end_end_end
+      parentName: Humano_L_ToeBase_end_end
+      position: {x: 1.3824319e-11, y: 0.0014343687, z: -1.0622898e-10}
+      rotation: {x: -0.00000004470346, y: 0.0000006332992, z: 0.00000007543711, w: 1}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1.0000006}
+    - name: Humano_L_ToeBase_end_end_end_end
+      parentName: Humano_L_ToeBase_end_end_end
+      position: {x: -5.122274e-11, y: 0.0014343689, z: 1.0913936e-11}
+      rotation: {x: 0.000000014901156, y: -0.00000021234145, z: -0.000000024680041, w: 1}
+      scale: {x: 1.0000005, y: 1.0000001, z: 1.0000002}
+    - name: Humano_L_ToeBase_end_end_end_end_end
+      parentName: Humano_L_ToeBase_end_end_end_end
+      position: {x: -0, y: 0.0014343692, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_CalfTwist01
+      parentName: Humano_L_Calf
+      position: {x: 6.976188e-10, y: 0.0000000046996864, z: 3.2800015e-10}
+      rotation: {x: 0.0000011324881, y: -0.00077141647, z: 0.00000010922666, w: 0.99999976}
+      scale: {x: 1.0000006, y: 1.0000013, z: 1.0000005}
+    - name: Humano_L_CalfTwist02
+      parentName: Humano_L_CalfTwist01
+      position: {x: 0.000000044886182, y: 0.0017524629, z: -0.0000002570718}
+      rotation: {x: -0.0000036905253, y: -0.02299914, z: -0.00000035585978, w: 0.99973553}
+      scale: {x: 1.0000005, y: 1.0000006, z: 1.0000006}
+    - name: Humano_L_CalfTwist02_end
+      parentName: Humano_L_CalfTwist02
+      position: {x: 9.3277774e-11, y: 0.0017524598, z: 2.3283064e-12}
+      rotation: {x: -6.6665945e-10, y: -0.000000024214382, z: -0.000000028048206, w: 1}
+      scale: {x: 1.0000004, y: 1.0000007, z: 0.9999995}
+    - name: Humano_L_CalfTwist02_end_end
+      parentName: Humano_L_CalfTwist02_end
+      position: {x: 6.4610504e-11, y: 0.0017524608, z: 9.3132255e-12}
+      rotation: {x: 0.0000000023906057, y: 0.000000096857526, z: 0.00000010055467, w: 1}
+      scale: {x: 1.0000008, y: 1.0000008, z: 1.0000002}
+    - name: Humano_L_CalfTwist02_end_end_end
+      parentName: Humano_L_CalfTwist02_end_end
+      position: {x: -1.7462297e-11, y: 0.0017524592, z: 4.6566128e-12}
+      rotation: {x: -0.0000000026727762, y: -0.000000106170745, z: -0.000000112425674, w: 1}
+      scale: {x: 1.0000005, y: 1.0000002, z: 1}
+    - name: Humano_L_CalfTwist02_end_end_end_end
+      parentName: Humano_L_CalfTwist02_end_end_end
+      position: {x: -3.259629e-11, y: 0.0017524591, z: 4.1909514e-11}
+      rotation: {x: 6.6665923e-10, y: 0.000000026077027, z: 0.00000002804822, w: 1}
+      scale: {x: 1.0000006, y: 1.0000006, z: 0.99999994}
+    - name: Humano_L_CalfTwist02_end_end_end_end_end
+      parentName: Humano_L_CalfTwist02_end_end_end_end
+      position: {x: -0, y: 0.0017524591, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_ThighTwist01
+      parentName: Humano_L_Thigh
+      position: {x: -0.0000000011055635, y: -0.0000000025413465, z: -6.402843e-11}
+      rotation: {x: -0.00000877402, y: -0.0019702243, z: 0.00006335718, w: 0.9999981}
+      scale: {x: 0.9999999, y: 1.0000011, z: 1.0000006}
+    - name: Humano_L_ThighTwist02
+      parentName: Humano_L_ThighTwist01
+      position: {x: 0.00000017830418, y: 0.001965214, z: -0.000000021114683}
+      rotation: {x: -0.0000061371356, y: 0.001973564, z: -0.000054608252, w: 0.9999981}
+      scale: {x: 1.0000013, y: 1.0000007, z: 1.0000005}
+    - name: Humano_L_ThighTwist02_end
+      parentName: Humano_L_ThighTwist02
+      position: {x: 1.3606041e-11, y: 0.0019652108, z: 5.0349627e-11}
+      rotation: {x: 0.00000002843398, y: -0.00000005122273, z: -0.00000005401581, w: 1}
+      scale: {x: 1.0000004, y: 1.0000002, z: 0.9999999}
+    - name: Humano_L_ThighTwist02_end_end
+      parentName: Humano_L_ThighTwist02_end
+      position: {x: -3.2014213e-12, y: 0.001965208, z: 4.6566128e-12}
+      rotation: {x: -0.000000026425816, y: 0.00000012386587, z: 0.00000011921003, w: 1}
+      scale: {x: 1.0000007, y: 1.0000008, z: 1.0000004}
+    - name: Humano_L_ThighTwist02_end_end_end
+      parentName: Humano_L_ThighTwist02_end_end
+      position: {x: -4.06726e-11, y: 0.0019652084, z: 5.8207657e-12}
+      rotation: {x: -0.000000094034455, y: -0.0000001667067, z: -0.00000015902431, w: 1}
+      scale: {x: 1.0000002, y: 1.0000006, z: 1.0000002}
+    - name: Humano_L_ThighTwist02_end_end_end_end
+      parentName: Humano_L_ThighTwist02_end_end_end
+      position: {x: 4.0745363e-12, y: 0.0019652091, z: -1.01863405e-11}
+      rotation: {x: 0.00000009048288, y: 0.000000036321588, z: 0.00000002305043, w: 1}
+      scale: {x: 1.0000007, y: 1.0000005, z: 1}
+    - name: Humano_L_ThighTwist02_end_end_end_end_end
+      parentName: Humano_L_ThighTwist02_end_end_end_end
+      position: {x: -0, y: 0.0019652087, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Thigh
+      parentName: Humano_Pelvis
+      position: {x: 0.0010196789, y: -0.00042997132, z: 0.00047856182}
+      rotation: {x: -0.006761399, y: 0.3907209, z: 0.9202173, w: 0.022172317}
+      scale: {x: 1, y: 1.0000011, z: 1.0000012}
+    - name: Humano_R_ThighTwist01
+      parentName: Humano_R_Thigh
+      position: {x: -3.700006e-10, y: 0.000000003214518, z: -3.5855918e-10}
+      rotation: {x: -0.000014855948, y: 0.0016947947, z: -0.000008365372, w: 0.9999986}
+      scale: {x: 1.0000011, y: 1.0000004, z: 0.9999997}
+    - name: Humano_R_ThighTwist02
+      parentName: Humano_R_ThighTwist01
+      position: {x: 0.00000003969155, y: 0.001964932, z: 0.0000000043108592}
+      rotation: {x: -0.00000030705542, y: -0.0016982723, z: 0.00000020962962, w: 0.9999986}
+      scale: {x: 1.0000007, y: 1.0000015, z: 1.0000005}
+    - name: Humano_R_ThighTwist02_end
+      parentName: Humano_R_ThighTwist02
+      position: {x: 5.12955e-11, y: 0.0019649335, z: -2.881279e-11}
+      rotation: {x: 6.6927436e-10, y: -0.000000032596287, z: -0.00000003166574, w: 1}
+      scale: {x: 1.0000002, y: 1.0000005, z: 0.99999934}
+    - name: Humano_R_ThighTwist02_end_end
+      parentName: Humano_R_ThighTwist02_end
+      position: {x: -4.6420607e-11, y: 0.0019649318, z: 2.9103829e-12}
+      rotation: {x: -0.0000000012936702, y: 0.00000006426124, z: 0.00000008009611, w: 1}
+      scale: {x: 1.0000004, y: 1.0000002, z: 1.0000004}
+    - name: Humano_R_ThighTwist02_end_end_end
+      parentName: Humano_R_ThighTwist02_end_end
+      position: {x: 7.2031977e-12, y: 0.0019649328, z: -6.577466e-11}
+      rotation: {x: -8.861843e-11, y: 0.000000003725297, z: -0.000000009314838, w: 1}
+      scale: {x: 1, y: 1, z: 0.99999964}
+    - name: Humano_R_ThighTwist02_end_end_end_end
+      parentName: Humano_R_ThighTwist02_end_end_end
+      position: {x: -2.4301698e-11, y: 0.001964932, z: 4.9767548e-11}
+      rotation: {x: 2.0347116e-10, y: -0.00000001117587, z: -0.000000016763439, w: 1}
+      scale: {x: 1.0000001, y: 1, z: 1}
+    - name: Humano_R_ThighTwist02_end_end_end_end_end
+      parentName: Humano_R_ThighTwist02_end_end_end_end
+      position: {x: -0, y: 0.0019649323, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Calf
+      parentName: Humano_R_Thigh
+      position: {x: 0.00000014426172, y: 0.003930166, z: -0.0000001376582}
+      rotation: {x: -0.064262584, y: 0.0022579345, z: 0.027175903, w: 0.9975603}
+      scale: {x: 1.0000001, y: 0.9999997, z: 0.9999992}
+    - name: Humano_R_Foot
+      parentName: Humano_R_Calf
+      position: {x: -0.00000008035163, y: 0.003492328, z: -0.00000054692487}
+      rotation: {x: 0.49829, y: -0.061340205, z: 0.029885821, w: 0.86432123}
+      scale: {x: 0.9999989, y: 0.9999995, z: 1.0000004}
+    - name: Humano_R_ToeBase
+      parentName: Humano_R_Foot
+      position: {x: -0.000000005664624, y: 0.0014480659, z: 8.335337e-10}
+      rotation: {x: 0.17659815, y: 0.025299527, z: -0.019699572, w: 0.98376065}
+      scale: {x: 1.0000008, y: 0.9999991, z: 0.99999917}
+    - name: Humano_R_ToeBase_end
+      parentName: Humano_R_ToeBase
+      position: {x: -1.7374986e-10, y: 0.0014480659, z: 2.3283064e-12}
+      rotation: {x: -0.00000005960465, y: 0.0000016782434, z: -0.000000014901163, w: 1}
+      scale: {x: 1.0000017, y: 1.0000006, z: 1.0000011}
+    - name: Humano_R_ToeBase_end_end
+      parentName: Humano_R_ToeBase_end
+      position: {x: -1.9790605e-11, y: 0.0014480653, z: 4.1909514e-11}
+      rotation: {x: -0.0000002086164, y: -0.0000010598451, z: 0.00000007357407, w: 1}
+      scale: {x: 1.0000001, y: 1.0000008, z: 0.99999994}
+    - name: Humano_R_ToeBase_end_end_end
+      parentName: Humano_R_ToeBase_end_end
+      position: {x: -1.16415315e-11, y: 0.001448065, z: -7.916242e-11}
+      rotation: {x: 0.00000019371514, y: -0.0000002719463, z: -0.00000003213058, w: 1}
+      scale: {x: 1.0000012, y: 1.0000005, z: 1.0000007}
+    - name: Humano_R_ToeBase_end_end_end_end
+      parentName: Humano_R_ToeBase_end_end_end
+      position: {x: -9.778887e-11, y: 0.0014480666, z: -6.984919e-12}
+      rotation: {x: -0.00000007450584, y: -0.0000006854535, z: -0.000000046566214, w: 1}
+      scale: {x: 1.0000005, y: 1.0000002, z: 1.0000004}
+    - name: Humano_R_ToeBase_end_end_end_end_end
+      parentName: Humano_R_ToeBase_end_end_end_end
+      position: {x: -0, y: 0.0014480663, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_CalfTwist01
+      parentName: Humano_R_Calf
+      position: {x: 3.2727257e-10, y: 4.4412443e-10, z: 1.2660166e-11}
+      rotation: {x: -0.00006956608, y: 0.0012781435, z: 0.000011755911, w: 0.9999992}
+      scale: {x: 0.99999994, y: 1.000001, z: 1.0000005}
+    - name: Humano_R_CalfTwist02
+      parentName: Humano_R_CalfTwist01
+      position: {x: -0.000000002680972, y: 0.0017461665, z: -0.000000008548377}
+      rotation: {x: 0.00006720339, y: 0.021043569, z: -0.000010161825, w: 0.99977857}
+      scale: {x: 1.0000012, y: 1.0000005, z: 0.9999991}
+    - name: Humano_R_CalfTwist02_end
+      parentName: Humano_R_CalfTwist02
+      position: {x: -1.1983502e-10, y: 0.0017461661, z: 6.984919e-12}
+      rotation: {x: 0.000000029780495, y: 0.000000007450581, z: 0.0000000012478267, w: 1}
+      scale: {x: 1.0000017, y: 1.0000014, z: 1.0000012}
+    - name: Humano_R_CalfTwist02_end_end
+      parentName: Humano_R_CalfTwist02_end
+      position: {x: 1.02154445e-10, y: 0.0017461663, z: 4.6566128e-12}
+      rotation: {x: 4.5110937e-10, y: -0.000000022351742, z: -0.00000002001832, w: 1}
+      scale: {x: 1.0000013, y: 1.0000012, z: 1}
+    - name: Humano_R_CalfTwist02_end_end_end
+      parentName: Humano_R_CalfTwist02_end_end
+      position: {x: -3.4924596e-12, y: 0.0017461651, z: 4.6566128e-12}
+      rotation: {x: -0.000000038686267, y: 0.000000070780516, z: 0.0000000635298, w: 1}
+      scale: {x: 1.0000013, y: 1.0000014, z: 1}
+    - name: Humano_R_CalfTwist02_end_end_end_end
+      parentName: Humano_R_CalfTwist02_end_end_end
+      position: {x: -1.3504177e-10, y: 0.0017461644, z: -1.3969838e-11}
+      rotation: {x: 0.000000008432835, y: -0.000000040978193, z: -0.000000043712134, w: 1}
+      scale: {x: 1.0000015, y: 1.0000013, z: 0.9999997}
+    - name: Humano_R_CalfTwist02_end_end_end_end_end
+      parentName: Humano_R_CalfTwist02_end_end_end_end
+      position: {x: -0, y: 0.0017461652, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_Waist
+      parentName: Humano_Hip
+      position: {x: 0.0000000018336687, y: 0.0011822333, z: 0.00023056609}
+      rotation: {x: -0.27133763, y: 0.00009134524, z: 0.0003654322, w: 0.9624842}
+      scale: {x: 0.99999976, y: 0.99999994, z: 0.9999996}
+    - name: Humano_Spine01
+      parentName: Humano_Waist
+      position: {x: 0.0000000019612718, y: 0.00044173002, z: -0.000000008605222}
+      rotation: {x: -0.0015965104, y: -0.0000004212052, z: -0.0000023100201, w: 0.9999988}
+      scale: {x: 0.9999998, y: 0.9999998, z: 1.0000001}
+    - name: Humano_Spine02
+      parentName: Humano_Spine01
+      position: {x: -2.2225777e-11, y: 0.0011043226, z: 0.00000005301046}
+      rotation: {x: -0.1402074, y: -0.000023157852, z: -0.00000373258, w: 0.9901222}
+      scale: {x: 1.0000001, y: 0.99999994, z: 0.9999997}
+    - name: Humano_NeckTwist01
+      parentName: Humano_Spine02
+      position: {x: 4.1636564e-10, y: 0.0024161641, z: -0.00000022242494}
+      rotation: {x: 0.39386392, y: 0.000014158977, z: 0.0000075046883, w: 0.9191688}
+      scale: {x: 1.0000004, y: 1, z: 1.0000002}
+    - name: Humano_NeckTwist02
+      parentName: Humano_NeckTwist01
+      position: {x: -5.1799842e-11, y: 0.00045640522, z: -0.0000000067035555}
+      rotation: {x: 0.0000081658345, y: 0.000014185721, z: 0.00000045918011, w: 1}
+      scale: {x: 0.99999994, y: 1.0000001, z: 1.0000007}
+    - name: Humano_Head
+      parentName: Humano_NeckTwist02
+      position: {x: 3.9353493e-10, y: 0.00045640583, z: -0.000000015022934}
+      rotation: {x: -0.2305051, y: -0.00003694973, z: -0.000006134059, w: 0.97307116}
+      scale: {x: 1.0000002, y: 0.9999998, z: 1.000001}
+    - name: Humano_R_Eye
+      parentName: Humano_Head
+      position: {x: 0.00032224663, y: 0.00067789346, z: 0.00086912495}
+      rotation: {x: 0.70680165, y: 0.0015225328, z: 0.0015566123, w: 0.70740855}
+      scale: {x: 0.9999998, y: 0.9999997, z: 0.9999994}
+    - name: Humano_R_Eye_end
+      parentName: Humano_R_Eye
+      position: {x: -4.206413e-11, y: 0.0011555662, z: -7.5960993e-10}
+      rotation: {x: -0.000000029802315, y: -0.00018445514, z: -0.00000012700909, w: 1}
+      scale: {x: 0.99999994, y: 1, z: 1.0000007}
+    - name: Humano_R_Eye_end_end
+      parentName: Humano_R_Eye_end
+      position: {x: -1.8189894e-14, y: 0.0011555665, z: 6.3868355e-10}
+      rotation: {x: -0.00000071525625, y: 0.00014171911, z: 0.00000009350123, w: 1}
+      scale: {x: 0.9999997, y: 1, z: 1}
+    - name: Humano_R_Eye_end_end_end
+      parentName: Humano_R_Eye_end_end
+      position: {x: 1.868102e-11, y: 0.0011555663, z: 5.509355e-10}
+      rotation: {x: 0.0000006258454, y: 0.00007488564, z: -0.000000013125887, w: 1}
+      scale: {x: 0.9999998, y: 1.000001, z: 1.0000005}
+    - name: Humano_R_Eye_end_end_end_end
+      parentName: Humano_R_Eye_end_end_end
+      position: {x: -8.949428e-12, y: 0.0011555662, z: -9.343785e-10}
+      rotation: {x: 0.00000011921189, y: -0.00004334025, z: -0.000000015833825, w: 1}
+      scale: {x: 1.0000002, y: 0.99999994, z: 0.9999999}
+    - name: Humano_R_Eye_end_end_end_end_end
+      parentName: Humano_R_Eye_end_end_end_end
+      position: {x: -0, y: 0.0011555662, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Eye
+      parentName: Humano_Head
+      position: {x: -0.00034303928, y: 0.00068152917, z: 0.00087740924}
+      rotation: {x: 0.7067979, y: 0.00151697, z: 0.0015509243, w: 0.7074122}
+      scale: {x: 0.9999995, y: 0.99999917, z: 0.9999994}
+    - name: Humano_L_Eye_end
+      parentName: Humano_L_Eye
+      position: {x: 2.1191226e-12, y: 0.0011555662, z: 0.000000001106091}
+      rotation: {x: -0.000000059604638, y: -0.00014654871, z: -0.000000046798952, w: 1}
+      scale: {x: 1.0000002, y: 1.0000002, z: 1}
+    - name: Humano_L_Eye_end_end
+      parentName: Humano_L_Eye_end
+      position: {x: 3.8380677e-11, y: 0.0011555675, z: 4.454341e-10}
+      rotation: {x: -0.0000000298005, y: 0.00021369217, z: 0.000000080692914, w: 1}
+      scale: {x: 1.0000001, y: 1.0000006, z: 1.000001}
+    - name: Humano_L_Eye_end_end_end
+      parentName: Humano_L_Eye_end_end
+      position: {x: 4.1709428e-11, y: 0.001155567, z: -3.04135e-11}
+      rotation: {x: 0.000000029800846, y: -0.00017094739, z: -0.00000006427453, w: 1}
+      scale: {x: 0.99999994, y: 1.0000006, z: 0.99999994}
+    - name: Humano_L_Eye_end_end_end_end
+      parentName: Humano_L_Eye_end_end_end
+      position: {x: -3.1650416e-12, y: 0.0011555662, z: 5.243055e-10}
+      rotation: {x: 0.00000005960538, y: 0.000085481784, z: 0.000000032129527, w: 1}
+      scale: {x: 1.0000004, y: 1.0000002, z: 1.0000004}
+    - name: Humano_L_Eye_end_end_end_end_end
+      parentName: Humano_L_Eye_end_end_end_end
+      position: {x: -0, y: 0.0011555662, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Clavicle
+      parentName: Humano_Spine02
+      position: {x: -0.0007101007, y: 0.0020305633, z: -0.0002088777}
+      rotation: {x: 0.119452566, y: -0.12420665, z: 0.6983439, w: 0.69470847}
+      scale: {x: 1.0000007, y: 1.0000004, z: 1.0000006}
+    - name: Humano_L_Upperarm
+      parentName: Humano_L_Clavicle
+      position: {x: -0.000000012923047, y: 0.0011351791, z: 0.000000020260922}
+      rotation: {x: 0.001985527, y: -0.00080388767, z: -0.0036020158, w: 0.9999913}
+      scale: {x: 1, y: 0.9999995, z: 0.99999917}
+    - name: Humano_L_Forearm
+      parentName: Humano_L_Upperarm
+      position: {x: 0.0000000067090147, y: 0.0025111446, z: 0.000000013763783}
+      rotation: {x: 0.0012258056, y: 0.0017798048, z: 0.0003638179, w: 0.9999976}
+      scale: {x: 1.000001, y: 1.0000014, z: 1.0000007}
+    - name: Humano_L_ForearmTwist01
+      parentName: Humano_L_Forearm
+      position: {x: -0.0000000022230238, y: 0.0000000012039163, z: 3.355126e-11}
+      rotation: {x: -0.00000074726967, y: 0.0061110556, z: 0.00000040279232, w: 0.99998134}
+      scale: {x: 1.0000013, y: 1.0000006, z: 0.99999934}
+    - name: Humano_L_ForearmTwist02
+      parentName: Humano_L_ForearmTwist01
+      position: {x: 0.000000029028305, y: 0.0012125087, z: 0.00000003020221}
+      rotation: {x: -0.0000031058867, y: -0.0013445916, z: 0.0000043856803, w: 0.9999991}
+      scale: {x: 0.9999992, y: 1.0000005, z: 0.9999995}
+    - name: Humano_L_ForearmTwist02_end
+      parentName: Humano_L_ForearmTwist02
+      position: {x: 5.4846166e-10, y: 0.0012125077, z: -1.04773785e-11}
+      rotation: {x: -0.000000055742678, y: 0.0000019663703, z: 0.0000020979846, w: 1}
+      scale: {x: 0.9999999, y: 1.0000004, z: 1}
+    - name: Humano_L_ForearmTwist02_end_end
+      parentName: Humano_L_ForearmTwist02_end
+      position: {x: -0.0000000013767567, y: 0.0012125096, z: 1.6880221e-11}
+      rotation: {x: 0.000000018453546, y: -0.0000020037396, z: -0.0000020906664, w: 1}
+      scale: {x: 1.0000002, y: 1, z: 0.99999976}
+    - name: Humano_L_ForearmTwist02_end_end_end
+      parentName: Humano_L_ForearmTwist02_end_end
+      position: {x: -5.3696565e-11, y: 0.0012125083, z: 3.0267983e-11}
+      rotation: {x: 0.000000049280438, y: -0.0000014423849, z: -0.0000013276579, w: 1}
+      scale: {x: 1, y: 1.0000002, z: 0.99999976}
+    - name: Humano_L_ForearmTwist02_end_end_end_end
+      parentName: Humano_L_ForearmTwist02_end_end_end
+      position: {x: -0.000000001364242, y: 0.0012125088, z: 2.910383e-11}
+      rotation: {x: -0.000000011991689, y: 0.0000014796378, z: 0.0000013203394, w: 1}
+      scale: {x: 0.9999998, y: 0.99999976, z: 0.9999998}
+    - name: Humano_L_ForearmTwist02_end_end_end_end_end
+      parentName: Humano_L_ForearmTwist02_end_end_end_end
+      position: {x: -0, y: 0.0012125077, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Hand
+      parentName: Humano_L_Forearm
+      position: {x: -0.0000000028495808, y: 0.002425016, z: -0.0000000018079026}
+      rotation: {x: -0.000666126, y: 0.0072704107, z: 0.00017652188, w: 0.99997336}
+      scale: {x: 1.0000005, y: 1.0000002, z: 0.9999992}
+    - name: Humano_L_Mid1
+      parentName: Humano_L_Hand
+      position: {x: 0.00005841465, y: 0.000947234, z: 0.00010203404}
+      rotation: {x: 0.000044254564, y: 0.0033330347, z: -0.00015406804, w: 0.99999446}
+      scale: {x: 1, y: 1, z: 1.0000001}
+    - name: Humano_L_Mid2
+      parentName: Humano_L_Mid1
+      position: {x: -0.0000000010618533, y: 0.00038602937, z: 1.8335413e-11}
+      rotation: {x: 0.00038956784, y: -0.0035207018, z: 0.00013543584, w: 0.99999374}
+      scale: {x: 1.0000007, y: 1, z: 0.9999998}
+    - name: Humano_L_Mid3
+      parentName: Humano_L_Mid2
+      position: {x: -5.611946e-10, y: 0.0002801339, z: 1.542503e-11}
+      rotation: {x: 0.00035587195, y: -0.000076042685, z: 0.0006391765, w: 0.99999976}
+      scale: {x: 1.0000006, y: 1.0000014, z: 1.0000008}
+    - name: Humano_L_Mid3_end
+      parentName: Humano_L_Mid3
+      position: {x: 5.7174476e-10, y: 0.00028013624, z: 0}
+      rotation: {x: 0.00000008282946, y: 0.000008553467, z: 0.000008578213, w: 1}
+      scale: {x: 0.9999996, y: 0.9999995, z: 0.99999934}
+    - name: Humano_L_Mid3_end_end
+      parentName: Humano_L_Mid3_end
+      position: {x: -6.61239e-10, y: 0.00028013324, z: -1.6880221e-11}
+      rotation: {x: 0.000000014902213, y: -0.000006370244, z: -0.0000065127388, w: 1}
+      scale: {x: 1.0000005, y: 1.0000004, z: 1.0000002}
+    - name: Humano_L_Mid3_end_end_end
+      parentName: Humano_L_Mid3_end_end
+      position: {x: -0.0000000010493386, y: 0.00028013307, z: -1.9208527e-11}
+      rotation: {x: 0.00000016894802, y: -0.000006383029, z: -0.000006221872, w: 1}
+      scale: {x: 1.0000005, y: 1.0000002, z: 0.99999964}
+    - name: Humano_L_Mid3_end_end_end_end
+      parentName: Humano_L_Mid3_end_end_end
+      position: {x: -0.000000001443841, y: 0.0002801341, z: 4.0745363e-12}
+      rotation: {x: -0.00000007316687, y: 0.000004222973, z: 0.000004199634, w: 1}
+      scale: {x: 1.0000005, y: 1.0000004, z: 1.0000005}
+    - name: Humano_L_Mid3_end_end_end_end_end
+      parentName: Humano_L_Mid3_end_end_end_end
+      position: {x: -0, y: 0.00028013444, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Index1
+      parentName: Humano_L_Hand
+      position: {x: -0.00002535278, y: 0.00097209826, z: 0.00033870526}
+      rotation: {x: 0.0007986222, y: 0.0039487905, z: -0.0003936545, w: 0.9999918}
+      scale: {x: 0.9999999, y: 0.9999992, z: 0.9999999}
+    - name: Humano_L_Index2
+      parentName: Humano_L_Index1
+      position: {x: -0.0000000025256304, y: 0.00034165874, z: 1.7462298e-12}
+      rotation: {x: -0.0005289498, y: -0.0052203047, z: 0.000441343, w: 0.9999861}
+      scale: {x: 1.0000005, y: 0.9999998, z: 0.999999}
+    - name: Humano_L_Index3
+      parentName: Humano_L_Index2
+      position: {x: 0.0000000017922138, y: 0.0002498028, z: 3.45608e-11}
+      rotation: {x: 0.00018768737, y: -0.0000053588296, z: 0.00025019355, w: 1}
+      scale: {x: 0.9999995, y: 1.0000004, z: 1.0000002}
+    - name: Humano_L_Index3_end
+      parentName: Humano_L_Index3
+      position: {x: 4.3219187e-10, y: 0.0002498, z: 1.3387761e-11}
+      rotation: {x: 0.00000008550703, y: 0.0000096568065, z: 0.000009636575, w: 1}
+      scale: {x: 1.0000005, y: 1.0000004, z: 1.0000004}
+    - name: Humano_L_Index3_end_end
+      parentName: Humano_L_Index3_end
+      position: {x: -8.936331e-10, y: 0.00024980138, z: 2.881279e-11}
+      rotation: {x: -0.00000015654987, y: 0.000021469656, z: 0.000021467895, w: 1}
+      scale: {x: 1.0000005, y: 1.0000011, z: 0.9999998}
+    - name: Humano_L_Index3_end_end_end
+      parentName: Humano_L_Index3_end_end
+      position: {x: -2.561137e-11, y: 0.00024980353, z: 8.731149e-13}
+      rotation: {x: -0.000000007926343, y: -0.000019057521, z: -0.000019186817, w: 1}
+      scale: {x: 1.0000004, y: 1.0000006, z: 1.0000001}
+    - name: Humano_L_Index3_end_end_end_end
+      parentName: Humano_L_Index3_end_end_end
+      position: {x: 3.4255207e-10, y: 0.0002498019, z: 2.9103829e-12}
+      rotation: {x: 0.00000005771034, y: 0.0000046938244, z: 0.0000048440893, w: 1}
+      scale: {x: 1.0000004, y: 1.0000008, z: 1.0000002}
+    - name: Humano_L_Index3_end_end_end_end_end
+      parentName: Humano_L_Index3_end_end_end_end
+      position: {x: -0, y: 0.00024980135, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Ring1
+      parentName: Humano_L_Hand
+      position: {x: 0.000025567288, y: 0.0009179086, z: -0.00010104056}
+      rotation: {x: 0.000837583, y: -0.0000144937, z: 0.0010787145, w: 0.99999905}
+      scale: {x: 1.0000002, y: 0.9999992, z: 1.0000002}
+    - name: Humano_L_Ring2
+      parentName: Humano_L_Ring1
+      position: {x: -1.580338e-10, y: 0.00034626588, z: 3.4924596e-12}
+      rotation: {x: -0.0005950294, y: 0.00013051706, z: -0.000757382, w: 0.9999996}
+      scale: {x: 1.0000013, y: 1.0000008, z: 0.9999988}
+    - name: Humano_L_Ring3
+      parentName: Humano_L_Ring2
+      position: {x: 5.940092e-10, y: 0.0002518964, z: 1.7607816e-11}
+      rotation: {x: -0.00011850796, y: 0.00017284503, z: -0.00047050457, w: 0.9999999}
+      scale: {x: 0.9999998, y: 1.0000005, z: 1.0000004}
+    - name: Humano_L_Ring3_end
+      parentName: Humano_L_Ring3
+      position: {x: 4.605681e-10, y: 0.0002518883, z: 1.4551915e-11}
+      rotation: {x: 0.00000075615355, y: -0.000011817547, z: -0.0000117488125, w: 1}
+      scale: {x: 1.000001, y: 1.0000017, z: 1.000001}
+    - name: Humano_L_Ring3_end_end
+      parentName: Humano_L_Ring3_end
+      position: {x: -6.635673e-10, y: 0.00025189266, z: -1.8335413e-11}
+      rotation: {x: -0.00000020061152, y: 0.000009496536, z: 0.000009521968, w: 1}
+      scale: {x: 1.0000004, y: 0.9999999, z: 0.99999964}
+    - name: Humano_L_Ring3_end_end_end
+      parentName: Humano_L_Ring3_end_end
+      position: {x: 0.0000000016560079, y: 0.000251891, z: 1.7753337e-11}
+      rotation: {x: 0.000000025313996, y: 0.000011817555, z: 0.000011814544, w: 1}
+      scale: {x: 1.0000001, y: 0.9999992, z: 1.0000002}
+    - name: Humano_L_Ring3_end_end_end_end
+      parentName: Humano_L_Ring3_end_end_end
+      position: {x: 7.468043e-10, y: 0.00025188975, z: -6.4028427e-12}
+      rotation: {x: -0.000000088483645, y: -0.0000070738315, z: -0.0000070554825, w: 1}
+      scale: {x: 1.0000002, y: 1.0000001, z: 0.99999994}
+    - name: Humano_L_Ring3_end_end_end_end_end
+      parentName: Humano_L_Ring3_end_end_end_end
+      position: {x: -0, y: 0.00025188987, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Pinky1
+      parentName: Humano_L_Hand
+      position: {x: -0.000028515517, y: 0.0008230997, z: -0.00029971424}
+      rotation: {x: 0.00040756582, y: 0.00015889101, z: -0.00040124985, w: 0.9999999}
+      scale: {x: 1.0000004, y: 1.0000001, z: 1.0000002}
+    - name: Humano_L_Pinky2
+      parentName: Humano_L_Pinky1
+      position: {x: 1.6705598e-10, y: 0.00023265058, z: 2.0663719e-11}
+      rotation: {x: 0.00028299866, y: 0.0013796411, z: 0.0001402605, w: 0.99999905}
+      scale: {x: 1.0000006, y: 1.0000011, z: 0.9999992}
+    - name: Humano_L_Pinky3
+      parentName: Humano_L_Pinky2
+      position: {x: 5.7538274e-10, y: 0.00018251048, z: -3.4924596e-12}
+      rotation: {x: -0.00029846694, y: -0.000048975206, z: 0.0009059623, w: 0.9999995}
+      scale: {x: 1.000001, y: 1.0000007, z: 0.9999999}
+    - name: Humano_L_Pinky3_end
+      parentName: Humano_L_Pinky3
+      position: {x: -2.4971086e-10, y: 0.00018251523, z: -5.8062142e-11}
+      rotation: {x: 0.0000009379869, y: -0.000013052647, z: -0.000012799106, w: 1}
+      scale: {x: 1.0000006, y: 1.0000008, z: 1.0000004}
+    - name: Humano_L_Pinky3_end_end
+      parentName: Humano_L_Pinky3_end
+      position: {x: -3.5099218e-10, y: 0.00018251428, z: 1.12049744e-11}
+      rotation: {x: -0.000000507539, y: 0.000013046395, z: 0.000012979419, w: 1}
+      scale: {x: 0.99999976, y: 0.99999976, z: 0.9999999}
+    - name: Humano_L_Pinky3_end_end_end
+      parentName: Humano_L_Pinky3_end_end
+      position: {x: -0.0000000013236422, y: 0.00018251494, z: -8.571078e-11}
+      rotation: {x: -0.0000002650491, y: -0.0000032655983, z: -0.0000033800432, w: 1}
+      scale: {x: 1.0000006, y: 1.0000002, z: 1.0000002}
+    - name: Humano_L_Pinky3_end_end_end_end
+      parentName: Humano_L_Pinky3_end_end_end
+      position: {x: 7.1595424e-11, y: 0.00018251372, z: 1.03318595e-11}
+      rotation: {x: 0.0000002880109, y: -0.0000065246813, z: -0.0000065253957, w: 1}
+      scale: {x: 1.0000002, y: 1.0000002, z: 1.0000001}
+    - name: Humano_L_Pinky3_end_end_end_end_end
+      parentName: Humano_L_Pinky3_end_end_end_end
+      position: {x: -0, y: 0.00018251318, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_Thumb1
+      parentName: Humano_L_Hand
+      position: {x: -0.00019950386, y: 0.0003397953, z: 0.00033509664}
+      rotation: {x: 0.37614876, y: 0.20859599, z: 0.1525238, w: 0.8897957}
+      scale: {x: 1.0000007, y: 1.0000005, z: 1.0000005}
+    - name: Humano_L_Thumb2
+      parentName: Humano_L_Thumb1
+      position: {x: -4.0046869e-10, y: 0.0003333277, z: -9.313225e-11}
+      rotation: {x: -0.018126767, y: -0.06408387, z: -0.015300022, w: 0.9976626}
+      scale: {x: 0.99999934, y: 1.0000005, z: 1.0000005}
+    - name: Humano_L_Thumb3
+      parentName: Humano_L_Thumb2
+      position: {x: 5.5792043e-10, y: 0.00031716906, z: 6.787013e-10}
+      rotation: {x: -0.0014958371, y: 0.0025739986, z: -0.00073872827, w: 0.9999953}
+      scale: {x: 0.99999964, y: 1.0000007, z: 1.0000006}
+    - name: Humano_L_Thumb3_end
+      parentName: Humano_L_Thumb3
+      position: {x: 0.000000003479654, y: 0.00031717448, z: -4.0337908e-10}
+      rotation: {x: -0.000000059604602, y: 0.00000003003513, z: -1.0686555e-10, w: 1}
+      scale: {x: 1.000001, y: 1.0000006, z: 0.9999999}
+    - name: Humano_L_Thumb3_end_end
+      parentName: Humano_L_Thumb3_end
+      position: {x: 0.000000001314329, y: 0.00031717142, z: 1.5716069e-10}
+      rotation: {x: 0.00000005972102, y: -0.00000003003513, z: 1.3005765e-10, w: 1}
+      scale: {x: 0.99999994, y: 1.0000008, z: 1.0000004}
+    - name: Humano_L_Thumb3_end_end_end
+      parentName: Humano_L_Thumb3_end_end
+      position: {x: -7.683411e-10, y: 0.00031717122, z: -1.9907019e-10}
+      rotation: {x: 0.00000038649858, y: 0.0000000710133, z: 0.00000025441506, w: 1}
+      scale: {x: 1.0000001, y: 1.0000002, z: 0.9999997}
+    - name: Humano_L_Thumb3_end_end_end_end
+      parentName: Humano_L_Thumb3_end_end_end
+      position: {x: 6.554182e-10, y: 0.00031717072, z: -2.5145708e-10}
+      rotation: {x: -0.00000044621962, y: -0.00000004097815, z: -0.0000002545451, w: 1}
+      scale: {x: 1.0000002, y: 1, z: 0.99999994}
+    - name: Humano_L_Thumb3_end_end_end_end_end
+      parentName: Humano_L_Thumb3_end_end_end_end
+      position: {x: -0, y: 0.0003171705, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_UpperarmTwist01
+      parentName: Humano_L_Upperarm
+      position: {x: 0.0000000036661367, y: -0.0000000014223406, z: -0.0000000041077146}
+      rotation: {x: 0.00000025029286, y: 0.00014373218, z: 0.00000045930113, w: 1}
+      scale: {x: 1.0000008, y: 1.0000013, z: 1.0000006}
+    - name: Humano_L_UpperarmTwist02
+      parentName: Humano_L_UpperarmTwist01
+      position: {x: 0.00000001101449, y: 0.0012555735, z: -0.0000000050954987}
+      rotation: {x: -0.0000009692671, y: 0.00010548003, z: -0.0000013285934, w: 1}
+      scale: {x: 0.99999964, y: 1.0000005, z: 0.9999995}
+    - name: Humano_L_UpperarmTwist02_end
+      parentName: Humano_L_UpperarmTwist02
+      position: {x: 0.0000000015754631, y: 0.001255573, z: 8.731149e-12}
+      rotation: {x: -0.00000003189858, y: -0.0000019036952, z: -0.0000018581827, w: 1}
+      scale: {x: 1.0000004, y: 1.0000001, z: 1.0000002}
+    - name: Humano_L_UpperarmTwist02_end_end
+      parentName: Humano_L_UpperarmTwist02_end
+      position: {x: -8.076313e-12, y: 0.001255575, z: -1.3969838e-11}
+      rotation: {x: 0.000000043791083, y: 0.0000028070342, z: 0.0000027162398, w: 1}
+      scale: {x: 1.0000002, y: 0.9999997, z: 0.99999976}
+    - name: Humano_L_UpperarmTwist02_end_end_end
+      parentName: Humano_L_UpperarmTwist02_end_end
+      position: {x: 0.0000000013167301, y: 0.0012555731, z: 1.8626451e-11}
+      rotation: {x: -0.000000039962696, y: -0.0000014258691, z: -0.0000012670437, w: 1}
+      scale: {x: 1.0000002, y: 1.0000002, z: 1.0000002}
+    - name: Humano_L_UpperarmTwist02_end_end_end_end
+      parentName: Humano_L_UpperarmTwist02_end_end_end
+      position: {x: 4.954927e-10, y: 0.0012555731, z: 3.259629e-11}
+      rotation: {x: 0.000000028070069, y: 0.00000052253006, z: 0.00000040898664, w: 1}
+      scale: {x: 1.0000002, y: 1.0000004, z: 1}
+    - name: Humano_L_UpperarmTwist02_end_end_end_end_end
+      parentName: Humano_L_UpperarmTwist02_end_end_end_end
+      position: {x: -0, y: 0.0012555731, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Clavicle
+      parentName: Humano_Spine02
+      position: {x: 0.0007101046, y: 0.0020305652, z: -0.0002088704}
+      rotation: {x: 0.11945477, y: 0.124202676, z: -0.69834447, w: 0.69470817}
+      scale: {x: 1.0000007, y: 0.99999994, z: 1.0000001}
+    - name: Humano_R_Upperarm
+      parentName: Humano_R_Clavicle
+      position: {x: 0.000000012917335, y: 0.0011351805, z: 0.000000020544975}
+      rotation: {x: 0.0019984017, y: 0.0008024794, z: 0.0035996214, w: 0.9999912}
+      scale: {x: 1.0000002, y: 1.0000004, z: 1.0000001}
+    - name: Humano_R_UpperarmTwist01
+      parentName: Humano_R_Upperarm
+      position: {x: 0.0000000047348294, y: -0.0000000017877755, z: -0.000000001246517}
+      rotation: {x: 0.0000002076849, y: 0.20346045, z: -0.0000005241017, w: 0.97908324}
+      scale: {x: 1.0000006, y: 1.0000015, z: 1.0000004}
+    - name: Humano_R_UpperarmTwist02
+      parentName: Humano_R_UpperarmTwist01
+      position: {x: 0.0000000020644801, y: 0.0012264986, z: 7.0605893e-10}
+      rotation: {x: -0.000002092756, y: 0.0010614393, z: 0.000004048634, w: 0.9999995}
+      scale: {x: 1.0000008, y: 1.0000001, z: 0.9999998}
+    - name: Humano_R_UpperarmTwist02_end
+      parentName: Humano_R_UpperarmTwist02
+      position: {x: 0.0000000034509138, y: 0.0012264994, z: -3.702007e-10}
+      rotation: {x: 0.0000009596862, y: -0.0000024139872, z: -0.0000021174, w: 1}
+      scale: {x: 0.9999998, y: 1.0000002, z: 1.0000001}
+    - name: Humano_R_UpperarmTwist02_end_end
+      parentName: Humano_R_UpperarmTwist02_end
+      position: {x: 0.0000000020606967, y: 0.0012264987, z: -2.6775523e-10}
+      rotation: {x: -0, y: -0, z: 4.293439e-14, w: 1}
+      scale: {x: 0.9999998, y: 1.0000004, z: 0.9999994}
+    - name: Humano_R_UpperarmTwist02_end_end_end
+      parentName: Humano_R_UpperarmTwist02_end_end
+      position: {x: 4.3597537e-10, y: 0.0012264983, z: -6.891787e-10}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1.0000001}
+    - name: Humano_R_UpperarmTwist02_end_end_end_end
+      parentName: Humano_R_UpperarmTwist02_end_end_end
+      position: {x: 7.993367e-10, y: 0.0012264977, z: -7.8463924e-10}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000002, y: 1.0000001, z: 0.9999999}
+    - name: Humano_R_UpperarmTwist02_end_end_end_end_end
+      parentName: Humano_R_UpperarmTwist02_end_end_end_end
+      position: {x: -0, y: 0.0012264978, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Forearm
+      parentName: Humano_R_Upperarm
+      position: {x: -0.000000019238795, y: 0.0024529977, z: 0.0000000073650153}
+      rotation: {x: 0.0012273843, y: -0.0017797784, z: -0.00035806643, w: 0.9999976}
+      scale: {x: 1.0000001, y: 1.0000013, z: 1.0000004}
+    - name: Humano_R_ForearmTwist01
+      parentName: Humano_R_Forearm
+      position: {x: -0.0000000011969546, y: 2.3495886e-10, z: -0.0000000033105971}
+      rotation: {x: 0.00000044668548, y: -0.0009002888, z: -0.0000003564841, w: 0.9999996}
+      scale: {x: 0.99999917, y: 0.99999976, z: 0.99999946}
+    - name: Humano_R_ForearmTwist02
+      parentName: Humano_R_ForearmTwist01
+      position: {x: -0.000000018453974, y: 0.0012129885, z: 0.000000014126999}
+      rotation: {x: -0.0000034576906, y: 0.0055398094, z: -0.0000044518238, w: 0.99998474}
+      scale: {x: 1.0000011, y: 1.000001, z: 0.9999999}
+    - name: Humano_R_ForearmTwist02_end
+      parentName: Humano_R_ForearmTwist02
+      position: {x: 5.094625e-10, y: 0.0012129911, z: 2.3283063e-11}
+      rotation: {x: -0.000000013665154, y: -0.0000004856846, z: -0.00000059226306, w: 1}
+      scale: {x: 0.99999994, y: 1.0000001, z: 0.9999996}
+    - name: Humano_R_ForearmTwist02_end_end
+      parentName: Humano_R_ForearmTwist02_end
+      position: {x: -4.1531165e-10, y: 0.001212988, z: 1.8626451e-11}
+      rotation: {x: 0.000000013665154, y: 0.0000004856846, z: 0.0000005922631, w: 1}
+      scale: {x: 1.0000007, y: 1.0000008, z: 0.9999998}
+    - name: Humano_R_ForearmTwist02_end_end_end
+      parentName: Humano_R_ForearmTwist02_end_end
+      position: {x: -7.964263e-10, y: 0.0012129871, z: -8.1490726e-12}
+      rotation: {x: -0.000000013665154, y: -0.0000004856846, z: -0.0000005922631, w: 1}
+      scale: {x: 1.0000002, y: 1.0000001, z: 0.99999994}
+    - name: Humano_R_ForearmTwist02_end_end_end_end
+      parentName: Humano_R_ForearmTwist02_end_end_end
+      position: {x: 6.548362e-10, y: 0.0012129877, z: 2.0954757e-11}
+      rotation: {x: 0.000000013665154, y: 0.0000004856846, z: 0.0000005922631, w: 1}
+      scale: {x: 1.0000002, y: 1.0000005, z: 1}
+    - name: Humano_R_ForearmTwist02_end_end_end_end_end
+      parentName: Humano_R_ForearmTwist02_end_end_end_end
+      position: {x: -0, y: 0.001212987, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Hand
+      parentName: Humano_R_Forearm
+      position: {x: 0.0000000034777161, y: 0.0024259726, z: 1.5152181e-10}
+      rotation: {x: -0.0005498934, y: -0.0050762333, z: -0.0003746199, w: 0.9999869}
+      scale: {x: 0.999999, y: 0.9999999, z: 0.99999934}
+    - name: Humano_R_Mid1
+      parentName: Humano_R_Hand
+      position: {x: -0.000030850115, y: 0.0009573714, z: 0.000099000594}
+      rotation: {x: 0.0005004466, y: -0.0018073886, z: 0.0008493068, w: 0.999998}
+      scale: {x: 1, y: 1, z: 0.9999993}
+    - name: Humano_R_Mid2
+      parentName: Humano_R_Mid1
+      position: {x: 0.0000000022986204, y: 0.0003563635, z: 2.910383e-11}
+      rotation: {x: -0.0011196743, y: 0.0035458421, z: -0.0007750227, w: 0.9999928}
+      scale: {x: 1.0000002, y: 1.0000006, z: 1.0000005}
+    - name: Humano_R_Mid3
+      parentName: Humano_R_Mid2
+      position: {x: -5.546462e-10, y: 0.0002798876, z: -1.7462297e-11}
+      rotation: {x: 0.00080838724, y: 0.00014304434, z: 0.00019704804, w: 0.99999976}
+      scale: {x: 1.0000011, y: 1.0000012, z: 1.0000007}
+    - name: Humano_R_Mid3_end
+      parentName: Humano_R_Mid3
+      position: {x: -1.13905115e-10, y: 0.0002798834, z: -4.4417447e-12}
+      rotation: {x: -0.000000037078255, y: -0.000023395149, z: -0.000023415467, w: 1}
+      scale: {x: 1.0000005, y: 1.0000006, z: 0.9999999}
+    - name: Humano_R_Mid3_end_end
+      parentName: Humano_R_Mid3_end
+      position: {x: -1.583112e-10, y: 0.000279887, z: 2.7432633e-12}
+      rotation: {x: 0.00000003463171, y: 0.000014936257, z: 0.000014871259, w: 1}
+      scale: {x: 1.0000008, y: 1.0000006, z: 1.0000005}
+    - name: Humano_R_Mid3_end_end_end
+      parentName: Humano_R_Mid3_end_end
+      position: {x: -0.0000000010150143, y: 0.0002798855, z: -3.5936408e-12}
+      rotation: {x: -0.000000018276591, y: -0.000010669734, z: -0.000010705732, w: 1}
+      scale: {x: 0.9999996, y: 1.0000004, z: 1.0000001}
+    - name: Humano_R_Mid3_end_end_end_end
+      parentName: Humano_R_Mid3_end_end_end
+      position: {x: 2.5613645e-10, y: 0.00027988563, z: 5.331913e-13}
+      rotation: {x: -0.0000000064021344, y: 0.000002121229, z: 0.00000217164, w: 1}
+      scale: {x: 1.0000002, y: 1.0000004, z: 0.99999994}
+    - name: Humano_R_Mid3_end_end_end_end_end
+      parentName: Humano_R_Mid3_end_end_end_end
+      position: {x: -0, y: 0.0002798855, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Ring1
+      parentName: Humano_R_Hand
+      position: {x: -0.00000009977957, y: 0.0009083509, z: -0.000102806574}
+      rotation: {x: 0.00022819122, y: 0.0021096119, z: 0.000071522365, w: 0.99999774}
+      scale: {x: 0.99999994, y: 1, z: 1.0000005}
+    - name: Humano_R_Ring2
+      parentName: Humano_R_Ring1
+      position: {x: -0.0000000022664608, y: 0.0003245205, z: -1.4842953e-11}
+      rotation: {x: -0.00009772817, y: 0.00014789679, z: 0.00009884077, w: 1}
+      scale: {x: 1.0000001, y: 1.0000004, z: 0.99999946}
+    - name: Humano_R_Ring3
+      parentName: Humano_R_Ring2
+      position: {x: -1.945591e-10, y: 0.00027495727, z: 2.5465852e-11}
+      rotation: {x: 0.00008279862, y: -0.000266771, z: -0.00026707063, w: 1}
+      scale: {x: 1.0000001, y: 1.0000005, z: 1.0000002}
+    - name: Humano_R_Ring3_end
+      parentName: Humano_R_Ring3
+      position: {x: -9.19681e-10, y: 0.0002749541, z: -4.8385115e-12}
+      rotation: {x: -0.00000051352964, y: -0.000006470594, z: -0.0000065190125, w: 1}
+      scale: {x: 1.0000002, y: 1.0000011, z: 0.99999994}
+    - name: Humano_R_Ring3_end_end
+      parentName: Humano_R_Ring3_end
+      position: {x: 9.927317e-10, y: 0.0002749537, z: 4.3655745e-13}
+      rotation: {x: 0.0000002611924, y: -0.000010827572, z: -0.000010886062, w: 1}
+      scale: {x: 1.0000011, y: 1.0000011, z: 1}
+    - name: Humano_R_Ring3_end_end_end
+      parentName: Humano_R_Ring3_end_end
+      position: {x: 1.4784746e-10, y: 0.00027495658, z: -1.553417e-11}
+      rotation: {x: 0.00000011107654, y: 0.0000108052855, z: 0.000010977561, w: 1}
+      scale: {x: 1.0000001, y: 0.9999998, z: 1.0000004}
+    - name: Humano_R_Ring3_end_end_end_end
+      parentName: Humano_R_Ring3_end_end_end
+      position: {x: 9.610085e-10, y: 0.00027495375, z: -2.5975168e-11}
+      rotation: {x: -0.000000037472518, y: -0.0000043797154, z: -0.000004548767, w: 1}
+      scale: {x: 1.0000002, y: 1.0000008, z: 1.0000002}
+    - name: Humano_R_Ring3_end_end_end_end_end
+      parentName: Humano_R_Ring3_end_end_end_end
+      position: {x: -0, y: 0.0002749545, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Thumb1
+      parentName: Humano_R_Hand
+      position: {x: 0.00015452874, y: 0.00025304317, z: 0.0002984282}
+      rotation: {x: -0.37186038, y: 0.2137631, z: 0.16401182, w: -0.88832724}
+      scale: {x: 0.99999964, y: 0.99999994, z: 0.99999976}
+    - name: Humano_R_Thumb2
+      parentName: Humano_R_Thumb1
+      position: {x: 6.984919e-11, y: 0.00036152403, z: -2.7939676e-10}
+      rotation: {x: 0.017307276, y: -0.06038008, z: -0.015835067, w: -0.9978998}
+      scale: {x: 1.0000008, y: 1.0000008, z: 1.0000011}
+    - name: Humano_R_Thumb3
+      parentName: Humano_R_Thumb2
+      position: {x: -0.0000000013434328, y: 0.0003314811, z: 1.1641532e-10}
+      rotation: {x: -0.00015658136, y: 0.0015216355, z: -0.00040350287, w: 0.99999875}
+      scale: {x: 1.0000004, y: 1.0000001, z: 0.9999996}
+    - name: Humano_R_Thumb3_end
+      parentName: Humano_R_Thumb3
+      position: {x: -3.1490344e-10, y: 0.0003314846, z: 9.647919e-10}
+      rotation: {x: 1.3096721e-10, y: 0.00000020477451, z: -0.00000013965042, w: 1}
+      scale: {x: 1.0000004, y: 1.0000002, z: 0.9999993}
+    - name: Humano_R_Thumb3_end_end
+      parentName: Humano_R_Thumb3_end
+      position: {x: 3.853347e-10, y: 0.00033148206, z: 3.3469405e-10}
+      rotation: {x: 0.000000029773211, y: -0.000000029802315, z: 0.000000026130564, w: 1}
+      scale: {x: 1.0000002, y: 1.0000002, z: 1.0000001}
+    - name: Humano_R_Thumb3_end_end_end
+      parentName: Humano_R_Thumb3_end_end
+      position: {x: -0.0000000012351665, y: 0.00033148247, z: 6.300979e-10}
+      rotation: {x: 0.00000044348354, y: 0.0000018550777, z: 0.0000018449782, w: 1}
+      scale: {x: 1.0000002, y: 1.0000008, z: 1.0000002}
+    - name: Humano_R_Thumb3_end_end_end_end
+      parentName: Humano_R_Thumb3_end_end_end
+      position: {x: -1.5075784e-10, y: 0.0003314809, z: 3.4604453e-10}
+      rotation: {x: -0.00000047325665, y: -0.0000018252754, z: -0.0000018711088, w: 1}
+      scale: {x: 0.99999994, y: 1.0000002, z: 1.0000001}
+    - name: Humano_R_Thumb3_end_end_end_end_end
+      parentName: Humano_R_Thumb3_end_end_end_end
+      position: {x: -0, y: 0.0003314813, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Index1
+      parentName: Humano_R_Hand
+      position: {x: 0.00004015902, y: 0.00091591437, z: 0.00038412612}
+      rotation: {x: 0.00015416088, y: -0.0025173097, z: -0.00023915224, w: 0.99999684}
+      scale: {x: 0.99999994, y: 0.9999999, z: 0.9999995}
+    - name: Humano_R_Index2
+      parentName: Humano_R_Index1
+      position: {x: 0.0000000024247855, y: 0.00033183984, z: 3.3614923e-11}
+      rotation: {x: 0.00047268788, y: 0.0051310007, z: 0.0005874487, w: 0.9999866}
+      scale: {x: 1.0000007, y: 1.0000012, z: 1.0000002}
+    - name: Humano_R_Index3
+      parentName: Humano_R_Index2
+      position: {x: 5.059701e-10, y: 0.00023773388, z: -9.3132255e-12}
+      rotation: {x: 0.00026181072, y: -0.00010898845, z: 0.00037730133, w: 0.9999999}
+      scale: {x: 1.0000004, y: 1.0000011, z: 1.0000007}
+    - name: Humano_R_Index3_end
+      parentName: Humano_R_Index3
+      position: {x: -8.22547e-10, y: 0.00023773967, z: 1.6298145e-11}
+      rotation: {x: 0.0000007171763, y: 0.00004523657, z: 0.00004514761, w: 1}
+      scale: {x: 1.0000001, y: 0.9999998, z: 0.99999994}
+    - name: Humano_R_Index3_end_end
+      parentName: Humano_R_Index3_end
+      position: {x: -1.439912e-10, y: 0.0002377402, z: 2.3283063e-11}
+      rotation: {x: -0.00000035957908, y: -0.000020127267, z: -0.000020057254, w: 1}
+      scale: {x: 0.9999999, y: 0.99999976, z: 1}
+    - name: Humano_R_Index3_end_end_end
+      parentName: Humano_R_Index3_end_end
+      position: {x: -5.0997184e-10, y: 0.00023773745, z: -1.2805685e-11}
+      rotation: {x: 0.000000030036617, y: 0.000000028854615, z: -0.000000029807715, w: 1}
+      scale: {x: 1.0000002, y: 0.9999997, z: 0.99999976}
+    - name: Humano_R_Index3_end_end_end_end
+      parentName: Humano_R_Index3_end_end_end
+      position: {x: -4.815229e-10, y: 0.00023773703, z: 8.1490726e-12}
+      rotation: {x: 0.000000081638255, y: -5.2568766e-10, z: -0.00000008323509, w: 1}
+      scale: {x: 1.0000002, y: 1, z: 1.0000002}
+    - name: Humano_R_Index3_end_end_end_end_end
+      parentName: Humano_R_Index3_end_end_end_end
+      position: {x: -0, y: 0.00023773646, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_Pinky1
+      parentName: Humano_R_Hand
+      position: {x: 0.000040166116, y: 0.00080865517, z: -0.00028532976}
+      rotation: {x: -0.0007784982, y: 0.0016106878, z: 0.00068317936, w: 0.9999982}
+      scale: {x: 1.0000004, y: 1.0000001, z: 0.9999998}
+    - name: Humano_R_Pinky2
+      parentName: Humano_R_Pinky1
+      position: {x: -0.0000000014249235, y: 0.00023883897, z: 4.307367e-11}
+      rotation: {x: 0.0013801169, y: -0.00070992485, z: -0.0013678019, w: 0.9999979}
+      scale: {x: 1.0000006, y: 1.000001, z: 1.0000005}
+    - name: Humano_R_Pinky3
+      parentName: Humano_R_Pinky2
+      position: {x: 2.0576407e-10, y: 0.00019023716, z: 3.085006e-11}
+      rotation: {x: 0.00060149876, y: 0.000053680178, z: 0.0012891638, w: 0.999999}
+      scale: {x: 1.0000002, y: 1.0000004, z: 0.9999995}
+    - name: Humano_R_Pinky3_end
+      parentName: Humano_R_Pinky3
+      position: {x: 0.0000000014805118, y: 0.00019023563, z: -5.47152e-11}
+      rotation: {x: 0.000000019033896, y: -0.000012664391, z: -0.000012603694, w: 1}
+      scale: {x: 1.0000005, y: 1.0000005, z: 1.0000002}
+    - name: Humano_R_Pinky3_end_end
+      parentName: Humano_R_Pinky3_end
+      position: {x: -4.985486e-10, y: 0.00019023531, z: -9.3132255e-12}
+      rotation: {x: -0.0000006588552, y: -0.00002203346, z: -0.000022169208, w: 1}
+      scale: {x: 1, y: 1.0000008, z: 0.9999996}
+    - name: Humano_R_Pinky3_end_end_end
+      parentName: Humano_R_Pinky3_end_end
+      position: {x: 1.3038516e-10, y: 0.00019023502, z: -3.0267983e-11}
+      rotation: {x: 0.00000063132325, y: 0.00001886345, z: 0.000019001009, w: 1}
+      scale: {x: 1.0000007, y: 1, z: 1.0000001}
+    - name: Humano_R_Pinky3_end_end_end_end
+      parentName: Humano_R_Pinky3_end_end_end
+      position: {x: -1.6996636e-10, y: 0.00019023645, z: -2.3283063e-11}
+      rotation: {x: -0.00000023574043, y: -0.0000031928303, z: -0.0000031536283, w: 1}
+      scale: {x: 1, y: 1.0000004, z: 0.9999998}
+    - name: Humano_R_Pinky3_end_end_end_end_end
+      parentName: Humano_R_Pinky3_end_end_end_end
+      position: {x: -0, y: 0.0001902358, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_R_RibsTwist
+      parentName: Humano_Spine02
+      position: {x: 0.000843619, y: 0.00056953455, z: 0.0007612475}
+      rotation: {x: -0.0000002479371, y: 0.63663137, z: 0.77116835, w: 0.000008244463}
+      scale: {x: 1.0000005, y: 1.0000004, z: 1.0000006}
+    - name: Humano_R_Breast
+      parentName: Humano_R_RibsTwist
+      position: {x: -0.000000001214446, y: 0.00017723934, z: 0.0000000030366794}
+      rotation: {x: 0.0000010132788, y: -0.000000053719745, z: -0.000000036041776, w: 1}
+      scale: {x: 1, y: 1.0000001, z: 0.99999934}
+    - name: Humano_R_Breast_end
+      parentName: Humano_R_Breast
+      position: {x: 1.4642865e-12, y: 0.00017723777, z: 2.7765623e-10}
+      rotation: {x: -0.00001066921, y: -0.0000027207043, z: 0.00000021030826, w: 1}
+      scale: {x: 1, y: 0.9999998, z: 1.0000001}
+    - name: Humano_R_Breast_end_end
+      parentName: Humano_R_Breast_end
+      position: {x: 4.6138666e-11, y: 0.00017723888, z: 3.0835734e-10}
+      rotation: {x: 0.000006586236, y: 0.000010906115, z: -0.00000084076055, w: 1}
+      scale: {x: 1.0000002, y: 1.0000004, z: 1.0000004}
+    - name: Humano_R_Breast_end_end_end
+      parentName: Humano_R_Breast_end_end
+      position: {x: -1.18257045e-11, y: 0.00017723955, z: -3.9477582e-10}
+      rotation: {x: 0.000010550078, y: -0.000008191042, z: 0.00000063052676, w: 1}
+      scale: {x: 0.9999998, y: 1.0000001, z: 0.99999994}
+    - name: Humano_R_Breast_end_end_end_end
+      parentName: Humano_R_Breast_end_end_end
+      position: {x: 6.8973806e-11, y: 0.00017723882, z: 7.9008483e-10}
+      rotation: {x: -0.000006794929, y: 0.0000000049121796, z: 1.0142786e-10, w: 1}
+      scale: {x: 1.0000005, y: 1.0000006, z: 1.0000007}
+    - name: Humano_R_Breast_end_end_end_end_end
+      parentName: Humano_R_Breast_end_end_end_end
+      position: {x: -0, y: 0.00017723869, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Humano_L_RibsTwist
+      parentName: Humano_Spine02
+      position: {x: -0.00084433914, y: 0.00056895945, z: 0.0007615849}
+      rotation: {x: -0.000012340143, y: 0.63662857, z: 0.7711707, w: -0.000003918581}
+      scale: {x: 1.0000005, y: 1.0000006, z: 1.0000006}
+    - name: Humano_L_Breast
+      parentName: Humano_L_RibsTwist
+      position: {x: -0.0000000012824045, y: 0.0001772399, z: 0.0000000028973248}
+      rotation: {x: 0.0000005662569, y: -0.0000025824595, z: -0.000000036049634, w: 1}
+      scale: {x: 0.9999999, y: 0.99999994, z: 0.9999999}
+    - name: Humano_L_Breast_end
+      parentName: Humano_L_Breast
+      position: {x: -7.3248144e-11, y: 0.00017723966, z: 2.1658138e-10}
+      rotation: {x: 0.0000106692405, y: -0.0000027327035, z: 0.00000021032642, w: 1}
+      scale: {x: 1.0000008, y: 1.0000005, z: 1.0000001}
+    - name: Humano_L_Breast_end_end
+      parentName: Humano_L_Breast_end
+      position: {x: -3.898151e-11, y: 0.00017723782, z: -8.7375723e-10}
+      rotation: {x: -0.0000070929964, y: 0.00001091365, z: -0.00000084087617, w: 1}
+      scale: {x: 0.99999946, y: 0.99999964, z: 0.9999997}
+    - name: Humano_L_Breast_end_end_end
+      parentName: Humano_L_Breast_end_end
+      position: {x: -4.4738328e-11, y: 0.00017723923, z: 4.982212e-11}
+      rotation: {x: -0.0000033080235, y: -0.000008181197, z: 0.0000006304624, w: 1}
+      scale: {x: 1.0000006, y: 1.0000004, z: 1.0000001}
+    - name: Humano_L_Breast_end_end_end_end
+      parentName: Humano_L_Breast_end_end_end
+      position: {x: -6.0455245e-11, y: 0.00017723891, z: 0.0000000018553669}
+      rotation: {x: -0, y: -0, z: -6.1287768e-15, w: 1}
+      scale: {x: 0.99999994, y: 0.99999994, z: 0.99999994}
+    - name: Humano_L_Breast_end_end_end_end_end
+      parentName: Humano_L_Breast_end_end_end_end
+      position: {x: -0, y: 0.0001772388, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 3
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
