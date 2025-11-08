@@ -31,6 +31,8 @@ public class OpenAIRequest : MonoBehaviour
     private List<Dictionary<string, string>> chatMessages;
     private string currentPatientResponse = "";
 
+    public List<GameObject> PatientObjects;
+
     // Precompiled regex for emotion/motion code extraction
     private static readonly Regex EmotionMotionRegex =
         new Regex(@"\[(\d+)\]\[(\d+)\]", RegexOptions.Compiled);
