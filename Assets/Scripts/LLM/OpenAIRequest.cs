@@ -21,8 +21,11 @@ public class OpenAIRequest : MonoBehaviour
     [SerializeField] private string currentScenario = ""; // left empty until login sets it
     public string lostResponse = "umm... fast... uh... fast... ";
     public float maxSpeechSpeed = 200f;
-    // Components
-    private CharacterAnimationController animationController;
+     public bool SetSimLevel;
+     public int simLevel;
+     public List<GameObject> PatientObjects;
+     // Components
+     private CharacterAnimationController animationController;
     private EmotionController emotionController;
 
     // Internal state
@@ -30,9 +33,7 @@ public class OpenAIRequest : MonoBehaviour
     private string basePath;
     private List<Dictionary<string, string>> chatMessages;
     private string currentPatientResponse = "";
-
-    public List<GameObject> PatientObjects;
-
+     
     // Precompiled regex for emotion/motion code extraction
     private static readonly Regex EmotionMotionRegex =
         new Regex(@"\[(\d+)\]\[(\d+)\]", RegexOptions.Compiled);
@@ -102,7 +103,11 @@ public class OpenAIRequest : MonoBehaviour
         {
             Debug.LogWarning("[OpenAIRequest] currentScenario is empty at Start; will initialize after login via ApplyLoginContext.");
         }
-    }
+
+          PatientObjects[0].SetActive(true);
+          PatientObjects[1].SetActive(false);
+          PatientObjects[2].SetActive(false);
+     }
 
     private void LoadApiKey()
     {
@@ -159,6 +164,8 @@ public class OpenAIRequest : MonoBehaviour
         CurrentUserId = userId;
         Debug.Log($"[OpenAIRequest] Authenticated user: {CurrentUserId}");
 
+          if (SetSimLevel) simulationLevel = simLevel;
+
         // Map level → scenario
         switch (simulationLevel)
         {
@@ -168,11 +175,20 @@ public class OpenAIRequest : MonoBehaviour
             default:
                 Debug.LogWarning($"[OpenAIRequest] Unknown simulationLevel {simulationLevel}, defaulting to task1");
                 currentScenario = "task1";
+                    emotionController.SetPatient(PatientObjects[0]);
                 break;
         }
+          int targetIndex = simulationLevel - 1;
+          for (int i = 0; i < PatientObjects.Count; i++)
+          {
+               PatientObjects[i].SetActive(i == targetIndex);
+          }
 
-        // Rebuild base path + reset prompt/chat + re-init scoring
-        basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
+          if (targetIndex >= 0 && targetIndex < PatientObjects.Count)
+               emotionController.SetPatient(PatientObjects[targetIndex]);
+
+          // Rebuild base path + reset prompt/chat + re-init scoring
+          basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
         InitializeChat();
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.Initialize(currentScenario);

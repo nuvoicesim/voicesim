@@ -23,6 +23,7 @@ public class EmotionController : MonoBehaviour
     public string[] emotionNames = {"Neutral", "Discomfort", "Happy", "Pain", "Sad", "Anger", "Frustrated", "Thinking", "Apologetic", "Cry"};
     public string[] motionNames = { "Neutral", "Confused", "Nod 1", "Nod 2", "Nod 3", "Nod 4", "Head Shake 1", "Head Shake 2", "Tap Table", "Struggling"};
     
+    private GameObject PatientObject;
     private List<TrackAsset> allTracks = new();
     private List<TTSManager.WordTiming> charTimings;
     private List<TTSManager.WordTiming> wordTimings;
@@ -44,7 +45,12 @@ public class EmotionController : MonoBehaviour
         }
         allTracks = timeline.GetOutputTracks().ToList();
     }
-    
+
+    public void SetPatient(GameObject patient)
+     {
+          PatientObject = patient;
+          animator = PatientObject.GetComponentInChildren<Animator>();
+     }
     public void SyncAnimationsWithWordTimings(List<TTSManager.WordTiming> timings)
     {
         charTimings = timings;
