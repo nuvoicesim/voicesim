@@ -14,12 +14,19 @@ public class FacialController : MonoBehaviour
 
     [Header("Channels")]
     // Populate with ARKit-like names that exist on your model.
-    public string[] channelNames = new string[] { "browInnerUp", "eyeBlinkLeft", "jawOpen" };
+    public string[] channelNames = new string[] { };
 
     int[] indices;
 
     void Awake()
     {
+        // Auto-populate all ARKit blendshapes if channelNames is empty or too short
+        if (channelNames == null || channelNames.Length < 10)
+        {
+            channelNames = GetAllARKitBlendshapeNames();
+            Debug.Log("Auto-detected " + channelNames.Length + " ARKit blendshapes");
+        }
+
         // Resolve provider interface.
         provider = providerBehaviour as IExpressionProvider;
         if (provider == null)
@@ -47,8 +54,10 @@ public class FacialController : MonoBehaviour
         {
             indices[i] = mesh.GetBlendShapeIndex(channelNames[i]);
             if (indices[i] < 0)
-                Debug.LogWarning($"Blendshape '{channelNames[i]}' not found on mesh.");
+                Debug.LogWarning("Blendshape '" + channelNames[i] + "' not found on mesh.");
         }
+        
+        Debug.Log("FacialController initialized with " + channelNames.Length + " channels");
     }
 
     void Update()
@@ -70,5 +79,65 @@ public class FacialController : MonoBehaviour
                 face.SetBlendShapeWeight(idx, clamped);
             }
         }
+    }
+
+    // Get all standard ARKit blendshape names
+    string[] GetAllARKitBlendshapeNames()
+    {
+        return new string[]
+        {
+            "browInnerUp", 
+            "browDownLeft", 
+            "browDownRight", 
+            "browOuterUpLeft", 
+            "browOuterUpRight",
+            "eyeLookDownLeft", 
+            "eyeLookDownRight", 
+            "eyeLookInLeft", 
+            "eyeLookInRight",
+            "eyeLookOutLeft", 
+            "eyeLookOutRight", 
+            "eyeLookUpLeft", 
+            "eyeLookUpRight",
+            "eyeBlinkLeft", 
+            "eyeBlinkRight", 
+            "eyeSquintLeft", 
+            "eyeSquintRight",
+            "eyeWideLeft", 
+            "eyeWideRight", 
+            "cheekPuff", 
+            "cheekSquintLeft", 
+            "cheekSquintRight",
+            "noseSneerLeft", 
+            "noseSneerRight", 
+            "jawOpen", 
+            "jawForward", 
+            "jawLeft", 
+            "jawRight",
+            "mouthFunnel", 
+            "mouthPucker", 
+            "mouthLeft", 
+            "mouthRight",
+            "mouthRollUpper", 
+            "mouthRollLower", 
+            "mouthShrugUpper", 
+            "mouthShrugLower",
+            "mouthClose", 
+            "mouthSmileLeft", 
+            "mouthSmileRight",
+            "mouthFrownLeft", 
+            "mouthFrownRight", 
+            "mouthDimpleLeft", 
+            "mouthDimpleRight",
+            "mouthStretchLeft", 
+            "mouthStretchRight", 
+            "mouthPressLeft", 
+            "mouthPressRight",
+            "mouthLowerDownLeft", 
+            "mouthLowerDownRight", 
+            "mouthUpperUpLeft", 
+            "mouthUpperUpRight",
+            "tongueOut"
+        };
     }
 }
