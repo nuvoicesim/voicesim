@@ -395,6 +395,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Humano2
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: fed75b34794ca4327b545f25273098d4, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 54c960b8020a44685946f3d9d45a1ea2, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -506,7 +510,7 @@ Transform:
   m_GameObject: {fileID: 1781162789}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0012913701, y: 0.99668616, z: -0.07971438, w: -0.016146705}
-  m_LocalPosition: {x: 5.695611, y: -0.3412828, z: -6.595406}
+  m_LocalPosition: {x: 5.7710447, y: 0.033621937, z: -4.267864}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
