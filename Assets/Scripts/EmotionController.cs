@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Serialization;
 using UnityEngine.Timeline;
-using Xceed.Document.NET;
 
 public class EmotionController : MonoBehaviour
 {

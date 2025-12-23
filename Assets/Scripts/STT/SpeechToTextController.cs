@@ -1,28 +1,45 @@
 using UnityEngine;
 using TMPro;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
-using Newtonsoft.Json; // Make sure you have Newtonsoft.Json imported for JSON parsing
+using System.Collections.Generic;
+using UnityEngine.Networking;
+using Newtonsoft.Json;
 
 public class SpeechToTextController : MonoBehaviour
 {
-    public TextMeshProUGUI transcriptText; // Reference to the Text or TextMeshPro field in the UI
+    public TextMeshProUGUI transcriptText;
     private bool isRecording = false;
     private AudioClip recordedClip;
 
-    // Set your OpenAI API Key here
     private string openAiApiKey;
 
-    void Start()
+    private const int RecordingLengthSeconds = 10;
+    private const int RecordingFrequency = 44100;
+
+    private void Start()
     {
+#if UNITY_WEBGL
+        // WebGL note:
+        // 1) Do not store/use OpenAI keys in WebGL client builds.
+        // 2) Microphone capture on WebGL should use a WebGL-compatible plugin and HTTPS hosting.
+        if (transcriptText != null)
+        {
+            transcriptText.text = "Web demo: voice input is not enabled yet. Please use text input.";
+        }
+#else
+        // Desktop/Mobile: keep existing behavior for now.
+        // Security note: client-side API keys are risky. Prefer server proxy for production.
         openAiApiKey = EnvironmentLoader.GetEnvVariable("OPENAI_API_KEY");
-        // Debug.Log("APIKey:" + openAiApiKey);
-        
+#endif
     }
 
-    void Update()
+    private void Update()
     {
+#if UNITY_WEBGL
+        // WebGL: disable microphone hotkey in Phase 1.
+        return;
+#else
         if (Input.GetKeyDown(KeyCode.R))
         {
             StartRecording();
@@ -31,102 +48,148 @@ public class SpeechToTextController : MonoBehaviour
         {
             StopRecordingAndTranscribe();
         }
+#endif
     }
 
     private void StartRecording()
     {
+#if UNITY_WEBGL
+        if (transcriptText != null)
+        {
+            transcriptText.text = "Web demo: microphone is not enabled yet.";
+        }
+        return;
+#else
         if (!isRecording)
         {
-            recordedClip = Microphone.Start(null, false, 10, 44100);
+            recordedClip = UnityEngine.Microphone.Start(null, false, RecordingLengthSeconds, RecordingFrequency);
             isRecording = true;
         }
+#endif
     }
 
     private void StopRecordingAndTranscribe()
     {
+#if UNITY_WEBGL
+        if (transcriptText != null)
+        {
+            transcriptText.text = "Web demo: microphone is not enabled yet.";
+        }
+        return;
+#else
         if (isRecording)
         {
-            Microphone.End(null);
+            UnityEngine.Microphone.End(null);
             isRecording = false;
-            _ = TranscribeAudio(); // Fire and forget the async task
+            _ = TranscribeAudio(); // Fire and forget
         }
+#endif
     }
 
     private async Task TranscribeAudio()
     {
-        // Save the AudioClip as a WAV file using SavWav
-        string filePath = Path.Combine(Application.persistentDataPath, "recordedAudio.wav");
-        SavWav.Save("recordedAudio.wav", recordedClip);
+#if UNITY_WEBGL
+        // WebGL: disabled in Phase 1
+        await Task.CompletedTask;
+        return;
+#else
+        try
+        {
+            string filePath = Path.Combine(Application.persistentDataPath, "recordedAudio.wav");
+            SavWav.Save("recordedAudio.wav", recordedClip);
 
-        // Send the WAV file to OpenAI Whisper API
-        string transcription = await SendToWhisperAPI(filePath, "whisper-1", "en", "json", 0.2f);
-       
-        // Display only the transcription text
-        transcriptText.text = transcription;
+            string transcription = await SendToWhisperAPI(filePath, "whisper-1", "en", "json", 0.2f);
 
-        // Optionally delete the temporary file
-        File.Delete(filePath);
+            if (transcriptText != null)
+            {
+                transcriptText.text = transcription;
+            }
 
-        // Fiona update 11/13: integrate with patient NPC
-        // if (OpenAIRequest.Instance != null)
-        //     {
-        //         OpenAIRequest.Instance.ReceiveNurseTranscription(transcription);
-        //     }
-        // else
-        //     {
-        //         Debug.LogError("OpenAIRequest instance not found.");
-        //     }
-        // for sitting char
-        if (sitPatientSpeech.Instance != null)
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+
+            // Integrate with patient NPC (keep your original behavior)
+            if (sitPatientSpeech.Instance != null)
             {
                 sitPatientSpeech.Instance.ReceiveNurseTranscription(transcription);
             }
-        else
+            else
             {
                 Debug.LogError("sitPatientSpeech instance not found.");
             }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error in transcription: " + e.Message);
+            if (transcriptText != null)
+            {
+                transcriptText.text = "Error in transcription";
+            }
+        }
+#endif
     }
 
     private async Task<string> SendToWhisperAPI(string filePath, string model, string language, string responseFormat, float temperature)
     {
-        using (HttpClient client = new HttpClient())
+#if UNITY_WEBGL
+        // WebGL: disabled in Phase 1
+        await Task.CompletedTask;
+        return "Web demo: voice input is not enabled yet.";
+#else
+        if (string.IsNullOrEmpty(openAiApiKey))
         {
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + openAiApiKey);
-
-            using (var form = new MultipartFormDataContent())
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                var audioContent = new StreamContent(fileStream);
-                audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/wav");
-                form.Add(audioContent, "file", Path.GetFileName(filePath));
-                form.Add(new StringContent(model), "model");
-
-                if (!string.IsNullOrEmpty(language))
-                    form.Add(new StringContent(language), "language");
-
-                form.Add(new StringContent(responseFormat), "response_format");
-                form.Add(new StringContent(temperature.ToString()), "temperature");
-
-                HttpResponseMessage response = await client.PostAsync("https://api.openai.com/v1/audio/transcriptions", form);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    // Parse the JSON response and extract only the "text" field
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var transcriptionResponse = JsonConvert.DeserializeObject<TranscriptionResponse>(responseContent);
-                    return transcriptionResponse.text;
-                }
-                else
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    Debug.LogError("Transcription failed: " + response.ReasonPhrase + " - " + errorContent);
-                    return "Error in transcription";
-                }
-            }
+            Debug.LogError("OPENAI_API_KEY is missing.");
+            return "Error in transcription";
         }
+
+        if (!File.Exists(filePath))
+        {
+            Debug.LogError("Audio file not found: " + filePath);
+            return "Error in transcription";
+        }
+
+        byte[] audioBytes = File.ReadAllBytes(filePath);
+
+        List<IMultipartFormSection> formData = new List<IMultipartFormSection>
+        {
+            new MultipartFormDataSection("model", model),
+            new MultipartFormDataSection("response_format", responseFormat),
+            new MultipartFormDataSection("temperature", temperature.ToString())
+        };
+
+        if (!string.IsNullOrEmpty(language))
+        {
+            formData.Add(new MultipartFormDataSection("language", language));
+        }
+
+        formData.Add(new MultipartFormFileSection("file", audioBytes, Path.GetFileName(filePath), "audio/wav"));
+
+        using (UnityWebRequest request = UnityWebRequest.Post("https://api.openai.com/v1/audio/transcriptions", formData))
+        {
+            request.SetRequestHeader("Authorization", "Bearer " + openAiApiKey);
+
+            var op = request.SendWebRequest();
+            while (!op.isDone)
+            {
+                await Task.Yield();
+            }
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                var responseContent = request.downloadHandler.text;
+                var transcriptionResponse = JsonConvert.DeserializeObject<TranscriptionResponse>(responseContent);
+                return transcriptionResponse != null ? transcriptionResponse.text : "";
+            }
+
+            string errorContent = request.downloadHandler != null ? request.downloadHandler.text : "";
+            Debug.LogError("Transcription failed: " + request.error + " - " + errorContent);
+            return "Error in transcription";
+        }
+#endif
     }
 
-    // Define a class to represent the JSON response structure
     private class TranscriptionResponse
     {
         public string text { get; set; }

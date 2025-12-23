@@ -22,15 +22,19 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using SFB;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using Xceed.Words.NET;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+
+#if !UNITY_WEBGL
+using SFB;
+using Xceed.Words.NET;
+#endif
+
 
 public class AssessmentManager : MonoBehaviour
 {
@@ -191,48 +195,61 @@ Keep your tone constructive and focused on growth. Limit your response to 2–3 
     // ===== SUMMATIVE =====
 
     public void StartSummativeAssessment()
+{
+#if UNITY_WEBGL
+    resultText.text =
+        "Summative assessment upload is not available in WebGL.\n\n" +
+        "Reason: .docx parsing uses DocX/Xceed libraries and native file dialogs, which are not supported in WebGL.\n\n" +
+        "Next: We can switch to a WebGL-friendly upload format (plain text / JSON) or handle upload via browser JS.";
+    Debug.LogWarning("Summative assessment disabled on WebGL build.");
+    return;
+#else
+    var extensions = new[]
     {
-        var extensions = new[]
+        new ExtensionFilter("Word Documents", "docx"),
+        new ExtensionFilter("All Files", "*")
+    };
+
+    string[] paths = StandaloneFileBrowser.OpenFilePanel("Upload Your Assessment", "", extensions, false);
+
+    if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
+    {
+        string filePath = paths[0];
+        string fileName = Path.GetFileName(filePath);
+        string content = ParseDocx(filePath);
+
+        if (!string.IsNullOrEmpty(content))
         {
-            new ExtensionFilter("Word Documents", "docx"),
-            new ExtensionFilter("All Files", "*")
-        };
-
-        string[] paths = StandaloneFileBrowser.OpenFilePanel("Upload Your Assessment", "", extensions, false);
-
-        if (paths.Length > 0 && !string.IsNullOrEmpty(paths[0]))
+            resultText.text = $"Upload Successful! Summative Assessment Uploaded:\n{fileName}\n\nEvaluating...";
+            StartCoroutine(SendToGPT4o(content));
+        }
+        else
         {
-            string filePath = paths[0];
-            string fileName = Path.GetFileName(filePath);
-            string content = ParseDocx(filePath);
-
-            if (!string.IsNullOrEmpty(content))
-            {
-                resultText.text = $"Upload Successful! Summative Assessment Uploaded:\n{fileName}\n\nEvaluating...";
-                StartCoroutine(SendToGPT4o(content));
-            }
-            else
-            {
-                resultText.text = "Failed to parse the document content.";
-            }
+            resultText.text = "Failed to parse the document content.";
         }
     }
+#endif
+}
 
-    private string ParseDocx(string filePath)
+
+    #if !UNITY_WEBGL
+private string ParseDocx(string filePath)
+{
+    try
     {
-        try
+        using (DocX document = DocX.Load(filePath))
         {
-            using (DocX document = DocX.Load(filePath))
-            {
-                return document.Text;
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("Error reading DOCX file: " + e.Message);
-            return null;
+            return document.Text;
         }
     }
+    catch (System.Exception e)
+    {
+        Debug.LogError("Error reading DOCX file: " + e.Message);
+        return null;
+    }
+}
+#endif
+
 
     private IEnumerator SendToGPT4o(string content)
     {
