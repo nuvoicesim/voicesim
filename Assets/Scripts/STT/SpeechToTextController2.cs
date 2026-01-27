@@ -27,7 +27,7 @@ public class SpeechToTextController2 : MonoBehaviour
         // 2) Microphone capture on WebGL should use a WebGL-compatible plugin and HTTPS hosting.
         if (transcriptText != null)
         {
-            transcriptText.text = "Web demo: voice input is not enabled yet. Please use text input.";
+            transcriptText.text = "Hold R to speak. Release R to send.";
         }
 #else
         LoadOpenAIApiKey();

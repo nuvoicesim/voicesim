@@ -21,15 +21,17 @@ public class STTController : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("[STTController] Start() ran. Platform=" + Application.platform + " GO=" + gameObject.name);
         bodyMove = FindObjectOfType<BodyMove>();
 
 #if UNITY_WEBGL
         // WebGL note:
         // 1) Do not store or use OpenAI API keys in WebGL client builds.
         // 2) Microphone capture may require a WebGL-specific plugin and HTTPS hosting.
+        Debug.Log("[STTController] UNITY_WEBGL branch entered.");
         if (transcriptText != null)
         {
-            transcriptText.text = "Web demo: voice input is not enabled yet. Please use text input.";
+            transcriptText.text = "Hold R to speak, release R to send.";
         }
 #else
         // Desktop/Mobile: keep your existing approach for now.
