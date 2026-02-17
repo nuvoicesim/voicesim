@@ -127,3 +127,6 @@ UserSettings/Layouts/default-2022.dwlt
 
 # local files
 local_docs/
+
+# unity build
+test_webgl/
