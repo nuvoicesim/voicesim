@@ -189,7 +189,13 @@ public class TTSManager : MonoBehaviour
     }
 
     // Public method to be called to convert text to speech
-    public async void ConvertTextToSpeech(string text)
+    public void ConvertTextToSpeech(string text)
+    {
+        ConvertTextToSpeech(text, null);
+    }
+
+    // Optional motionCode supports structured dialogue outputs where code is separate from text.
+    public async void ConvertTextToSpeech(string text, int? motionCode)
     {
         if (string.IsNullOrEmpty(text))
         {
@@ -226,7 +232,7 @@ public class TTSManager : MonoBehaviour
 
         if (audioData != null && wordTimings != null)
         {
-            ProcessAudioBytes(audioData, wordTimings, text);
+            ProcessAudioBytes(audioData, wordTimings, text, motionCode);
         }
         else
         {
@@ -362,7 +368,7 @@ public class TTSManager : MonoBehaviour
 
 
     // Method to process and play the audio bytes received
-    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent)
+    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent, int? motionCode)
     {
         // Save the audio data as a .wav file locally
         string filePath = Path.Combine(Application.persistentDataPath, "audio.wav");
@@ -375,11 +381,11 @@ public class TTSManager : MonoBehaviour
         AddWavHeaderAndSave(audioData, filePath);
 
         // Start coroutine to load and play the audio file
-        StartCoroutine(LoadAndPlayAudio(wordTimings, filePath, messageContent));
+        StartCoroutine(LoadAndPlayAudio(wordTimings, filePath, messageContent, motionCode));
     }
 
     // Coroutine to load and play the audio file
-    private IEnumerator LoadAndPlayAudio(List<WordTiming> wordTimings, string filePath, string messageContent)
+    private IEnumerator LoadAndPlayAudio(List<WordTiming> wordTimings, string filePath, string messageContent, int? motionCode)
     {
         // Create a UnityWebRequest to load the audio file
         using UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file://" + filePath, AudioType.WAV);
@@ -403,8 +409,15 @@ public class TTSManager : MonoBehaviour
                 emotionController.PlayEmotion();
             }
 
-            // Update animation based on emotion code
-            UpdateAnimation(messageContent);
+            // Update motion based on explicit code first, then legacy suffix if present.
+            if (motionCode.HasValue)
+            {
+                UpdateMotion(motionCode.Value);
+            }
+            else
+            {
+                UpdateMotionFromLegacySuffix(messageContent);
+            }
 
             float waitTime = audioClip.length + 0.5f;
             Debug.Log($"Audio playing, will wait {waitTime} seconds for completion");
@@ -491,64 +504,87 @@ public class TTSManager : MonoBehaviour
         public float speed { get; set; }
     }
 
-    public void UpdateAnimation(string message)
+    public void UpdateMotionFromLegacySuffix(string message)
     {
         if (animationController == null)
         {
-            Debug.LogWarning("Cannot update animation: animationController is null");
+            Debug.LogWarning("Cannot update motion: animationController is null");
             return;
         }
 
-        Match match = Regex.Match(message, @"\[([0-9]|10)\]$");
-        if (match.Success)
+        Match match = Regex.Match(message ?? string.Empty, @"\[([0-9]|10)\]$");
+        if (!match.Success)
         {
-            int emotionCode = int.Parse(match.Groups[1].Value);
-            switch (emotionCode)
-            {
-                case 0:
-                    animationController.PlayIdle();
-                    break;
-                case 1:
-                    animationController.PlayHeadPain();
-                    Debug.Log("changing to pain");
-                    break;
-                case 2:
-                    animationController.PlayHappy();
-                    break;
-                case 3:
-                    animationController.PlayShrug();
-                    break;
-                case 4:
-                    animationController.PlayHeadNod();
-                    break;
-                case 5:
-                    animationController.PlayHeadShake();
-                    break;
-                case 6:
-                    animationController.PlayWrithingInPain();
-                    break;
-                case 7:
-                    animationController.PlaySad();
-                    break;
-                case 8:
-                    animationController.PlayArmStretch();
-                    break;
-                case 9:
-                    animationController.PlayNeckStretch();
-                    break;
-                case 10:
-                    animationController.PlayBloodPressure();
-                    if (bloodEffectController != null)
-                        bloodEffectController.SetBloodVisibility(true);
-                    if (bloodTextController != null)
-                        bloodTextController.SetBloodTextVisibility(true);
-                    break;
-            }
+            Debug.Log($"No legacy animation code suffix found. Skipping TTSManager.UpdateMotionFromLegacySuffix for message: {message}");
+            return;
         }
-        else
+
+        int motionCode = int.Parse(match.Groups[1].Value);
+        UpdateMotion(motionCode);
+    }
+
+    public void UpdateMotion(int motionCode)
+    {
+        if (animationController == null)
         {
-            Debug.LogWarning($"No emotion code found: {message}");
-            animationController.PlayIdle();
+            Debug.LogWarning("Cannot update motion: animationController is null");
+            return;
         }
+
+        switch (motionCode)
+        {
+            case 0:
+                animationController.PlayIdle();
+                break;
+            case 1:
+                animationController.PlayHeadPain();
+                Debug.Log("changing to pain");
+                break;
+            case 2:
+                animationController.PlayHappy();
+                break;
+            case 3:
+                animationController.PlayShrug();
+                break;
+            case 4:
+                animationController.PlayHeadNod();
+                break;
+            case 5:
+                animationController.PlayHeadShake();
+                break;
+            case 6:
+                animationController.PlayWrithingInPain();
+                break;
+            case 7:
+                animationController.PlaySad();
+                break;
+            case 8:
+                animationController.PlayArmStretch();
+                break;
+            case 9:
+                animationController.PlayNeckStretch();
+                break;
+            case 10:
+                animationController.PlayBloodPressure();
+                if (bloodEffectController != null)
+                    bloodEffectController.SetBloodVisibility(true);
+                if (bloodTextController != null)
+                    bloodTextController.SetBloodTextVisibility(true);
+                break;
+            default:
+                Debug.LogWarning($"Unsupported motion code: {motionCode}");
+                break;
+        }
+    }
+
+    // Backward-compatible wrappers for existing callers.
+    public void UpdateAnimation(string message)
+    {
+        UpdateMotionFromLegacySuffix(message);
+    }
+
+    public void UpdateAnimation(int code)
+    {
+        UpdateMotion(code);
     }
 }
