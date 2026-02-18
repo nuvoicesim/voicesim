@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UI.Cues;
 
 public class OpenAIRequest : MonoBehaviour
 {
@@ -24,6 +25,8 @@ public class OpenAIRequest : MonoBehaviour
     // Components
     private CharacterAnimationController animationController;
     private EmotionController emotionController;
+    [SerializeField] private GameObject cueControllerObject;
+    private CueController cueController;
 
     // Internal state
     private float currentSpeechSpeed;
@@ -85,8 +88,13 @@ public class OpenAIRequest : MonoBehaviour
         // Initialize components
         animationController = GetComponent<CharacterAnimationController>();
         emotionController = GetComponent<EmotionController>();
+        cueController = cueControllerObject.GetComponent<CueController>();
+
         if (emotionController == null)
             Debug.LogError("EmotionController component not found on the GameObject.");
+
+        if (cueController == null)
+            Debug.LogError("CueController component not found on the UI GameObject.");
 
         // Initialize prompts/chat only if a scenario is already set (e.g., via Inspector)
         if (!string.IsNullOrEmpty(currentScenario))
@@ -587,6 +595,9 @@ public class OpenAIRequest : MonoBehaviour
 
         if (emotionController != null)
             emotionController.HandleEmotionCode(emotionCode, motionCode);
+
+        if (cueController != null)
+            cueController.HandleResponse(responseText);
     }
 
     private string BuildRequestBody()
