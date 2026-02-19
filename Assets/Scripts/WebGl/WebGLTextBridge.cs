@@ -35,18 +35,33 @@ public class WebGLTextBridge : MonoBehaviour
     public string webglLlmUrl = "https://rkh0ga80p1.execute-api.us-east-2.amazonaws.com/webgl/llm";
 
     [Header("References")]
-    public WebGLMockResponder mockResponder; // We will reuse this to trigger animations
+    public WebGLMockResponder mockResponder;   // gesture/animation trigger
+    public WebGLTTSPlayer ttsPlayer;           // audio playback (mp3 url)
+
+    [Header("Demo TTS (Placeholder)")]
+    [Tooltip("For demo: always play this fixed mp3 after LLM returns. Replace later with /tts output.")]
+    public string demoMp3Url = "http://localhost:8000/ElevenLabs_test.mp3";
 
     private void Awake()
     {
+        // 1) Auto-find mockResponder on same GameObject
         if (mockResponder == null)
         {
             mockResponder = GetComponent<WebGLMockResponder>();
         }
-
         if (mockResponder == null)
         {
             Debug.LogWarning("[WebGLTextBridge] WebGLMockResponder not found on the same GameObject.");
+        }
+
+        // 2) Auto-find ttsPlayer anywhere in scene (recommended for clarity)
+        if (ttsPlayer == null)
+        {
+            ttsPlayer = FindObjectOfType<WebGLTTSPlayer>();
+        }
+        if (ttsPlayer == null)
+        {
+            Debug.LogWarning("[WebGLTextBridge] WebGLTTSPlayer not found in scene. Audio playback will be skipped.");
         }
     }
 
@@ -122,21 +137,35 @@ public class WebGLTextBridge : MonoBehaviour
             }
 
             string patientReply = string.IsNullOrEmpty(parsed.data.clean_text) ? parsed.data.response : parsed.data.clean_text;
-            Debug.Log("[WebGLTextBridge] Patient reply: " + patientReply);
-            Debug.Log("[WebGLTextBridge] emotion=" + parsed.data.emotion_code + ", motion=" + parsed.data.motion_code);
+            int emotion = parsed.data.emotion_code;
+            int motion = parsed.data.motion_code;
 
-            // Trigger animation using your existing responder
+            Debug.Log("[WebGLTextBridge] Patient reply: " + patientReply);
+            Debug.Log("[WebGLTextBridge] emotion=" + emotion + ", motion=" + motion);
+
+            // Step 3: Trigger animation/gesture (DONE)
             if (mockResponder != null)
             {
-                // Option A: temporarily reuse text matching behavior
-                // mockResponder.OnNurseText(patientReply);
-
-                // Option B: directly map emotion/motion code to triggers (recommended next)
-                mockResponder.PlayByCodes(parsed.data.emotion_code, parsed.data.motion_code, patientReply);
+                mockResponder.PlayByCodes(emotion, motion, patientReply);
             }
             else
             {
                 Debug.LogWarning("[WebGLTextBridge] mockResponder is null, cannot trigger animations.");
+            }
+
+            // Step 4 (Demo): Play a fixed mp3 placeholder (so we can validate WebGL audio pipeline now)
+            // Later: replace demoMp3Url with /tts response audio_url.
+            if (ttsPlayer != null)
+            {
+                if (!string.IsNullOrEmpty(demoMp3Url))
+                {
+                    Debug.Log("[WebGLTextBridge] Demo TTS -> Playing fixed mp3: " + demoMp3Url);
+                    ttsPlayer.PlayFromUrl(demoMp3Url);
+                }
+                else
+                {
+                    Debug.LogWarning("[WebGLTextBridge] demoMp3Url is empty, skipping audio playback.");
+                }
             }
         }
     }
