@@ -57,10 +57,4 @@ public class WebGLTTSPlayer : MonoBehaviour
                       " length=" + clip.length);
         }
     }
-
-    [ContextMenu("Test Local MP3")]
-    public void TestLocalMP3()
-    {
-        PlayFromUrl("http://localhost:8000/ElevenLabs_test.mp3");
-    }
 }

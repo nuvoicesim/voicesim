@@ -4,30 +4,21 @@ public class WebGLMockResponder : MonoBehaviour
 {
     public Animator animator;
 
-    public void OnNurseText(string text)
+    // Optional: clear all triggers before setting a new one
+    private void ResetAllTriggers()
     {
-        if (animator == null)
-        {
-            Debug.LogError("[WebGLMockResponder] Animator not assigned");
-            return;
-        }
+        if (animator == null) return;
 
-        Debug.Log("[MockResponder] Nurse said: " + text);
-
-        string lower = text.ToLower();
-
-        if (lower.Contains("hello"))
-        {
-            animator.SetTrigger("Nod 1");
-        }
-        else if (lower.Contains("no"))
-        {
-            animator.SetTrigger("Head Shake 1");
-        }
-        else
-        {
-            animator.SetTrigger("Confused");
-        }
+        animator.ResetTrigger("Neutral");
+        animator.ResetTrigger("Confused");
+        animator.ResetTrigger("Nod 1");
+        animator.ResetTrigger("Nod 2");
+        animator.ResetTrigger("Nod 3");
+        animator.ResetTrigger("Nod 4");
+        animator.ResetTrigger("Head Shake 1");
+        animator.ResetTrigger("Head Shake 2");
+        animator.ResetTrigger("Tap Table");
+        animator.ResetTrigger("Struggling");
     }
 
     public void PlayByCodes(int emotionCode, int motionCode, string replyText)
@@ -38,21 +29,95 @@ public class WebGLMockResponder : MonoBehaviour
             return;
         }
 
-        Debug.Log("[WebGLMockResponder] reply=" + replyText + " emotion=" + emotionCode + " motion=" + motionCode);
+        Debug.Log("[WebGLMockResponder] reply=" + replyText +
+                  " emotion=" + emotionCode +
+                  " motion=" + motionCode);
 
-        // Minimal mapping for demo, you can expand later
-        // motion_code 1 -> Nod, 2 -> Head Shake, else -> Confused
-        if (motionCode == 1)
+        ResetAllTriggers();
+
+        // ----- MOTION PRIORITY -----
+        // Motion code drives visible animation first
+        switch (motionCode)
         {
-            animator.SetTrigger("Nod 1");
+            case 0:
+                animator.SetTrigger("Neutral");
+                break;
+
+            case 1:
+                animator.SetTrigger("Nod 1");
+                break;
+
+            case 2:
+                animator.SetTrigger("Head Shake 1");
+                break;
+
+            case 3:
+                animator.SetTrigger("Nod 2");
+                break;
+
+            case 4:
+                animator.SetTrigger("Nod 3");
+                break;
+
+            case 5:
+                animator.SetTrigger("Confused");
+                break;
+
+            case 6:
+                animator.SetTrigger("Tap Table");
+                break;
+
+            case 7:
+                animator.SetTrigger("Struggling");
+                break;
+
+            case 8:
+                animator.SetTrigger("Head Shake 2");
+                break;
+
+            case 9:
+                animator.SetTrigger("Nod 4");
+                break;
+
+            default:
+                // Fallback using emotion if motion not mapped
+                ApplyEmotionFallback(emotionCode);
+                break;
         }
-        else if (motionCode == 2)
+    }
+
+    private void ApplyEmotionFallback(int emotionCode)
+    {
+        // Simple emotion fallback logic
+        switch (emotionCode)
         {
-            animator.SetTrigger("Head Shake 1");
-        }
-        else
-        {
-            animator.SetTrigger("Confused");
+            case 0:
+                animator.SetTrigger("Neutral");
+                break;
+
+            case 1:
+            case 2:
+                animator.SetTrigger("Nod 1");
+                break;
+
+            case 3:
+            case 4:
+                animator.SetTrigger("Confused");
+                break;
+
+            case 5:
+            case 6:
+                animator.SetTrigger("Struggling");
+                break;
+
+            case 7:
+            case 8:
+                animator.SetTrigger("Head Shake 2");
+                break;
+
+            default:
+                animator.SetTrigger("Confused");
+                break;
         }
     }
 }

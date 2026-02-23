@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Unity Web Player | V.O.I.C.E</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
+  </head>
+
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+
+      <div id="unity-warning"></div>
+
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">V.O.I.C.E</div>
+      </div>
+    </div>
+
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+
+      // =========================
+      // URL PARAMS (Stage A)
+      // =========================
+      // English: allow changing target GameObject/method/hold-key by URL params.
+      // 中文：支持用 URL 参数动态指定 GameObject / Method / 按键。
+      const params = new URLSearchParams(window.location.search);
+
+      // Defaults (fallbacks)
+      // English: these match your current manual SendMessage test.
+      // 中文：默认值就是你现在手动 SendMessage 用的对象名和方法名。
+      const DEFAULT_GO = "aphasia_model_stroke_fixed (1)";
+      const DEFAULT_METHOD = "InjectText";
+      const DEFAULT_KEY = "r";
+
+      const UNITY_GAMEOBJECT_NAME = params.get("go") || DEFAULT_GO;
+      const UNITY_METHOD_NAME = params.get("method") || DEFAULT_METHOD;
+      const HOLD_KEY = (params.get("key") || DEFAULT_KEY).toLowerCase();
+
+      console.log("[WebGL] Bridge config:", {
+        go: UNITY_GAMEOBJECT_NAME,
+        method: UNITY_METHOD_NAME,
+        holdKey: HOLD_KEY,
+      });
+
+      // =========================
+      // UNITY BANNER
+      // =========================
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type === "error") div.style = "background: red; padding: 10px;";
+        else {
+          if (type === "warning") div.style = "background: yellow; padding: 10px;";
+          setTimeout(function () {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      // =========================
+      // UNITY LOADER CONFIG
+      // =========================
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/built.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/built.data",
+        frameworkUrl: buildUrl + "/built.framework.js",
+        codeUrl: buildUrl + "/built.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Northeastern Unitversity",
+        productName: "V.O.I.C.E",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement("meta");
+        meta.name = "viewport";
+        meta.content =
+          "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+        document.getElementsByTagName("head")[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+        // config.devicePixelRatio = 1;
+      } else {
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      // =========================
+      // STT (Hold-Key) via Web Speech API
+      // Fix: one utterance => one backend call
+      // =========================
+      (function setupHoldToTalkSTT() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+          console.warn("[STT] Web Speech API not supported in this browser.");
+          return;
+        }
+
+        const rec = new SpeechRecognition();
+        rec.lang = "en-US";
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.maxAlternatives = 1;
+
+        let isRecording = false;
+        let hasSentResult = false; // <-- KEY FIX: only send once per recording
+
+        function sendToUnity(text) {
+          if (!text || !text.trim()) return;
+
+          if (!window.unityInstance || !window.unityInstance.SendMessage) {
+            console.warn("[STT] unityInstance not ready yet. Dropping text:", text);
+            return;
+          }
+
+          console.log("[STT] Sending:", text);
+          try {
+            window.unityInstance.SendMessage(UNITY_GAMEOBJECT_NAME, UNITY_METHOD_NAME, text);
+          } catch (e) {
+            console.error("[STT] SendMessage failed:", e);
+          }
+        }
+
+        rec.onstart = () => {
+          isRecording = true;
+          hasSentResult = false; // <-- reset here, so one hold => one send
+          console.log("[STT] Recording started");
+        };
+
+        rec.onend = () => {
+          isRecording = false;
+          console.log("[STT] Recording ended");
+        };
+
+        rec.onerror = (e) => {
+          isRecording = false;
+          console.error("[STT] Error:", e && e.error ? e.error : e);
+        };
+
+        rec.onresult = (event) => {
+          // <-- KEY FIX: some browsers fire onresult twice
+          if (hasSentResult) return;
+          hasSentResult = true;
+
+          try {
+            const transcript = event.results[0][0].transcript;
+            console.log("[STT] Transcript:", transcript);
+            sendToUnity(transcript);
+          } catch (e) {
+            console.error("[STT] Failed to parse result:", e);
+          }
+        };
+
+        function startRec() {
+          if (isRecording) return;
+          try {
+            rec.start();
+          } catch (e) {
+            console.warn("[STT] start() blocked:", e);
+          }
+        }
+
+        function stopRec() {
+          if (!isRecording) return;
+          try {
+            rec.stop();
+          } catch (e) {
+            console.warn("[STT] stop() blocked:", e);
+          }
+        }
+
+        document.addEventListener("keydown", (e) => {
+          if (!e.key) return;
+          if (e.key.toLowerCase() !== HOLD_KEY) return;
+          if (e.repeat) return;
+
+          startRec();
+        });
+
+        document.addEventListener("keyup", (e) => {
+          if (!e.key) return;
+          if (e.key.toLowerCase() !== HOLD_KEY) return;
+
+          stopRec();
+        });
+
+        console.log("[STT] Hold-to-talk ready. Hold '" + HOLD_KEY.toUpperCase() + "' to speak.");
+      })();
+
+      // =========================
+      // LOAD UNITY
+      // =========================
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+        })
+          .then((unityInstance) => {
+            window.unityInstance = unityInstance;
+            console.log("[WebGL] unityInstance ready", unityInstance);
+
+            document.querySelector("#unity-loading-bar").style.display = "none";
+            document.querySelector("#unity-fullscreen-button").onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+          })
+          .catch((message) => {
+            alert(message);
+          });
+      };
+
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
