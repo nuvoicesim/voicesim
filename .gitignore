@@ -135,3 +135,21 @@ Assets/Scripts/.DS_Store
 .DS_Store
 Assets/.DS_Store
 Assets/Scripts/.DS_Store
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+Recordings/
+
+# IDE
+.idea/
+.vscode/
