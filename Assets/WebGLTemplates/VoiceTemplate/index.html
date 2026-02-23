@@ -112,7 +112,10 @@
 
       // =========================
       // STT (Hold-Key) via Web Speech API
-      // Fix: one utterance => one backend call
+      // Behavior:
+      // - Hold key to record
+      // - Aggregate interim + final
+      // - Send ONCE on key release (onend)
       // =========================
       (function setupHoldToTalkSTT() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -124,24 +127,28 @@
 
         const rec = new SpeechRecognition();
         rec.lang = "en-US";
-        rec.continuous = false;
-        rec.interimResults = false;
+        rec.continuous = true;
+        rec.interimResults = true;
         rec.maxAlternatives = 1;
 
         let isRecording = false;
-        let hasSentResult = false; // <-- KEY FIX: only send once per recording
+        let keyHeld = false;
+
+        let finalBuffer = "";
+        let interimBuffer = "";
 
         function sendToUnity(text) {
-          if (!text || !text.trim()) return;
+          const cleaned = (text || "").trim();
+          if (!cleaned) return;
 
           if (!window.unityInstance || !window.unityInstance.SendMessage) {
-            console.warn("[STT] unityInstance not ready yet. Dropping text:", text);
+            console.warn("[STT] unityInstance not ready yet. Dropping text:", cleaned);
             return;
           }
 
-          console.log("[STT] Sending:", text);
+          console.log("[STT] Sending:", cleaned);
           try {
-            window.unityInstance.SendMessage(UNITY_GAMEOBJECT_NAME, UNITY_METHOD_NAME, text);
+            window.unityInstance.SendMessage(UNITY_GAMEOBJECT_NAME, UNITY_METHOD_NAME, cleaned);
           } catch (e) {
             console.error("[STT] SendMessage failed:", e);
           }
@@ -149,13 +156,31 @@
 
         rec.onstart = () => {
           isRecording = true;
-          hasSentResult = false; // <-- reset here, so one hold => one send
+          finalBuffer = "";
+          interimBuffer = "";
           console.log("[STT] Recording started");
         };
 
         rec.onend = () => {
           isRecording = false;
           console.log("[STT] Recording ended");
+
+          const toSend = (finalBuffer || interimBuffer || "").trim();
+          if (toSend) {
+            console.log("[STT] Final transcript to send:", toSend);
+            sendToUnity(toSend);
+          } else {
+            console.warn("[STT] No transcript captured.");
+          }
+
+          // Edge case: if the key is still held (lost keyup), restart automatically
+          if (keyHeld) {
+            try {
+              rec.start();
+            } catch (e) {
+              console.warn("[STT] restart blocked:", e);
+            }
+          }
         };
 
         rec.onerror = (e) => {
@@ -164,16 +189,27 @@
         };
 
         rec.onresult = (event) => {
-          // <-- KEY FIX: some browsers fire onresult twice
-          if (hasSentResult) return;
-          hasSentResult = true;
+          let interimSoFar = "";
 
-          try {
-            const transcript = event.results[0][0].transcript;
-            console.log("[STT] Transcript:", transcript);
-            sendToUnity(transcript);
-          } catch (e) {
-            console.error("[STT] Failed to parse result:", e);
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const res = event.results[i];
+            const text = res[0] && res[0].transcript ? res[0].transcript : "";
+            if (!text) continue;
+
+            if (res.isFinal) {
+              finalBuffer = (finalBuffer + " " + text).trim();
+            } else {
+              interimSoFar = (interimSoFar + " " + text).trim();
+            }
+          }
+
+          if (interimSoFar) {
+            interimBuffer = interimSoFar;
+            console.log("[STT] Interim:", interimSoFar);
+          }
+
+          if (finalBuffer) {
+            console.log("[STT] FinalSoFar:", finalBuffer);
           }
         };
 
@@ -200,6 +236,7 @@
           if (e.key.toLowerCase() !== HOLD_KEY) return;
           if (e.repeat) return;
 
+          keyHeld = true;
           startRec();
         });
 
@@ -207,6 +244,7 @@
           if (!e.key) return;
           if (e.key.toLowerCase() !== HOLD_KEY) return;
 
+          keyHeld = false;
           stopRec();
         });
 

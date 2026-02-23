@@ -102,6 +102,21 @@ public class OpenAIRequest : MonoBehaviour
             Debug.LogWarning("[OpenAIRequest] currentScenario is empty at Start; will initialize after login via ApplyLoginContext.");
     }
 
+    // WebGL bridge: Unity WebGL SendMessage can only pass one string parameter.
+    // This method lets JS call: unityInstance.SendMessage(gameObjectName, "InjectText", "Hello");
+    // and routes into the normal nurse->LLM pipeline so ScoreManager.RecordTurn works.
+    public void InjectText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            Debug.LogWarning("[OpenAIRequest] InjectText received empty text.");
+            return;
+        }
+
+        // WebGL doesn't provide WPM easily from JS; pass 0 so it won't trigger "too fast" fallback.
+        ReceiveNurseTranscription(text, 0f);
+    }
+
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
         CurrentUserId = userId;
@@ -166,7 +181,6 @@ public class OpenAIRequest : MonoBehaviour
         {
             StartCoroutine(PostDialogueRequest());
         }
-
     }
 
     private IEnumerator PostDialogueRequest()
@@ -328,10 +342,14 @@ public class OpenAIRequest : MonoBehaviour
         });
         PrintChatMessage(chatMessages);
 
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        Debug.Log("[OpenAIRequest] WebGL testing mode: Unity ElevenLabs TTS skipped.");
+        #else
         if (TTSManager.Instance != null)
             TTSManager.Instance.ConvertTextToSpeech(responseText, motionCode);
         else
             Debug.LogError("TTSManager instance not found.");
+        #endif
 
         if (emotionController != null)
             emotionController.HandleEmotionCode(emotionCode, motionCode);

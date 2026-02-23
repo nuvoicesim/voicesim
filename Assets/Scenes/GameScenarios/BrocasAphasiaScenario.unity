@@ -4582,7 +4582,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -331.50034, y: 471.50037}
+  m_AnchoredPosition: {x: -331.50015, y: 471.50037}
   m_SizeDelta: {x: 680, y: 5000}
   m_Pivot: {x: 0, y: 1}
 --- !u!4 &730950017 stripped
@@ -5950,8 +5950,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 175523163}
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
-  m_Value: 0.000012565972
-  m_Size: 0.97499985
+  m_Value: -0.0000017951323
+  m_Size: 0.9749997
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -8036,6 +8036,8 @@ MonoBehaviour:
   reportText: {fileID: 333830809}
   closeButton: {fileID: 1954227787}
   progressBarUI: {fileID: 2076932622}
+  fallbackScoringUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev/llm-scoring
+  scoringTimeoutSeconds: 60
 --- !u!4 &1397519268
 Transform:
   m_ObjectHideFlags: 0
