@@ -27,21 +27,103 @@ public class EmotionController : MonoBehaviour
     private List<TTSManager.WordTiming> wordTimings;
     private int previousEmotionCode = 0;
     private int previousMotionCode = 0;
+    private TimelineAsset cachedTimeline;
+    private bool hasLoggedMissingTimeline;
 
-    void Start()
+    private static bool DirectorHasUsableTracks(PlayableDirector candidate)
+    {
+        if (candidate == null) return false;
+        TimelineAsset timeline = candidate.playableAsset as TimelineAsset;
+        if (timeline == null) return false;
+        return timeline.GetOutputTracks().Any();
+    }
+
+    private PlayableDirector ResolveFallbackDirector()
+    {
+        var candidates = FindObjectsOfType<PlayableDirector>();
+
+        foreach (var candidate in candidates)
+        {
+            if (DirectorHasUsableTracks(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        // Fallback to any director if none expose tracks yet.
+        return candidates.FirstOrDefault();
+    }
+
+    private bool TryEnsureTimelineTracks(string context)
     {
         if (director == null)
         {
-            Debug.LogError("PlayableDirector not assigned.");
+            director = GetComponent<PlayableDirector>();
+            if (director == null) director = GetComponentInChildren<PlayableDirector>();
+            if (director == null) director = GetComponentInParent<PlayableDirector>();
+            if (director == null) director = ResolveFallbackDirector();
         }
-        
+
+        if (director == null)
+        {
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"PlayableDirector not assigned in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
+        }
+
         TimelineAsset timeline = director.playableAsset as TimelineAsset;
         if (timeline == null)
         {
-            Debug.LogError("No TimelineAsset assigned to the PlayableDirector.");
-            return;
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"No TimelineAsset assigned to PlayableDirector in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
         }
-        allTracks = timeline.GetOutputTracks().ToList();
+
+        if (cachedTimeline != timeline || allTracks == null || allTracks.Count == 0)
+        {
+            cachedTimeline = timeline;
+            allTracks = timeline.GetOutputTracks().ToList();
+        }
+
+        if (allTracks == null || allTracks.Count == 0)
+        {
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"Timeline '{timeline.name}' has no output tracks in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
+        }
+
+        hasLoggedMissingTimeline = false;
+        return true;
+    }
+
+    private int ClampTrackIndex(int requestedIndex, string context)
+    {
+        if (!TryEnsureTimelineTracks(context))
+        {
+            return -1;
+        }
+
+        int clampedIndex = Mathf.Clamp(requestedIndex, 0, allTracks.Count - 1);
+        if (clampedIndex != requestedIndex)
+        {
+            Debug.LogWarning($"Track index {requestedIndex} out of bounds in {context}. Auto-corrected to {clampedIndex}.");
+        }
+
+        return clampedIndex;
+    }
+
+    void Start()
+    {
+        TryEnsureTimelineTracks("Start");
     }
     
     public void SyncAnimationsWithWordTimings(List<TTSManager.WordTiming> timings)
@@ -106,7 +188,13 @@ public class EmotionController : MonoBehaviour
             int emotionCode = MapWordToEmotion(wordTiming.Word);
             if (emotionCode != 0)
             {
-                TrackAsset selectedTrack = allTracks[emotionCode];
+                int mappedIndex = ClampTrackIndex(emotionCode, "TriggerAnimationsWithTiming(mapped emotion)");
+                if (mappedIndex < 0)
+                {
+                    yield break;
+                }
+
+                TrackAsset selectedTrack = allTracks[mappedIndex];
                 foreach (var track in allTracks.Where(track => track.name != "Blink Track"))
                 {
                     track.muted = (track != selectedTrack);
@@ -117,7 +205,13 @@ public class EmotionController : MonoBehaviour
                 var animationDelay = selectedTrack.duration;
                 yield return new WaitForSeconds((float)animationDelay);
                 
-                selectedTrack = allTracks[currentEmotionCode];
+                int currentIndex = ClampTrackIndex(currentEmotionCode, "TriggerAnimationsWithTiming(current emotion)");
+                if (currentIndex < 0)
+                {
+                    yield break;
+                }
+
+                selectedTrack = allTracks[currentIndex];
                 foreach (var track in allTracks.Where(track => track.name != "Blink Track"))
                 {
                     track.muted = (track != selectedTrack);
@@ -154,11 +248,12 @@ public class EmotionController : MonoBehaviour
         if (!setEmotionCode) { currentEmotionCode = emotionCode;}
         if (!setMotionCode) { currentMotionCode = motionCode; }
 
-        if (currentEmotionCode < 0 || currentEmotionCode >= allTracks.Count)
+        int validEmotionIndex = ClampTrackIndex(currentEmotionCode, "HandleEmotionCode");
+        if (validEmotionIndex < 0)
         {
-            Debug.LogError("Track index out of bounds.");
             return;
         }
+        currentEmotionCode = validEmotionIndex;
         
         TrackAsset selectedTrack = allTracks[currentEmotionCode];
         
@@ -181,6 +276,8 @@ public class EmotionController : MonoBehaviour
 
     public void PlayEmotion()
     {
+        if (!TryEnsureTimelineTracks("PlayEmotion")) return;
+
         director.RebuildGraph();
         director.Play();
     }
