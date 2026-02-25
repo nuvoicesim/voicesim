@@ -9,6 +9,8 @@ using System;
 
 public class SpeechToTextController2 : MonoBehaviour
 {
+    [SerializeField] private CueSkipGuard cueSkipGuard;
+
     public TextMeshProUGUI transcriptText; // Reference to the Text or TextMeshPro field in the UI
     private bool isRecording = false;
     private AudioClip recordedClip;
@@ -177,6 +179,7 @@ public class SpeechToTextController2 : MonoBehaviour
         }
 
         // Fiona update 11/13: integrate with patient NPC
+        cueSkipGuard?.CheckStudentUtterance(speech.text, "");
         await WaitForOpenAIRequestAndSend(speech.text, speech.wpm);
     }
 
