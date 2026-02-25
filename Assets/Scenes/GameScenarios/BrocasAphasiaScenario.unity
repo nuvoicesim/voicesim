@@ -791,9 +791,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8603941499062760594, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 456669814}
     - targetCorrespondingSourceObject: {fileID: 335689851042734832, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 85079552}
@@ -823,6 +820,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   apiUrl: https://api.openai.com/v1/chat/completions
   apiKey: 
+  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
+  dialoguePath: /llm-dialogue
+  maxRetries: 2
+  requestTimeoutSeconds: 45
   currentScenario: task1
   lostResponse: 'um... fast... uh... too... fast...  '
   maxSpeechSpeed: 170
@@ -843,8 +844,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a5e3eefea68847789642833bc724829, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebGLTextBridge
-  webglLlmUrl: https://rkh0ga80p1.execute-api.us-east-2.amazonaws.com/webgl/llm
-  mockResponder: {fileID: 85079566}
+  defaultSpeechWpm: 0
 --- !u!114 &85079566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2622,7 +2622,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1120805673}
   m_Direction: 2
   m_Value: 0.9999999
-  m_Size: 0.094299965
+  m_Size: 0.18859993
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3264,25 +3264,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aafc7d2234b0c3d4d863f32487a2f2b3, type: 3}
---- !u!1 &456669812 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8603941499062760594, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
-  m_PrefabInstance: {fileID: 85079550}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &456669814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 456669812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc9937d0c085413448fdeabd649f478d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::sitPatientSpeech
-  apiUrl: https://api.openai.com/v1/chat/completions
-  apiKey: 
 --- !u!1001 &459489565
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4886,7 +4867,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -331.5002, y: 471.50037}
+  m_AnchoredPosition: {x: -331.50034, y: 471.50037}
   m_SizeDelta: {x: 680, y: 5000}
   m_Pivot: {x: 0, y: 1}
 --- !u!4 &730950017 stripped
@@ -4899,20 +4880,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 417378689791786542, guid: 4f474c2f1e7a14e68bca52ad37af5f7c, type: 3}
   m_PrefabInstance: {fileID: 1767475470}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &740541868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 740541865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a5e3eefea68847789642833bc724829, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WebGLTextBridge
-  webglLlmUrl: https://rkh0ga80p1.execute-api.us-east-2.amazonaws.com/webgl/llm
-  mockResponder: {fileID: 0}
 --- !u!114 &740541869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6230,7 +6197,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
   m_Value: 0.000012565972
-  m_Size: 0.48749802
+  m_Size: 0.97499985
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -8270,6 +8237,8 @@ MonoBehaviour:
   reportText: {fileID: 333830809}
   closeButton: {fileID: 1954227787}
   progressBarUI: {fileID: 2076932622}
+  fallbackScoringUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev/llm-scoring
+  scoringTimeoutSeconds: 60
 --- !u!4 &1397519268
 Transform:
   m_ObjectHideFlags: 0
@@ -9529,9 +9498,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 417378689791786542, guid: 4f474c2f1e7a14e68bca52ad37af5f7c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 740541868}
     - targetCorrespondingSourceObject: {fileID: 417378689791786542, guid: 4f474c2f1e7a14e68bca52ad37af5f7c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 740541869}
@@ -10821,6 +10787,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7653040576838738761, guid: f24a0ddf02263e84e8e2847c2883cee5, type: 3}
   m_PrefabInstance: {fileID: 837904678}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &9040450946290668613
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.17227
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.22059
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 3.17227
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052789248270393940, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4496802368141655942, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
+      propertyPath: m_Name
+      value: WebGLGlobalBridge
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2ae55369a80a84d508abcd1c9ef9d92e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -10834,6 +10857,7 @@ SceneRoots:
   - {fileID: 85949100}
   - {fileID: 1796031801}
   - {fileID: 2053119591}
-  - {fileID: 85079550}
   - {fileID: 1767475470}
   - {fileID: 1459096457}
+  - {fileID: 85079550}
+  - {fileID: 9040450946290668613}
