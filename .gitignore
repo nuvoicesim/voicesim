@@ -130,3 +130,7 @@ local_docs/
 
 # unity build
 test_webgl/
+
+# temporary local Addressables workspace
+/[Aa]ssets/Addressables_Temp.meta
+/[Aa]ssets/Addressables_Temp/
