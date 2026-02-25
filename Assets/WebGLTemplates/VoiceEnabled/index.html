@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | V.O.I.C.E</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
@@ -27,6 +27,35 @@
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var unityInstanceGlobal = null;
+      var knownBridgeName = null;
+
+      const LOG_LEVELS = { debug: 10, info: 20, warn: 30, error: 40 };
+
+      function resolveVoiceSimLogLevel() {
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = (params.get('voicesimLog') || '').toLowerCase();
+        if (LOG_LEVELS[fromQuery]) {
+          localStorage.setItem('voicesim.logLevel', fromQuery);
+          return fromQuery;
+        }
+
+        const fromStorage = (localStorage.getItem('voicesim.logLevel') || '').toLowerCase();
+        if (LOG_LEVELS[fromStorage]) {
+          return fromStorage;
+        }
+
+        return 'warn';
+      }
+
+      const activeVoiceSimLogLevel = resolveVoiceSimLogLevel();
+
+      function voiceLog(level, ...args) {
+        if (!LOG_LEVELS[level] || LOG_LEVELS[level] < LOG_LEVELS[activeVoiceSimLogLevel]) {
+          return;
+        }
+        const fn = (level === 'error') ? console.error : (level === 'warn' ? console.warn : console.log);
+        fn('[VoiceSim]', ...args);
+      }
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
@@ -94,7 +123,7 @@
 
           initializeVoiceRecognition();
         }).catch((message) => {
-          console.error('[VoiceSim] Unity load failed:', message);
+          voiceLog('error', 'Unity load failed:', message);
           alert(message);
         });
       };
@@ -109,12 +138,14 @@
       let finalTranscript = '';
       let interimTranscript = '';
       let isRKeyPressed = false;
+      let lastInterimLogAt = 0;
+      const interimLogThrottleMs = 800;
 
       function initializeVoiceRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-          console.error('[VoiceSim] Web Speech API not supported. Use Chrome/Edge/Safari.');
+          voiceLog('error', 'Web Speech API not supported. Use Chrome/Edge/Safari.');
           return;
         }
 
@@ -126,7 +157,7 @@
 
         recognition.onstart = () => {
           isRecognitionActive = true;
-          console.log('[VoiceSim] Recording started. Hold R to keep recording, release R to send.');
+          voiceLog('info', 'Recording started. Hold R to keep recording, release R to send.');
           notifyUnityStatus('Recording started');
         };
 
@@ -137,14 +168,16 @@
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
               finalTranscript += transcript + ' ';
-              console.log('[VoiceSim] Final segment:', transcript);
+              voiceLog('info', 'Final segment:', transcript);
             } else {
               interimTranscript += transcript;
             }
           }
 
-          if (interimTranscript) {
-            console.log('[VoiceSim] Interim:', interimTranscript);
+          const now = Date.now();
+          if (interimTranscript && now - lastInterimLogAt >= interimLogThrottleMs) {
+            voiceLog('debug', 'Interim:', interimTranscript);
+            lastInterimLogAt = now;
           }
         };
 
@@ -154,26 +187,26 @@
           if (text) {
             sendToUnity(text);
           } else {
-            console.log('[VoiceSim] Recording ended with no transcript.');
+            voiceLog('debug', 'Recording ended with no transcript.');
           }
         };
 
         recognition.onerror = (event) => {
           isRecognitionActive = false;
-          console.error('[VoiceSim] Speech recognition error:', event.error);
+          voiceLog('error', 'Speech recognition error:', event.error);
           notifyUnityStatus('Error: ' + event.error);
         };
 
-        console.log('[VoiceSim] Voice recognition initialized. Use keyboard: hold R to record, release R to send.');
+        voiceLog('info', 'Voice recognition initialized. Use keyboard: hold R to record, release R to send.');
       }
 
       function startRecording() {
         if (!recognition) {
-          console.error('[VoiceSim] Recognition is not initialized.');
+          voiceLog('error', 'Recognition is not initialized.');
           return;
         }
         if (isRecognitionActive) {
-          console.warn('[VoiceSim] Recognition is already active.');
+          voiceLog('warn', 'Recognition is already active.');
           return;
         }
 
@@ -183,7 +216,7 @@
         try {
           recognition.start();
         } catch (error) {
-          console.error('[VoiceSim] Failed to start recording:', error);
+          voiceLog('error', 'Failed to start recording:', error);
         }
       }
 
@@ -194,9 +227,9 @@
 
         try {
           recognition.stop();
-          console.log('[VoiceSim] Stopping recording...');
+          voiceLog('info', 'Stopping recording...');
         } catch (error) {
-          console.error('[VoiceSim] Failed to stop recording:', error);
+          voiceLog('error', 'Failed to stop recording:', error);
         }
       }
 
@@ -207,13 +240,13 @@
         try {
           unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'UpdateVoiceStatus', status);
         } catch (error) {
-          console.warn('[VoiceSim] Could not send status to Unity:', error.message);
+          voiceLog('debug', 'Could not send status to Unity:', error.message);
         }
       }
 
       function sendToUnity(text) {
         if (!unityInstanceGlobal) {
-          console.error('[VoiceSim] Unity instance is not available.');
+          voiceLog('error', 'Unity instance is not available.');
           return;
         }
 
@@ -223,20 +256,32 @@
           'Humano_Aphasia'
         ];
 
+        if (knownBridgeName) {
+          try {
+            unityInstanceGlobal.SendMessage(knownBridgeName, 'InjectText', text);
+            voiceLog('info', 'Sent transcript via', knownBridgeName + ':', text);
+            return;
+          } catch (error) {
+            voiceLog('warn', 'Known bridge failed, rediscovering:', knownBridgeName, error.message);
+            knownBridgeName = null;
+          }
+        }
+
         let sent = false;
         for (const name of possibleNames) {
           try {
             unityInstanceGlobal.SendMessage(name, 'InjectText', text);
-            console.log('[VoiceSim] Sent transcript via', name, ':', text);
+            knownBridgeName = name;
+            voiceLog('info', 'Sent transcript via', name + ':', text);
             sent = true;
             break;
           } catch (error) {
-            console.warn('[VoiceSim] SendMessage failed for', name, ':', error.message);
+            voiceLog('debug', 'SendMessage failed for', name + ':', error.message);
           }
         }
 
         if (!sent) {
-          console.error('[VoiceSim] Failed to send transcript to Unity.');
+          voiceLog('error', 'Failed to send transcript to Unity.');
         }
       }
 
