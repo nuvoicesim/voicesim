@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
 using System.IO;
+using UnityEngine.UI;
+using TMPro;
 
 namespace UI.Cues
 {
@@ -41,10 +43,10 @@ namespace UI.Cues
     // ----------------------------
     public enum CueLevel
     {
-        None,       // Correct
-        Semantic,   // Meaning-based hint
-        Phonemic,   // Sound/letter hint
-        Model       // Full model
+        None,      
+        Semantic,   
+        Phonemic,   
+        Model       
     }
 
     // ----------------------------
@@ -60,6 +62,14 @@ namespace UI.Cues
 
         private CueLevel lastCueLevel = CueLevel.None;
         private CueLevel currentCueLevel = CueLevel.None;
+
+        [SerializeField] private GameObject cueButtonPanel;             // Panel containing the cue buttons
+        [SerializeField] private Button hintButton;                     // Brings up the cueButtonPanel when pressed
+        [SerializeField] private Button semanticCueButton;              // Button that triggers the Semantic Cue hint
+        [SerializeField] private Button phonemicCueButton;              // Button that triggers the Phonemic Cue hint
+        [SerializeField] private Button modelCueButton;                 // Button that triggers the Model Cue hint
+        [SerializeField] private GameObject hintBox;                    // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
+        [SerializeField] private TextMeshProUGUI hintText;              // Text element to display the student hint
 
         void Start()
         {
@@ -237,6 +247,7 @@ namespace UI.Cues
             lastCueLevel = currentCueLevel;
             currentCueLevel = DetermineCueLevel(patientResponse, saidTarget);
             string hint = GetStudentHint(currentCueLevel);
+            if (hint != null) SetHintText(hint);
 
             Debug.Log("Patient response: " + patientResponse);
             Debug.Log("Target said? " + saidTarget);
@@ -247,5 +258,32 @@ namespace UI.Cues
             else
                 Debug.Log("No hint needed. Target word produced");
         }
+
+        // ----------------------------
+        // UI HANDLERS
+        // ----------------------------
+        public void ToggleCuePanel()
+        {
+            Debug.Log("Toggling cue button panel");
+            if (cueButtonPanel != null)
+                cueButtonPanel.SetActive(!cueButtonPanel.activeSelf);
+        }
+
+        public void ToggleHintBox()
+        {
+            Debug.Log("Toggling hint box");
+            if (hintBox != null)
+                hintBox.SetActive(!hintBox.activeSelf);
+        }
+
+        private void SetHintText(string hint)
+        {
+            //TODO: Only show the hint if the cue button has been pressed and the cue level matches the button pressed.
+            //      This way the student can choose when to see the hint, but they only get the hint that corresponds to the patient's current cue level.
+            if (hintText != null)
+                hintText.text = hint;
+
+        }
+
     }
 }
