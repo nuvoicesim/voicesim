@@ -61,7 +61,9 @@ namespace UI.Cues
 
         private CueLevel lastCueLevel = CueLevel.None;
         private CueLevel currentCueLevel = CueLevel.None;
-
+        
+        private int maxCueCount = 3;                                        // Maximum number of cues before escalating to the next level
+        private int semanticCueCount = 0;                       // Tracks how many times the student has received a semantic cue for the current target word.
         private int phonemicCueCount = 0;                       // Tracks how many times the student has received a phonemic cue for the current target word.
 
         private CueLevel pressedCueButton = CueLevel.None;      // Tracks which cue button the student most recently pressed.
@@ -190,6 +192,9 @@ namespace UI.Cues
 
             foreach (var desc in currentScript.semanticKeywords)
             {
+                    semanticCueCount++;
+                    if (semanticCueCount >= 3)
+                        return CueLevel.Phonemic;
                 if (responseLower.Contains(desc.ToLower()))
                     return CueLevel.Semantic;
             }
@@ -256,6 +261,7 @@ namespace UI.Cues
             // - Make buttons greyed out if the corresponding CueLevel has not yet been reached.
             // - Make cue text look nicer.
             // - Make recommended cue button highlighted to guide the student towards the next appropriate cue level.
+            // - Add a target word to the UI so the student knows what the target is and can better understand the hints.
 
             if (!cueingActive) return;
 
