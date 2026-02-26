@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using UnityEngine.UI;
 using TMPro;
+using UI.Cues.WarningSystem;
 
 namespace UI.Cues
 {
@@ -62,7 +63,7 @@ namespace UI.Cues
         private CueLevel lastCueLevel = CueLevel.None;
         private CueLevel currentCueLevel = CueLevel.None;
         
-        private int maxCueCount = 3;                                        // Maximum number of cues before escalating to the next level
+        private int maxCueCount = 2;                            // Maximum number of cues before escalating to the next level
         private int semanticCueCount = 0;                       // Tracks how many times the student has received a semantic cue for the current target word.
         private int phonemicCueCount = 0;                       // Tracks how many times the student has received a phonemic cue for the current target word.
 
@@ -76,6 +77,8 @@ namespace UI.Cues
         [SerializeField] private Button modelCueButton;         // Button that triggers the Model Cue hint
         [SerializeField] private GameObject hintBox;            // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
         [SerializeField] private TextMeshProUGUI hintText;      // Text element to display the student hint
+
+
 
         void Start()
         {
@@ -182,6 +185,8 @@ namespace UI.Cues
         /// <returns>The CueLevel that should be applied for this response</returns>
         private CueLevel DetermineCueLevel(string patientResponse, bool saidTarget)
         {
+            CueLevel nextCueLevel = currentCueLevel;
+
             if (string.IsNullOrEmpty(patientResponse) || currentScript == null)
                 return lastCueLevel;
 
@@ -192,27 +197,47 @@ namespace UI.Cues
 
             foreach (var desc in currentScript.semanticKeywords)
             {
-                    semanticCueCount++;
-                    if (semanticCueCount >= 3)
-                        return CueLevel.Phonemic;
                 if (responseLower.Contains(desc.ToLower()))
-                    return CueLevel.Semantic;
+                {
+                    Debug.Log("Semantic keyword detected: " + desc + " Setting cue level to Semantic.");
+                    nextCueLevel = CueLevel.Semantic;
+                    semanticCueCount++;
+                    break; // If we detect any semantic keyword, we can break out of the loop and
+                }
             }
 
             foreach (var word in currentScript.phonemicKeywords)
             {
                 if (responseLower.Contains(word.ToLower()))
                 {
+                    Debug.Log("Phonemic keyword detected: " + word + " Setting cue level to Semantic.");
+                    nextCueLevel = CueLevel.Phonemic;
                     phonemicCueCount++;
-                    if (phonemicCueCount >= 3)
-                        return CueLevel.Model;
-
-                    return CueLevel.Phonemic;
+                    break; // If we detect any phonemic keyword, we can break out of the loop and set the cue level to Phonemic.
                 }
-                    
             }
 
-            
+            if (currentCueLevel == CueLevel.Semantic && nextCueLevel == CueLevel.Semantic)
+            {
+                Debug.Log("Semantic cue given again. Current semantic cue count " + semanticCueCount);
+                if (semanticCueCount >= maxCueCount)
+                {
+                    nextCueLevel = CueLevel.Phonemic;
+                    semanticCueCount = 0; // reset semantic cue count when escalating to phonemic cue
+                }
+            }
+            else if (currentCueLevel == CueLevel.Phonemic && nextCueLevel == CueLevel.Phonemic)
+            {
+                phonemicCueCount++;
+                Debug.Log("Phonemic cue given again. Current phonemic cue count " + phonemicCueCount);
+                if (phonemicCueCount >= maxCueCount)
+                {
+                    nextCueLevel = CueLevel.Model;
+                    phonemicCueCount = 0; // reset phonemic cue count when escalating to model cue
+                }
+            }
+
+
             /*
             foreach (var fragment in currentScript.modelKeywords)
             {
@@ -221,7 +246,7 @@ namespace UI.Cues
             }
             */
 
-            return CueLevel.Semantic;
+            return nextCueLevel;
         }
 
         /// <summary>
