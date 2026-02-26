@@ -19,7 +19,6 @@ namespace UI.Cues
 
         public string[] semanticKeywords;
         public string[] phonemicKeywords;
-        public string[] modelKeywords;
 
         public StudentHints studentHints;
     }
@@ -56,20 +55,25 @@ namespace UI.Cues
     {
         public bool cueingActive = false;
 
-        public int scriptNum = 1;             // The active script number
-        public ScriptEntry currentScript;     // The active script
-        private ScriptData allScripts;        // All scripts loaded from JSON
+        public int scriptNum = 1;                               // The active script number
+        public ScriptEntry currentScript;                       // The active script
+        private ScriptData allScripts;                          // All scripts loaded from JSON
 
         private CueLevel lastCueLevel = CueLevel.None;
         private CueLevel currentCueLevel = CueLevel.None;
 
-        [SerializeField] private GameObject cueButtonPanel;             // Panel containing the cue buttons
-        [SerializeField] private Button hintButton;                     // Brings up the cueButtonPanel when pressed
-        [SerializeField] private Button semanticCueButton;              // Button that triggers the Semantic Cue hint
-        [SerializeField] private Button phonemicCueButton;              // Button that triggers the Phonemic Cue hint
-        [SerializeField] private Button modelCueButton;                 // Button that triggers the Model Cue hint
-        [SerializeField] private GameObject hintBox;                    // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
-        [SerializeField] private TextMeshProUGUI hintText;              // Text element to display the student hint
+        private int phonemicCueCount = 0;                       // Tracks how many times the student has received a phonemic cue for the current target word.
+
+        private CueLevel pressedCueButton = CueLevel.None;      // Tracks which cue button the student most recently pressed.
+        private string lastComputedHint = "";                   // Stores the most recently computed hint for the currentCueLevel.
+
+        [SerializeField] private GameObject cueButtonPanel;     // Panel containing the cue buttons
+        [SerializeField] private Button hintButton;             // Brings up the cueButtonPanel when pressed
+        [SerializeField] private Button semanticCueButton;      // Button that triggers the Semantic Cue hint
+        [SerializeField] private Button phonemicCueButton;      // Button that triggers the Phonemic Cue hint
+        [SerializeField] private Button modelCueButton;         // Button that triggers the Model Cue hint
+        [SerializeField] private GameObject hintBox;            // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
+        [SerializeField] private TextMeshProUGUI hintText;      // Text element to display the student hint
 
         void Start()
         {
@@ -86,6 +90,18 @@ namespace UI.Cues
             {
                 Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
             }
+
+            // Wire up UI button callbacks
+            if (semanticCueButton != null)
+                semanticCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Semantic));
+            if (phonemicCueButton != null)
+                phonemicCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Phonemic));
+            if (modelCueButton != null)
+                modelCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Model));
+
+            // Ensure hint box starts hidden
+            if (hintBox != null)
+                hintBox.SetActive(false);
         }
 
         /// <summary>
@@ -181,14 +197,24 @@ namespace UI.Cues
             foreach (var word in currentScript.phonemicKeywords)
             {
                 if (responseLower.Contains(word.ToLower()))
+                {
+                    phonemicCueCount++;
+                    if (phonemicCueCount >= 3)
+                        return CueLevel.Model;
+
                     return CueLevel.Phonemic;
+                }
+                    
             }
 
+            
+            /*
             foreach (var fragment in currentScript.modelKeywords)
             {
                 if (responseLower.Contains(fragment.ToLower()))
                     return CueLevel.Model;
             }
+            */
 
             return CueLevel.Semantic;
         }
@@ -228,10 +254,6 @@ namespace UI.Cues
             // - Only check patientResponse if student has asked a question related to the target word.
             //      - How do we determine this?
             // - Make buttons greyed out if the corresponding CueLevel has not yet been reached.
-            // - Display button lables on hover.
-            // - Add button OnClick event to pop up student hint.
-            // - Enable CueButtonPanel when CueHintButton is pressed.
-            //      - This is where the Semantic, Phonemic, Model Cue buttons are.
 
             if (!cueingActive) return;
 
@@ -246,17 +268,22 @@ namespace UI.Cues
             bool saidTarget = CheckTargetWord(patientResponse);
             lastCueLevel = currentCueLevel;
             currentCueLevel = DetermineCueLevel(patientResponse, saidTarget);
+
+            // compute and cache the hint but do NOT show it unless the student pressed the matching cue button
             string hint = GetStudentHint(currentCueLevel);
-            if (hint != null) SetHintText(hint);
+            lastComputedHint = hint ?? "";
 
             Debug.Log("Patient response: " + patientResponse);
             Debug.Log("Target said? " + saidTarget);
             Debug.Log("Cue level: " + currentCueLevel);
 
             if (currentCueLevel != CueLevel.None)
-                Debug.Log("Student hint: " + hint);
+                Debug.Log("Student hint (cached): " + lastComputedHint);
             else
                 Debug.Log("No hint needed. Target word produced");
+
+            // After updating currentCueLevel and caching the hint, update UI visibility
+            
         }
 
         // ----------------------------
@@ -276,13 +303,61 @@ namespace UI.Cues
                 hintBox.SetActive(!hintBox.activeSelf);
         }
 
+        public void OnCueButtonPressed(CueLevel pressedCue)
+        {
+            pressedCueButton = pressedCue;
+            Debug.Log("Cue button pressed: " + pressedCue);
+            ShowHintIfAllowed();
+        }
+
+        /// <summary>
+        /// Shows the cached hint only when the student has pressed the cue button that matches currentCueLevel.
+        /// Hides the hint box otherwise.
+        /// </summary>
+        private void ShowHintIfAllowed()
+        {
+            // Preconditions
+            if (hintBox == null || hintText == null)
+                return;
+
+            if (pressedCueButton == CueLevel.Model && currentCueLevel != CueLevel.Model)
+            {
+                Debug.Log("Model cue button pressed but current cue level is not Model.");
+
+                string hint = GetStudentHint(CueLevel.Model);
+                lastComputedHint = hint ?? "";
+
+                hintText.text = lastComputedHint;
+                hintBox.SetActive(true);
+                Debug.Log("Showing student hint for " + CueLevel.Model);
+                return;
+            }
+
+            // Only show the hint when:
+            // - there is a cached hint for the current cue level,
+            // - the current cue level is not None,
+            // - and the student pressed the matching cue button.
+            if (currentCueLevel != CueLevel.None
+                && pressedCueButton == currentCueLevel
+                && !string.IsNullOrEmpty(lastComputedHint))
+            {
+                hintText.text = lastComputedHint;
+                hintBox.SetActive(true);
+                Debug.Log("Showing student hint for " + currentCueLevel);
+            }
+            else
+            {
+                // If not allowed to show, ensure hint box is hidden
+                hintBox.SetActive(false);
+                if (pressedCueButton != currentCueLevel)
+                    Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: " + pressedCueButton + " Current: " + currentCueLevel);
+            }
+        }
+
         private void SetHintText(string hint)
         {
-            //TODO: Only show the hint if the cue button has been pressed and the cue level matches the button pressed.
-            //      This way the student can choose when to see the hint, but they only get the hint that corresponds to the patient's current cue level.
-            if (hintText != null)
-                hintText.text = hint;
-
+            // Kept for compatibility but now only caches hint.
+            lastComputedHint = hint ?? "";
         }
 
     }

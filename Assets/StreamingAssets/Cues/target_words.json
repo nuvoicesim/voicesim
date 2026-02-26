@@ -5,11 +5,10 @@
       "title": "Morning Routine",
       "target_word": "Coffee",
       "alternate_target": "",
-      "semanticKeywords": [ "morning drink", "wake up beverage", "hot drink" ],
-      "phonemicKeywords": [ "Starts with 'C' like 'cat'", "First sound like 'cof'" ],
-      "modelKeywords": [ "cof", "caw", "cfe" ],
+      "semanticKeywords": [ "beverage", "hot", "drink", "iced", "cold", "drank" ],
+      "phonemicKeywords": [ "cof", "caw", "cfe", "kuh" ],
       "studentHints": {
-        "Semantic": "It’s a drink people often have in the morning.",
+        "Semantic": "It is a drink people often have in the morning.",
         "Phonemic": "It starts with 'C' like 'cat'.",
         "Model": "Say 'Coffee'."
       }
@@ -20,10 +19,9 @@
       "target_word": "Daughter",
       "alternate_target": "",
       "semanticKeywords": [ "female child", "my child", "family member" ],
-      "phonemicKeywords": [ "Starts with 'D' like 'dog'", "First sound like 'dau'" ],
-      "modelKeywords": [ "dau", "daw", "dag" ],
+      "phonemicKeywords": [ "dau", "daw", "dag" ],
       "studentHints": {
-        "Semantic": "It’s a female child in a family.",
+        "Semantic": "It is a female child in a family.",
         "Phonemic": "It starts with 'D' like 'dog'.",
         "Model": "Say 'Daughter'."
       }
@@ -34,10 +32,9 @@
       "target_word": "Shower",
       "alternate_target": "",
       "semanticKeywords": [ "wash body", "bath", "cleaning up", "hygiene" ],
-      "phonemicKeywords": [ "Starts with 'Sh' like 'shoe'", "First sound like 'sho'" ],
-      "modelKeywords": [ "sho", "shau", "shw" ],
+      "phonemicKeywords": [ "sho", "shau", "shw" ],
       "studentHints": {
-        "Semantic": "It’s an activity where you clean your body.",
+        "Semantic": "It is an activity where you clean your body.",
         "Phonemic": "It starts with 'Sh' like 'shoe'.",
         "Model": "Say 'Shower'."
       }
@@ -48,10 +45,9 @@
       "target_word": "Sandwich",
       "alternate_target": "",
       "semanticKeywords": [ "bread meal", "lunch food", "filled bread" ],
-      "phonemicKeywords": [ "Starts with 'S' like 'sand'", "First sound like 'san'" ],
-      "modelKeywords": [ "san", "saw", "sand" ],
+      "phonemicKeywords": [ "san", "saw", "sand" ],
       "studentHints": {
-        "Semantic": "It’s something you eat for lunch made with bread.",
+        "Semantic": "It is something you eat for lunch made with bread.",
         "Phonemic": "It starts with 'S' like 'sand'.",
         "Model": "Say 'Sandwich'."
       }
@@ -62,10 +58,9 @@
       "target_word": "Car",
       "alternate_target": "",
       "semanticKeywords": [ "vehicle", "drive", "automobile", "ride" ],
-      "phonemicKeywords": [ "Starts with 'C' like 'cat'", "First sound like 'car'" ],
-      "modelKeywords": [ "ca", "car", "kar" ],
+      "phonemicKeywords": [ "ca", "car", "kar" ],
       "studentHints": {
-        "Semantic": "It’s a vehicle you drive on the road.",
+        "Semantic": "It is a vehicle you drive on the road.",
         "Phonemic": "It starts with 'C' like 'cat'.",
         "Model": "Say 'Car'."
       }
@@ -76,10 +71,9 @@
       "target_word": "Shirt",
       "alternate_target": "",
       "semanticKeywords": [ "clothing", "clothes", "top" ],
-      "phonemicKeywords": [ "Starts with 'Sh' like 'shoe'", "First sound like 'shi'" ],
-      "modelKeywords": [ "shi", "sh", "sht" ],
+      "phonemicKeywords": [ "shi", "sh", "sht" ],
       "studentHints": {
-        "Semantic": "It’s what you wear on your upper body.",
+        "Semantic": "It is what you wear on your upper body.",
         "Phonemic": "It starts with 'Sh' like 'shoe'.",
         "Model": "Say 'Shirt'."
       }
@@ -90,10 +84,9 @@
       "target_word": "Sunny",
       "alternate_target": "",
       "semanticKeywords": [ "bright day", "no clouds", "sun is out" ],
-      "phonemicKeywords": [ "Starts with 'S' like 'sun'", "First sound like 'sun'" ],
-      "modelKeywords": [ "sun", "sunn", "suny" ],
+      "phonemicKeywords": [ "sun", "sunn", "suny" ],
       "studentHints": {
-        "Semantic": "It’s a bright day with lots of sunlight.",
+        "Semantic": "It is a bright day with lots of sunlight.",
         "Phonemic": "It starts with 'S' like 'sun'.",
         "Model": "Say 'Sunny'."
       }
@@ -104,10 +97,9 @@
       "target_word": "Television",
       "alternate_target": "TV",
       "semanticKeywords": [ "watch shows", "screen", "entertainment device" ],
-      "phonemicKeywords": [ "Starts with 'T' like 'table'", "First sound like 'tel'" ],
-      "modelKeywords": [ "tel", "tele", "tv" ],
+      "phonemicKeywords": [ "tel", "tele", "tv" ],
       "studentHints": {
-        "Semantic": "It’s the device you watch shows on.",
+        "Semantic": "It is the device you watch shows on.",
         "Phonemic": "It starts with 'T' like 'table'.",
         "Model": "Say 'Television'."
       }
@@ -118,10 +110,9 @@
       "target_word": "Pill",
       "alternate_target": "Pills",
       "semanticKeywords": [ "medicine", "tablet", "medication" ],
-      "phonemicKeywords": [ "Starts with 'P' like 'pen'", "First sound like 'pil'" ],
-      "modelKeywords": [ "pil", "pill", "p" ],
+      "phonemicKeywords": [ "pil", "pill", "p" ],
       "studentHints": {
-        "Semantic": "It’s a small medicine you take to feel better.",
+        "Semantic": "It is a small medicine you take to feel better.",
         "Phonemic": "It starts with 'P' like 'pen'.",
         "Model": "Say 'Pill'."
       }
@@ -132,10 +123,9 @@
       "target_word": "Tired",
       "alternate_target": "",
       "semanticKeywords": [ "sleepy", "fatigued", "need rest" ],
-      "phonemicKeywords": [ "Starts with 'T' like 'top'", "First sound like 'tir'" ],
-      "modelKeywords": [ "tir", "tie", "tird" ],
+      "phonemicKeywords": [ "tir", "tie", "tird" ],
       "studentHints": {
-        "Semantic": "It’s how you feel after a long day.",
+        "Semantic": "It is how you feel after a long day.",
         "Phonemic": "It starts with 'T' like 'top'.",
         "Model": "Say 'Tired'."
       }
