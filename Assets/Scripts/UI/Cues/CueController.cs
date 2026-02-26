@@ -291,6 +291,10 @@ namespace UI.Cues
         // ----------------------------
         // UI HANDLERS
         // ----------------------------
+
+        /// <summary>
+        /// Toggles the visibility of the cue button panel.
+        /// </summary>
         public void ToggleCuePanel()
         {
             Debug.Log("Toggling cue button panel");
@@ -298,6 +302,9 @@ namespace UI.Cues
                 cueButtonPanel.SetActive(!cueButtonPanel.activeSelf);
         }
 
+        /// <summary>
+        /// Toggles the visibility of the hint box.
+        /// </summary>
         public void ToggleHintBox()
         {
             Debug.Log("Toggling hint box");
@@ -305,6 +312,12 @@ namespace UI.Cues
                 hintBox.SetActive(!hintBox.activeSelf);
         }
 
+        /// <summary>
+        /// Function to be called when a Cue button is pressed. Caches which 
+        /// button was pressed and then calls ShowHintIfAllowed to determine 
+        /// whether to show the hint based on currentCueLevel and the pressed button.
+        /// </summary>
+        /// <param name="pressedCue"></param>
         public void OnCueButtonPressed(CueLevel pressedCue)
         {
             pressedCueButton = pressedCue;
@@ -355,12 +368,5 @@ namespace UI.Cues
                     Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: " + pressedCueButton + " Current: " + currentCueLevel);
             }
         }
-
-        private void SetHintText(string hint)
-        {
-            // Kept for compatibility but now only caches hint.
-            lastComputedHint = hint ?? "";
-        }
-
     }
 }
