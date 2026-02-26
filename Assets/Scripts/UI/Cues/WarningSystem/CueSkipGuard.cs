@@ -67,6 +67,8 @@ public class CueSkipGuard : MonoBehaviour
         if (WarningsPaused)
             return;
 
+        Debug.Log("IN CUE SKIP GUARD CHECK");
+
         CueLevel used = Classify(studentText, targetWord);
 
         // Helpful debug (you can remove later)

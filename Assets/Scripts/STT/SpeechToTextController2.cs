@@ -179,7 +179,10 @@ public class SpeechToTextController2 : MonoBehaviour
         }
 
         // Fiona update 11/13: integrate with patient NPC
-        cueSkipGuard?.CheckStudentUtterance(speech.text, "");
+        if (cueSkipGuard != null)
+            cueSkipGuard?.CheckStudentUtterance(speech.text, "");
+        else
+            Debug.LogWarning("STT: CueSkipGuard reference is missing!");
         await WaitForOpenAIRequestAndSend(speech.text, speech.wpm);
     }
 
