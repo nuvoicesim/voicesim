@@ -88,6 +88,13 @@ public class OpenAIRequest : MonoBehaviour
         // Initialize components
         animationController = GetComponent<CharacterAnimationController>();
         emotionController = GetComponent<EmotionController>();
+
+        if (cueControllerObject == null)
+{
+    Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
+    return;
+}
+
         cueController = cueControllerObject.GetComponent<CueController>();
 
         if (emotionController == null)
