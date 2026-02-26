@@ -254,6 +254,8 @@ namespace UI.Cues
             // - Only check patientResponse if student has asked a question related to the target word.
             //      - How do we determine this?
             // - Make buttons greyed out if the corresponding CueLevel has not yet been reached.
+            // - Make cue text look nicer.
+            // - Make recommended cue button highlighted to guide the student towards the next appropriate cue level.
 
             if (!cueingActive) return;
 
