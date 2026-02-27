@@ -44,7 +44,7 @@
       "title": "Meals",
       "target_word": "Sandwich",
       "alternate_target": "",
-      "semanticKeywords": [ "bread meal", "lunch food", "filled bread" ],
+      "semanticKeywords": [ "meat", "lunch food", "bread" ],
       "phonemicKeywords": [ "san", "saw", "sand" ],
       "studentHints": {
         "Semantic": "It is something you eat for lunch made with bread.",

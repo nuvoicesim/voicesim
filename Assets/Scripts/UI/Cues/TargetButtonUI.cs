@@ -19,6 +19,11 @@ public class TargetButtonUI : MonoBehaviour
         SetNormalState();
     }
 
+    public bool IsConfirmed()
+    {
+        return confirmed;
+    }
+
     public void OnTargetClicked()
     {
         if (!confirmed)

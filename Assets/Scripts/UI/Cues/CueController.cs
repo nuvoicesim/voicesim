@@ -77,6 +77,8 @@ namespace UI.Cues
         [SerializeField] private Button modelCueButton;         // Button that triggers the Model Cue hint
         [SerializeField] private GameObject hintBox;            // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
         [SerializeField] private TextMeshProUGUI hintText;      // Text element to display the student hint
+        [SerializeField] private TextMeshProUGUI targetText;    // Text element to display the current target word for the student
+        [SerializeField] private TargetButtonUI targetButtonUI; // Reference to the TargetButtonUI script to check if the target has been confirmed
 
 
 
@@ -107,6 +109,15 @@ namespace UI.Cues
             // Ensure hint box starts hidden
             if (hintBox != null)
                 hintBox.SetActive(false);
+
+            if (targetText == null)
+            {
+                Debug.LogError("No targetText object found");
+                return;
+            }
+
+            SetCurrentScript(scriptNum);
+            targetText.text = "Target: " + currentScript.target_word;
         }
 
         /// <summary>
@@ -272,6 +283,20 @@ namespace UI.Cues
             }
         }
 
+        private void UpdateTarget()
+        {
+            if (targetButtonUI.IsConfirmed())
+            {
+                scriptNum = UnityEngine.Random.Range(2, 11);
+                SetCurrentScript(scriptNum);
+
+                if (targetText != null && currentScript != null)
+                {
+                    targetText.text = "Target: " + currentScript.target_word;
+                }
+            }
+        }
+
         public CueLevel GetCurrentCueLevel()
         {
             return currentCueLevel;
@@ -288,6 +313,7 @@ namespace UI.Cues
             // Optionally hide the hint box when resetting
             if (hintBox != null)
                 hintBox.SetActive(false);
+            UpdateTarget();
         }
 
         /// <summary>
@@ -307,8 +333,6 @@ namespace UI.Cues
             // - Add a target word to the UI so the student knows what the target is and can better understand the hints.
 
             if (!cueingActive) return;
-
-            SetCurrentScript(scriptNum);
 
             if (currentScript == null)
             {
