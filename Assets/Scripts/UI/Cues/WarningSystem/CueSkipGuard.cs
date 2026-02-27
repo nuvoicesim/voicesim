@@ -1,9 +1,9 @@
 using UnityEngine;
+using UI.Cues;
 
 namespace UI.Cues.WarningSystem
 {
-
-    public enum CueLevel { None = 0, Semantic = 1, Phonemic = 2, Model = 3 }
+    //public enum CueLevel { None = 0, Semantic = 1, Phonemic = 2, Model = 3 }
 
     public class CueSkipGuard : MonoBehaviour
     {
@@ -27,9 +27,15 @@ namespace UI.Cues.WarningSystem
         private float _pauseUntilTime = 0f;
         public bool WarningsPaused => Time.time < _pauseUntilTime;
 
-        public void ResetToSemantic()
+        [SerializeField] private CueController _cueController;
+
+        public void ResetCueing()
         {
-            expectedLevel = CueLevel.Semantic;
+            Debug.Log("CueSkipGuard: Resetting cueing level.");
+            _cueController.ResetCueing();
+            expectedLevel = UI.Cues.CueLevel.Semantic;
+            Debug.Log("CueSkipGuard: expectedLevel reset to Semantic.");
+            Debug.Log("CueSkipGuard: CueController current level after reset: " + _cueController.GetCurrentCueLevel());
         }
 
         /// <summary>
@@ -53,7 +59,7 @@ namespace UI.Cues.WarningSystem
         /// </summary>
         public void OnTargetSuccess(float pauseSeconds = -1f)
         {
-            ResetToSemantic();
+            ResetCueing();
             PauseWarnings(pauseSeconds);
         }
 
@@ -70,14 +76,26 @@ namespace UI.Cues.WarningSystem
             if (WarningsPaused)
                 return;
 
-            Debug.Log("IN CUE SKIP GUARD CHECK");
+            if (_cueController == null)
+            {
+                Debug.LogError("CueSkipGuard: CueController reference not set. Cannot sync expectedLevel with current cue.");
+                return;
+            }
 
-            CueLevel used = Classify(studentText, targetWord);
+
+            Debug.Log("expectedLevel before CueController check: " + expectedLevel);
+            Debug.Log("Setting expectedLevel from CueController: " + _cueController.GetCurrentCueLevel());
+
+            expectedLevel = _cueController.GetCurrentCueLevel();
+
+            Debug.Log("expectedLevel after CueController check: " + expectedLevel);
+
+            UI.Cues.CueLevel used = Classify(studentText, targetWord);
 
             // Helpful debug (you can remove later)
             Debug.Log($"CueSkipGuard: text=\"{studentText}\" | used={used} expected={expectedLevel} bannerNull={(banner == null)} paused={WarningsPaused}");
 
-            if (used == CueLevel.None)
+            if (used == UI.Cues.CueLevel.None)
                 return;
 
             // If student skips ahead, warn
@@ -106,28 +124,28 @@ namespace UI.Cues.WarningSystem
             }
         }
 
-        private CueLevel NextLevel(CueLevel level)
+        private UI.Cues.CueLevel NextLevel(UI.Cues.CueLevel level)
         {
-            if (level == CueLevel.Semantic) return CueLevel.Phonemic;
-            if (level == CueLevel.Phonemic) return CueLevel.Model;
-            return CueLevel.Model;
+            if (level == UI.Cues.CueLevel.Semantic) return UI.Cues.CueLevel.Phonemic;
+            if (level == UI.Cues.CueLevel.Phonemic) return UI.Cues.CueLevel.Model;
+            return UI.Cues.CueLevel.Model;
         }
 
-        private string BuildWarning(CueLevel expected, CueLevel used)
+        private string BuildWarning(UI.Cues.CueLevel expected, UI.Cues.CueLevel used)
         {
-            if (expected == CueLevel.Semantic && used == CueLevel.Phonemic)
+            if (expected == UI.Cues.CueLevel.Semantic && used == UI.Cues.CueLevel.Phonemic)
                 return "Please try a Semantic cue first before moving to a Phonemic cue.";
-            if (expected == CueLevel.Semantic && used == CueLevel.Model)
+            if (expected == UI.Cues.CueLevel.Semantic && used == UI.Cues.CueLevel.Model)
                 return "Please try Semantic → Phonemic cues before providing the Model cue.";
-            if (expected == CueLevel.Phonemic && used == CueLevel.Model)
+            if (expected == UI.Cues.CueLevel.Phonemic && used == UI.Cues.CueLevel.Model)
                 return "Please try a Phonemic cue before providing the Model cue.";
             return "Please use cues in order: Semantic → Phonemic → Model.";
         }
 
         // Rule-based classifier (MVP)
-        private CueLevel Classify(string text, string targetWord)
+        private UI.Cues.CueLevel Classify(string text, string targetWord)
         {
-            if (string.IsNullOrWhiteSpace(text)) return CueLevel.None;
+            if (string.IsNullOrWhiteSpace(text)) return UI.Cues.CueLevel.None;
 
             string t = text.ToLowerInvariant().Trim();
             string target = (targetWord ?? "").ToLowerInvariant().Trim();
@@ -143,13 +161,13 @@ namespace UI.Cues.WarningSystem
                     "please repeat",
                     "just say"))
             {
-                return CueLevel.Model;
+                return UI.Cues.CueLevel.Model;
             }
 
             // If targetWord is known, explicit quoting of target is also model-like
             if (!string.IsNullOrEmpty(target) && (t.Contains($"\"{target}\"") || t.Contains($"'{target}'")))
             {
-                return CueLevel.Model;
+                return UI.Cues.CueLevel.Model;
             }
 
             // --- Phonemic cue
@@ -164,7 +182,7 @@ namespace UI.Cues.WarningSystem
                     "sounds like",
                     "rhymes with"))
             {
-                return CueLevel.Phonemic;
+                return UI.Cues.CueLevel.Phonemic;
             }
 
             // --- Semantic cue (light heuristic)
@@ -179,10 +197,10 @@ namespace UI.Cues.WarningSystem
                     "it helps",
                     "you can"))
             {
-                return CueLevel.Semantic;
+                return UI.Cues.CueLevel.Semantic;
             }
 
-            return CueLevel.None;
+            return UI.Cues.CueLevel.None;
         }
 
         private bool ContainsAny(string t, params string[] keys)

@@ -43,10 +43,10 @@ namespace UI.Cues
     // ----------------------------
     public enum CueLevel
     {
-        None,      
-        Semantic,   
-        Phonemic,   
-        Model       
+        None = 0,      
+        Semantic = 1,   
+        Phonemic = 2,   
+        Model = 3      
     }
 
     // ----------------------------
@@ -192,8 +192,14 @@ namespace UI.Cues
 
             string responseLower = patientResponse.ToLower();
 
-            if (saidTarget)
-                return CueLevel.None;
+            //if (saidTarget)
+                //return CueLevel.None;
+            if (currentCueLevel == CueLevel.Model)
+            {
+                Debug.Log("Model cue given again. Do not check for other levels");
+                return currentCueLevel;
+
+            }
 
             foreach (var desc in currentScript.semanticKeywords)
             {
@@ -201,7 +207,6 @@ namespace UI.Cues
                 {
                     Debug.Log("Semantic keyword detected: " + desc + " Setting cue level to Semantic.");
                     nextCueLevel = CueLevel.Semantic;
-                    semanticCueCount++;
                     break; // If we detect any semantic keyword, we can break out of the loop and
                 }
             }
@@ -210,9 +215,8 @@ namespace UI.Cues
             {
                 if (responseLower.Contains(word.ToLower()))
                 {
-                    Debug.Log("Phonemic keyword detected: " + word + " Setting cue level to Semantic.");
+                    Debug.Log("Phonemic keyword detected: " + word + " Setting cue level to Phonemic.");
                     nextCueLevel = CueLevel.Phonemic;
-                    phonemicCueCount++;
                     break; // If we detect any phonemic keyword, we can break out of the loop and set the cue level to Phonemic.
                 }
             }
@@ -221,9 +225,9 @@ namespace UI.Cues
             {
                 Debug.Log("Semantic cue given again. Current semantic cue count " + semanticCueCount);
                 if (semanticCueCount >= maxCueCount)
-                {
+                {   
+                    Debug.Log("Max semantic cue count reached. Escalating to phonemic cue.");
                     nextCueLevel = CueLevel.Phonemic;
-                    semanticCueCount = 0; // reset semantic cue count when escalating to phonemic cue
                 }
             }
             else if (currentCueLevel == CueLevel.Phonemic && nextCueLevel == CueLevel.Phonemic)
@@ -232,19 +236,15 @@ namespace UI.Cues
                 Debug.Log("Phonemic cue given again. Current phonemic cue count " + phonemicCueCount);
                 if (phonemicCueCount >= maxCueCount)
                 {
+                    Debug.Log("Max phonemic cue count reached. Escalating to model cue.");
                     nextCueLevel = CueLevel.Model;
-                    phonemicCueCount = 0; // reset phonemic cue count when escalating to model cue
                 }
             }
 
-
-            /*
-            foreach (var fragment in currentScript.modelKeywords)
-            {
-                if (responseLower.Contains(fragment.ToLower()))
-                    return CueLevel.Model;
-            }
-            */
+            if (nextCueLevel == CueLevel.Semantic)
+                semanticCueCount++;
+            else if (nextCueLevel == CueLevel.Phonemic)
+                phonemicCueCount++;
 
             return nextCueLevel;
         }
@@ -270,6 +270,24 @@ namespace UI.Cues
                 default:
                     return "";
             }
+        }
+
+        public CueLevel GetCurrentCueLevel()
+        {
+            return currentCueLevel;
+        }
+
+        public void ResetCueing()
+        {
+            lastCueLevel = CueLevel.None;
+            currentCueLevel = CueLevel.None;
+            semanticCueCount = 0;
+            phonemicCueCount = 0;
+            lastComputedHint = "";
+            pressedCueButton = CueLevel.None;
+            // Optionally hide the hint box when resetting
+            if (hintBox != null)
+                hintBox.SetActive(false);
         }
 
         /// <summary>
@@ -309,11 +327,14 @@ namespace UI.Cues
             Debug.Log("Patient response: " + patientResponse);
             Debug.Log("Target said? " + saidTarget);
             Debug.Log("Cue level: " + currentCueLevel);
+            Debug.Log("Cached hint: " + lastComputedHint);
+            Debug.Log("Semantic cue count: " + semanticCueCount);
+            Debug.Log("Phonemic cue count: " + phonemicCueCount);
 
             if (currentCueLevel != CueLevel.None)
                 Debug.Log("Student hint (cached): " + lastComputedHint);
             else
-                Debug.Log("No hint needed. Target word produced");
+                Debug.Log("No hint needed");
 
             // After updating currentCueLevel and caching the hint, update UI visibility
             

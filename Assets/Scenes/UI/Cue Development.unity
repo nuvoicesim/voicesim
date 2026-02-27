@@ -2371,7 +2371,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1120805673}
   m_Direction: 2
   m_Value: 0.9999999
-  m_Size: 0.18859993
+  m_Size: 0.094299965
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5595,6 +5595,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 9017778977025014296, guid: 09c7922a310436f48b3899428d148533, type: 3}
   m_PrefabInstance: {fileID: 7493123059958747648}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &900251394 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+  m_PrefabInstance: {fileID: 7493123059958747648}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 900251393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8673004093d3b4eb55085424678faf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Cues.CueController
 --- !u!1001 &901776693
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6079,7 +6090,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
   m_Value: -0.0000017951323
-  m_Size: 0.9749997
+  m_Size: 0.487498
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7611,6 +7622,7 @@ MonoBehaviour:
   expectedLevel: 1
   warningCooldownSeconds: 1
   defaultPauseSeconds: 10
+  _cueController: {fileID: 900251394}
 --- !u!1001 &1288509233
 PrefabInstance:
   m_ObjectHideFlags: 0

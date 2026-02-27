@@ -16,7 +16,7 @@ public class MarkCorrectUI : MonoBehaviour
             return;
         }
 
-        cueSkipGuard.ResetToSemantic();
+        cueSkipGuard.ResetCueing();
         cueSkipGuard.PauseWarnings(pauseSeconds);
 
         if (statusText != null)

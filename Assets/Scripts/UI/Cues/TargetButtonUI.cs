@@ -50,7 +50,7 @@ public class TargetButtonUI : MonoBehaviour
 
             if (cueSkipGuard != null)
             {
-                cueSkipGuard.ResetToSemantic();
+                cueSkipGuard.ResetCueing();
                 cueSkipGuard.PauseWarnings(0f); // 立刻恢复
             }
 
