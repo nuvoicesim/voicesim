@@ -21,6 +21,9 @@ public class EmotionController : MonoBehaviour
     public int currentMotionCode;
     public string[] emotionNames = {"Neutral", "Discomfort", "Happy", "Pain", "Sad", "Anger", "Frustrated", "Thinking", "Apologetic", "Cry"};
     public string[] motionNames = { "Neutral", "Confused", "Nod 1", "Nod 2", "Nod 3", "Nod 4", "Head Shake 1", "Head Shake 2", "Tap Table", "Struggling"};
+
+    [Header("Facial Expression Integration")]
+    public FacialExpressionRuntimeBridge facialExpressionBridge;
     
     private List<TrackAsset> allTracks = new();
     private List<TTSManager.WordTiming> charTimings;
@@ -124,6 +127,11 @@ public class EmotionController : MonoBehaviour
     void Start()
     {
         TryEnsureTimelineTracks("Start");
+
+        if (facialExpressionBridge == null)
+        {
+            facialExpressionBridge = GetComponent<FacialExpressionRuntimeBridge>();
+        }
     }
     
     public void SyncAnimationsWithWordTimings(List<TTSManager.WordTiming> timings)
@@ -270,6 +278,11 @@ public class EmotionController : MonoBehaviour
         {
             animator.SetTrigger(motionNames[currentMotionCode]);
             Debug.Log("Set trigger: " + motionNames[currentEmotionCode]);
+        }
+
+        if (facialExpressionBridge != null)
+        {
+            facialExpressionBridge.HandleEmotionAndMotion(currentEmotionCode, currentMotionCode);
         }
         
     }

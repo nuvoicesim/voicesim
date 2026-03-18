@@ -1721,6 +1721,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4829023946581723011}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1573346482229067111}
   m_SourcePrefab: {fileID: 100100000, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
 --- !u!137 &4062513801542246115 stripped
 SkinnedMeshRenderer:
@@ -2195,6 +2198,7 @@ MonoBehaviour:
   - Head Shake 2
   - Tap Table
   - Struggling
+  facialExpressionBridge: {fileID: 1573346482229067111}
 --- !u!114 &4829023946581723011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2227,3 +2231,26 @@ MonoBehaviour:
   speechReductionFull: 0.45
   speechSmoothingSpeed: 8
   expressionBlendSpeed: 220
+--- !u!114 &1573346482229067111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8068719081323617958}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe261c5345a94f849440e9064350811b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  facialController: {fileID: 4829023946581723011}
+  emotionController: {fileID: 6668925248582050730}
+  autoResolveReferences: 1
+  registerWithEmotionController: 1
+  happyOverlayIntensity: 0.55
+  stressOverlayIntensity: 0.6
+  confusedPeakIntensity: 0.75
+  happyPeakIntensity: 0.65
+  cryPeakIntensity: 0.95
+  reliefPeakIntensity: 0.6
+  resetOverlaysBeforeApply: 1
