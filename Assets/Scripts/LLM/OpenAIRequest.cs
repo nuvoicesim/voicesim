@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using UI.Cues;
 
 public class OpenAIRequest : MonoBehaviour
 {
@@ -31,6 +32,8 @@ public class OpenAIRequest : MonoBehaviour
     public int CurrentSimulationLevel { get; private set; } = 1;
 
     private EmotionController emotionController;
+    [SerializeField] private GameObject cueControllerObject;
+    private CueController cueController;
     private readonly List<Dictionary<string, string>> chatMessages = new List<Dictionary<string, string>>();
     private string currentPatientResponse = "";
     private string pendingNurseMessage = "";
@@ -93,8 +96,20 @@ public class OpenAIRequest : MonoBehaviour
     void Start()
     {
         emotionController = GetComponent<EmotionController>();
+
+        if (cueControllerObject == null)
+{
+    Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
+    return;
+}
+
+        cueController = cueControllerObject.GetComponent<CueController>();
+
         if (emotionController == null)
             Debug.LogError("EmotionController component not found on the GameObject.");
+
+        if (cueController == null)
+            Debug.LogError("CueController component not found on the UI GameObject.");
 
         if (!string.IsNullOrEmpty(currentScenario))
             InitializeChat();
@@ -335,6 +350,9 @@ public class OpenAIRequest : MonoBehaviour
 
         if (emotionController != null)
             emotionController.HandleEmotionCode(emotionCode, motionCode);
+
+        if (cueController != null)
+            cueController.HandleResponse(responseText);
 
         if (ScoreManager.Instance != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
         {
