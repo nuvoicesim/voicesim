@@ -2220,9 +2220,9 @@ MonoBehaviour:
   softSmileWeight: 0
   eyeTensionWeight: 0
   blinkPatternShiftWeight: 0
-  blinkPatternFrequency: 1.1
-  blinkPatternPulseWeight: 28
-  blinkPatternDutyCycle: 0.18
+  blinkPatternFrequency: 1.25
+  blinkPatternPulseWeight: 40
+  blinkPatternDutyCycle: 0.16
   speechReductionStart: 0.1
   speechReductionFull: 0.45
   speechSmoothingSpeed: 8

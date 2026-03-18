@@ -9,9 +9,6 @@ public class FacialExpressionTestController : MonoBehaviour
     public enum BaseState
     {
         Neutral,
-        Thinking,
-        SearchingWordFinding,
-        AttentiveListening,
         MildHappy,
         Frustrated
     }
@@ -115,9 +112,9 @@ public class FacialExpressionTestController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float blinkPatternShiftWeight = 0f;
 
     [Header("Blink Pattern Shift")]
-    [SerializeField, Range(0.1f, 5f)] float blinkPatternFrequency = 1.1f;
-    [SerializeField, Range(0f, 100f)] float blinkPatternPulseWeight = 28f;
-    [SerializeField, Range(0.05f, 0.45f)] float blinkPatternDutyCycle = 0.18f;
+    [SerializeField, Range(0.1f, 5f)] float blinkPatternFrequency = 1.25f;
+    [SerializeField, Range(0f, 100f)] float blinkPatternPulseWeight = 40f;
+    [SerializeField, Range(0.05f, 0.45f)] float blinkPatternDutyCycle = 0.16f;
 
     [Header("Speech-Aware Mouth Reduction")]
     [SerializeField, Range(0f, 1f)] float speechReductionStart = 0.1f;
@@ -187,6 +184,15 @@ public class FacialExpressionTestController : MonoBehaviour
         if (Enum.TryParse(stateName, true, out parsed))
         {
             SetBaseState(parsed, intensity);
+            return;
+        }
+
+        // Graceful fallback for any legacy calls that still send removed base state names.
+        if (string.Equals(stateName, "Thinking", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(stateName, "SearchingWordFinding", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(stateName, "AttentiveListening", StringComparison.OrdinalIgnoreCase))
+        {
+            SetBaseState(BaseState.Neutral, intensity);
         }
     }
 
@@ -658,63 +664,40 @@ public class FacialExpressionTestController : MonoBehaviour
             {
                 state = BaseState.Neutral,
                 preset = Preset(1f,
-                    BS("eyeWideLeft", 2f),
-                    BS("eyeWideRight", 2f))
-            },
-            new BaseStatePreset
-            {
-                state = BaseState.Thinking,
-                preset = Preset(1f,
-                    BS("browInnerUp", 15f),
-                    BS("browDownRight", 7f),
-                    BS("eyeLookUpLeft", 7f),
-                    BS("eyeLookUpRight", 7f),
-                    BS("mouthPressLeft", 10f, 0.85f),
-                    BS("mouthPressRight", 10f, 0.85f))
-            },
-            new BaseStatePreset
-            {
-                state = BaseState.SearchingWordFinding,
-                preset = Preset(1f,
-                    BS("browInnerUp", 24f),
-                    BS("browDownLeft", 10f),
-                    BS("browDownRight", 10f),
-                    BS("eyeSquintLeft", 11f),
-                    BS("eyeSquintRight", 11f),
-                    BS("mouthStretchLeft", 14f, 0.8f),
-                    BS("mouthStretchRight", 14f, 0.8f),
-                    BS("jawOpen", 6f, 0.8f))
-            },
-            new BaseStatePreset
-            {
-                state = BaseState.AttentiveListening,
-                preset = Preset(1f,
-                    BS("browInnerUp", 8f),
-                    BS("eyeWideLeft", 12f),
-                    BS("eyeWideRight", 12f),
-                    BS("mouthClose", 6f, 0.6f))
+                    BS("browInnerUp", 2f),
+                    BS("eyeWideLeft", 3f),
+                    BS("eyeWideRight", 3f),
+                    BS("mouthClose", 2f, 0.8f))
             },
             new BaseStatePreset
             {
                 state = BaseState.MildHappy,
                 preset = Preset(1f,
-                    BS("mouthSmileLeft", 20f, 0.65f),
-                    BS("mouthSmileRight", 20f, 0.65f),
-                    BS("cheekSquintLeft", 8f),
-                    BS("cheekSquintRight", 8f))
+                    BS("browOuterUpLeft", 9f),
+                    BS("browOuterUpRight", 9f),
+                    BS("eyeSquintLeft", 8f),
+                    BS("eyeSquintRight", 8f),
+                    BS("cheekSquintLeft", 16f),
+                    BS("cheekSquintRight", 16f),
+                    BS("mouthSmileLeft", 28f, 0.65f),
+                    BS("mouthSmileRight", 28f, 0.65f))
             },
             new BaseStatePreset
             {
                 state = BaseState.Frustrated,
                 preset = Preset(1f,
-                    BS("browDownLeft", 20f),
-                    BS("browDownRight", 20f),
-                    BS("eyeSquintLeft", 14f),
-                    BS("eyeSquintRight", 14f),
-                    BS("noseSneerLeft", 10f),
-                    BS("noseSneerRight", 10f),
-                    BS("mouthFrownLeft", 22f, 0.6f),
-                    BS("mouthFrownRight", 22f, 0.6f))
+                    BS("browDownLeft", 32f),
+                    BS("browDownRight", 32f),
+                    BS("browInnerUp", 12f),
+                    BS("eyeSquintLeft", 24f),
+                    BS("eyeSquintRight", 24f),
+                    BS("cheekSquintLeft", 14f),
+                    BS("cheekSquintRight", 14f),
+                    BS("noseSneerLeft", 18f),
+                    BS("noseSneerRight", 18f),
+                    BS("mouthFrownLeft", 28f, 0.55f),
+                    BS("mouthFrownRight", 28f, 0.55f),
+                    BS("jawForward", 8f, 0.5f))
             }
         };
     }
@@ -727,48 +710,65 @@ public class FacialExpressionTestController : MonoBehaviour
             {
                 state = PeakReaction.StrongHappy,
                 preset = Preset(1f,
-                    BS("mouthSmileLeft", 48f, 0.6f),
-                    BS("mouthSmileRight", 48f, 0.6f),
-                    BS("cheekSquintLeft", 26f),
-                    BS("cheekSquintRight", 26f),
-                    BS("eyeSquintLeft", 14f),
-                    BS("eyeSquintRight", 14f))
+                    BS("browOuterUpLeft", 14f),
+                    BS("browOuterUpRight", 14f),
+                    BS("eyeSquintLeft", 22f),
+                    BS("eyeSquintRight", 22f),
+                    BS("cheekSquintLeft", 34f),
+                    BS("cheekSquintRight", 34f),
+                    BS("mouthDimpleLeft", 20f, 0.55f),
+                    BS("mouthDimpleRight", 20f, 0.55f),
+                    BS("mouthSmileLeft", 58f, 0.6f),
+                    BS("mouthSmileRight", 58f, 0.6f))
             },
             new PeakReactionPreset
             {
                 state = PeakReaction.CryingOverwhelmed,
                 preset = Preset(1f,
-                    BS("browInnerUp", 44f),
-                    BS("browDownLeft", 18f),
-                    BS("browDownRight", 18f),
-                    BS("eyeSquintLeft", 24f),
-                    BS("eyeSquintRight", 24f),
-                    BS("mouthFrownLeft", 36f, 0.45f),
-                    BS("mouthFrownRight", 36f, 0.45f),
-                    BS("jawOpen", 18f, 0.75f))
+                    BS("browInnerUp", 58f),
+                    BS("browDownLeft", 24f),
+                    BS("browDownRight", 24f),
+                    BS("eyeWideLeft", 14f),
+                    BS("eyeWideRight", 14f),
+                    BS("eyeSquintLeft", 32f),
+                    BS("eyeSquintRight", 32f),
+                    BS("cheekSquintLeft", 20f),
+                    BS("cheekSquintRight", 20f),
+                    BS("mouthShrugUpper", 12f, 0.65f),
+                    BS("mouthFrownLeft", 46f, 0.4f),
+                    BS("mouthFrownRight", 46f, 0.4f),
+                    BS("jawOpen", 24f, 0.75f))
             },
             new PeakReactionPreset
             {
                 state = PeakReaction.Relief,
                 preset = Preset(1f,
-                    BS("browInnerUp", 9f),
-                    BS("browOuterUpLeft", 8f),
-                    BS("browOuterUpRight", 8f),
-                    BS("mouthSmileLeft", 22f, 0.65f),
-                    BS("mouthSmileRight", 22f, 0.65f),
-                    BS("jawOpen", 10f, 0.75f))
+                    BS("browInnerUp", 16f),
+                    BS("browOuterUpLeft", 16f),
+                    BS("browOuterUpRight", 16f),
+                    BS("eyeSquintLeft", 10f),
+                    BS("eyeSquintRight", 10f),
+                    BS("cheekSquintLeft", 16f),
+                    BS("cheekSquintRight", 16f),
+                    BS("mouthSmileLeft", 32f, 0.65f),
+                    BS("mouthSmileRight", 32f, 0.65f),
+                    BS("jawOpen", 14f, 0.8f))
             },
             new PeakReactionPreset
             {
                 state = PeakReaction.Confused,
                 preset = Preset(1f,
-                    BS("browInnerUp", 22f),
-                    BS("browDownLeft", 8f),
-                    BS("browOuterUpRight", 14f),
-                    BS("eyeSquintLeft", 9f),
-                    BS("eyeWideRight", 8f),
-                    BS("mouthPucker", 12f, 0.75f),
-                    BS("mouthFrownLeft", 12f, 0.55f))
+                    BS("browInnerUp", 14f),
+                    BS("browDownLeft", 18f),
+                    BS("browOuterUpRight", 26f),
+                    BS("eyeLookInLeft", 12f),
+                    BS("eyeLookOutRight", 14f),
+                    BS("eyeSquintLeft", 14f),
+                    BS("eyeWideRight", 18f),
+                    BS("noseSneerLeft", 8f),
+                    BS("jawLeft", 8f, 0.65f),
+                    BS("mouthPucker", 16f, 0.72f),
+                    BS("mouthFrownLeft", 18f, 0.5f))
             }
         };
     }
@@ -781,36 +781,42 @@ public class FacialExpressionTestController : MonoBehaviour
             {
                 state = Overlay.BrowTension,
                 preset = Preset(1f,
-                    BS("browDownLeft", 16f),
-                    BS("browDownRight", 16f),
-                    BS("browInnerUp", 10f))
+                    BS("browDownLeft", 28f),
+                    BS("browDownRight", 28f),
+                    BS("browInnerUp", 16f),
+                    BS("browOuterUpLeft", 8f),
+                    BS("browOuterUpRight", 8f))
             },
             new OverlayPreset
             {
                 state = Overlay.SoftSmile,
                 preset = Preset(1f,
-                    BS("mouthSmileLeft", 14f, 0.7f),
-                    BS("mouthSmileRight", 14f, 0.7f),
-                    BS("cheekSquintLeft", 6f),
-                    BS("cheekSquintRight", 6f))
+                    BS("eyeSquintLeft", 6f),
+                    BS("eyeSquintRight", 6f),
+                    BS("cheekSquintLeft", 14f),
+                    BS("cheekSquintRight", 14f),
+                    BS("mouthSmileLeft", 24f, 0.7f),
+                    BS("mouthSmileRight", 24f, 0.7f))
             },
             new OverlayPreset
             {
                 state = Overlay.EyeTension,
                 preset = Preset(1f,
-                    BS("eyeSquintLeft", 18f),
-                    BS("eyeSquintRight", 18f),
-                    BS("eyeWideLeft", 6f),
-                    BS("eyeWideRight", 6f))
+                    BS("eyeLookInLeft", 8f),
+                    BS("eyeLookInRight", 8f),
+                    BS("eyeSquintLeft", 30f),
+                    BS("eyeSquintRight", 30f),
+                    BS("cheekSquintLeft", 14f),
+                    BS("cheekSquintRight", 14f))
             },
             new OverlayPreset
             {
                 state = Overlay.BlinkPatternShift,
                 preset = Preset(1f,
-                    BS("eyeSquintLeft", 8f),
-                    BS("eyeSquintRight", 8f),
-                    BS("eyeBlinkLeft", 8f),
-                    BS("eyeBlinkRight", 8f))
+                    BS("eyeSquintLeft", 12f),
+                    BS("eyeSquintRight", 12f),
+                    BS("eyeBlinkLeft", 14f),
+                    BS("eyeBlinkRight", 14f))
             }
         };
     }

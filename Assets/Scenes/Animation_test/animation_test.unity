@@ -234,11 +234,55 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 08407aeb53c83473db46a848afff7da3, type: 3}
     - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: activeBaseState
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: baseStateWeight
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[0].preset.blendShapes.Array.data[0].weight
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[0].preset.blendShapes.Array.data[1].weight
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[0].preset.blendShapes.Array.data[2].weight
+      value: 26
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[0].preset.blendShapes.Array.data[3].weight
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[0].preset.blendShapes.Array.data[4].weight
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[0].weight
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[1].weight
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[2].weight
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[3].weight
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[4].weight
+      value: 28
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829023946581723011, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: overlayPresets.Array.data[2].preset.blendShapes.Array.data[5].weight
+      value: 28
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalPosition.x
