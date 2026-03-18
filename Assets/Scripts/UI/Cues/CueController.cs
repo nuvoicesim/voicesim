@@ -1,8 +1,10 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.IO;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Networking;
 using UI.Cues.WarningSystem;
 
 namespace UI.Cues
@@ -80,24 +82,8 @@ namespace UI.Cues
         [SerializeField] private TextMeshProUGUI targetText;    // Text element to display the current target word for the student
         [SerializeField] private TargetButtonUI targetButtonUI; // Reference to the TargetButtonUI script to check if the target has been confirmed
 
-
-
-        void Start()
+        private IEnumerator Start()
         {
-            // Construct full path to JSON file in StreamingAssets
-            string path = Path.Combine(Application.streamingAssetsPath, "Cues/target_words.json");
-
-            if (File.Exists(path))
-            {
-                string jsonText = File.ReadAllText(path);
-                LoadAllScripts(jsonText);
-                Debug.Log("Loaded scripts from StreamingAssets");
-            }
-            else
-            {
-                Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
-            }
-
             // Wire up UI button callbacks
             if (semanticCueButton != null)
                 semanticCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Semantic));
@@ -113,11 +99,14 @@ namespace UI.Cues
             if (targetText == null)
             {
                 Debug.LogError("No targetText object found");
-                return;
             }
 
-            SetCurrentScript(scriptNum);
-            targetText.text = "Target: " + currentScript.target_word;
+            yield return LoadScriptsFromStreamingAssets();
+
+            if (!SetCurrentScript(scriptNum))
+                yield break;
+
+            UpdateTargetText();
         }
 
         /// <summary>
@@ -128,27 +117,67 @@ namespace UI.Cues
         {
             if (string.IsNullOrEmpty(jsonText))
             {
-                Debug.LogError("JSON text is empty in " + jsonText);
+                Debug.LogError("JSON text is empty");
                 return;
             }
 
             allScripts = JsonUtility.FromJson<ScriptData>(jsonText);
-            if (allScripts != null)
+            if (allScripts != null && allScripts.scripts != null && allScripts.scripts.Length > 0)
                 Debug.Log("Loaded " + allScripts.scripts.Length + " scripts");
             else
                 Debug.LogError("Failed to parse JSON target scripts");
+        }
+
+        private IEnumerator LoadScriptsFromStreamingAssets()
+        {
+            string relativePath = "Cues/target_words.json";
+            string path = BuildStreamingAssetsPath(relativePath);
+
+            if (path.Contains("://"))
+            {
+                using (UnityWebRequest request = UnityWebRequest.Get(path))
+                {
+                    yield return request.SendWebRequest();
+
+                    if (request.result != UnityWebRequest.Result.Success)
+                    {
+                        Debug.LogError("Failed to load target_words.json from StreamingAssets: " + request.error + " Path: " + path);
+                        yield break;
+                    }
+
+                    LoadAllScripts(request.downloadHandler.text);
+                    Debug.Log("Loaded scripts from StreamingAssets via UnityWebRequest");
+                }
+
+                yield break;
+            }
+
+            if (!File.Exists(path))
+            {
+                Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
+                yield break;
+            }
+
+            LoadAllScripts(File.ReadAllText(path));
+            Debug.Log("Loaded scripts from StreamingAssets");
+        }
+
+        private static string BuildStreamingAssetsPath(string relativePath)
+        {
+            string normalizedRelativePath = relativePath.Replace("\\", "/").TrimStart('/');
+            return Application.streamingAssetsPath.TrimEnd('/') + "/" + normalizedRelativePath;
         }
 
         /// <summary>
         /// Sets the current script based on the given script number.
         /// </summary>
         /// <param name="scriptNumber">The script number to select</param>
-        private void SetCurrentScript(int scriptNumber)
+        private bool SetCurrentScript(int scriptNumber)
         {
             if (allScripts == null || allScripts.scripts == null)
             {
                 Debug.LogError("Target scripts not loaded. Call LoadAllScripts first");
-                return;
+                return false;
             }
 
             foreach (var entry in allScripts.scripts)
@@ -157,11 +186,20 @@ namespace UI.Cues
                 {
                     currentScript = entry;
                     Debug.Log("Current script set: " + entry.title);
-                    return;
+                    return true;
                 }
             }
 
             Debug.LogError("Target script number not found: " + scriptNumber);
+            return false;
+        }
+
+        private void UpdateTargetText()
+        {
+            if (targetText != null && currentScript != null)
+            {
+                targetText.text = "Target: " + currentScript.target_word;
+            }
         }
 
         /// <summary>
@@ -288,12 +326,8 @@ namespace UI.Cues
             if (targetButtonUI.IsConfirmed())
             {
                 scriptNum = UnityEngine.Random.Range(2, 11);
-                SetCurrentScript(scriptNum);
-
-                if (targetText != null && currentScript != null)
-                {
-                    targetText.text = "Target: " + currentScript.target_word;
-                }
+                if (SetCurrentScript(scriptNum))
+                    UpdateTargetText();
             }
         }
 

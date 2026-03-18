@@ -403,7 +403,7 @@ public class OpenAIRequest : MonoBehaviour
     {
         if (AWSAPIConnector.Instance != null && chatMessages.Count > 0)
         {
-            Debug.Log("🧪 Testing immediate chat history save...");
+            Debug.Log("Testing immediate chat history save...");
             AWSAPIConnector.Instance.SaveChatHistory(chatMessages);
         }
         else
