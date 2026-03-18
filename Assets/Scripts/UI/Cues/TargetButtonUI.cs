@@ -1,76 +1,74 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UI.Cues;
 using UI.Cues.WarningSystem;
 
 public class TargetButtonUI : MonoBehaviour
 {
     [SerializeField] private CueSkipGuard cueSkipGuard;
     [SerializeField] private TMP_Text buttonText;
-    [SerializeField] private Image buttonImage;
+    [SerializeField] private CueController cueController;
 
-    [SerializeField] private Color normalColor = new Color(0.85f, 0.85f, 0.85f);
-    [SerializeField] private Color confirmedColor = new Color(0.4f, 0.8f, 0.4f);
-
-    private bool confirmed = false;
+    private int currentTargetIndex = 1;
+    private const int MaxTargetIndex = 10;
 
     void Start()
     {
-        SetNormalState();
+        UpdateButtonLabel();
+
+        // 确保一开始加载的是 Target 1
+        if (cueController != null)
+        {
+            cueController.SetCurrentScriptByNumber(currentTargetIndex);
+        }
+        else
+        {
+            Debug.LogError("TargetButtonUI: cueController not assigned.");
+        }
     }
 
-    public bool IsConfirmed()
+    public int GetCurrentTargetIndex()
     {
-        return confirmed;
+        return currentTargetIndex;
     }
 
     public void OnTargetClicked()
     {
-        if (!confirmed)
+        // 先推进到下一个 target
+        currentTargetIndex++;
+        if (currentTargetIndex > MaxTargetIndex)
+            currentTargetIndex = 1;
+
+        UpdateButtonLabel();
+
+        // 切换到新的 target word
+        if (cueController != null)
         {
-            // ===== 切换到 Confirmed =====
-            confirmed = true;
-
-            if (buttonText != null)
-                buttonText.text = "Target Confirmed";
-
-            if (buttonImage != null)
-                buttonImage.color = confirmedColor;
-
-            if (cueSkipGuard != null)
-                cueSkipGuard.OnTargetSuccess();
-
-            Debug.Log("Target confirmed. Warnings paused.");
+            cueController.SetCurrentScriptByNumber(currentTargetIndex);
+            cueController.ResetCueing();
         }
         else
         {
-            // ===== 切换回 Normal =====
-            confirmed = false;
-
-            if (buttonText != null)
-                buttonText.text = "Target";
-
-            if (buttonImage != null)
-                buttonImage.color = normalColor;
-
-            if (cueSkipGuard != null)
-            {
-                cueSkipGuard.ResetCueing();
-                cueSkipGuard.PauseWarnings(0f); // 立刻恢复
-            }
-
-            Debug.Log("Target reset. Warnings resumed.");
+            Debug.LogError("TargetButtonUI: cueController not assigned.");
         }
+
+        // warning system 立即恢复正常
+        if (cueSkipGuard != null)
+        {
+            cueSkipGuard.ResetCueing();
+            cueSkipGuard.PauseWarnings(0f);
+        }
+        else
+        {
+            Debug.LogWarning("TargetButtonUI: cueSkipGuard not assigned.");
+        }
+
+        Debug.Log("Advanced to next target: Target " + currentTargetIndex);
     }
 
-    private void SetNormalState()
+    private void UpdateButtonLabel()
     {
-        confirmed = false;
-
         if (buttonText != null)
-            buttonText.text = "Target";
-
-        if (buttonImage != null)
-            buttonImage.color = normalColor;
+            buttonText.text = "Target " + currentTargetIndex;
     }
 }

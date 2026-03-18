@@ -4550,7 +4550,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -331.50034, y: 471.50037}
+  m_AnchoredPosition: {x: -331.49997, y: 471.50037}
   m_SizeDelta: {x: 680, y: 5000}
   m_Pivot: {x: 0, y: 1}
 --- !u!4 &730950017 stripped
@@ -5722,9 +5722,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TargetButtonUI
   cueSkipGuard: {fileID: 1275290724}
   buttonText: {fileID: 1614116011}
-  buttonImage: {fileID: 927083710}
-  normalColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
-  confirmedColor: {r: 0.4, g: 0.8, b: 0.4, a: 1}
+  cueController: {fileID: 900251394}
 --- !u!114 &927083708
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6089,8 +6087,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 175523163}
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
-  m_Value: 0.000012565972
-  m_Size: 0.48751202
+  m_Value: -0.0000017951323
+  m_Size: 0.4875127
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
