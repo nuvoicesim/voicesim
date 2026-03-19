@@ -1,6 +1,6 @@
 using UnityEngine;
-using System;
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UI.Cues.WarningSystem;
@@ -43,6 +43,15 @@ namespace UI.Cues
         Model = 3
     }
 
+    // 这个类用来在 Inspector 里配置：
+    // targetWord -> sprite
+    [System.Serializable]
+    public class TargetImageEntry
+    {
+        public string targetWord;
+        public Sprite image;
+    }
+
     public class CueController : MonoBehaviour
     {
         public bool cueingActive = false;
@@ -61,6 +70,7 @@ namespace UI.Cues
         private CueLevel pressedCueButton = CueLevel.None;
         private string lastComputedHint = "";
 
+        [Header("Cue UI")]
         [SerializeField] private GameObject cueButtonPanel;
         [SerializeField] private Button hintButton;
         [SerializeField] private Button semanticCueButton;
@@ -68,8 +78,13 @@ namespace UI.Cues
         [SerializeField] private Button modelCueButton;
         [SerializeField] private GameObject hintBox;
         [SerializeField] private TextMeshProUGUI hintText;
+
+        [Header("Target UI")]
         [SerializeField] private TextMeshProUGUI targetText;
-        [SerializeField] private TargetButtonUI targetButtonUI;
+        [SerializeField] private Image targetImage;
+
+        [Header("Target Images Mapping")]
+        [SerializeField] private List<TargetImageEntry> targetImages = new List<TargetImageEntry>();
 
         void Start()
         {
@@ -88,8 +103,10 @@ namespace UI.Cues
 
             if (semanticCueButton != null)
                 semanticCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Semantic));
+
             if (phonemicCueButton != null)
                 phonemicCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Phonemic));
+
             if (modelCueButton != null)
                 modelCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Model));
 
@@ -98,7 +115,7 @@ namespace UI.Cues
 
             if (targetText == null)
             {
-                Debug.LogError("No targetText object found");
+                Debug.LogError("CueController: targetText is not assigned.");
                 return;
             }
 
@@ -109,11 +126,12 @@ namespace UI.Cues
         {
             if (string.IsNullOrEmpty(jsonText))
             {
-                Debug.LogError("JSON text is empty in " + jsonText);
+                Debug.LogError("JSON text is empty.");
                 return;
             }
 
             allScripts = JsonUtility.FromJson<ScriptData>(jsonText);
+
             if (allScripts != null && allScripts.scripts != null)
                 Debug.Log("Loaded " + allScripts.scripts.Length + " scripts");
             else
@@ -124,7 +142,7 @@ namespace UI.Cues
         {
             if (allScripts == null || allScripts.scripts == null)
             {
-                Debug.LogError("Target scripts not loaded. Call LoadAllScripts first");
+                Debug.LogError("Target scripts not loaded. Call LoadAllScripts first.");
                 return;
             }
 
@@ -135,11 +153,9 @@ namespace UI.Cues
                     currentScript = entry;
                     scriptNum = scriptNumber;
 
-                    Debug.Log("Current script set: " + entry.title);
+                    Debug.Log("Current script set: " + entry.title + " | target_word = " + entry.target_word);
 
-                    if (targetText != null)
-                        targetText.text = "Target: " + currentScript.target_word;
-
+                    UpdateTargetUI();
                     return;
                 }
             }
@@ -147,9 +163,63 @@ namespace UI.Cues
             Debug.LogError("Target script number not found: " + scriptNumber);
         }
 
+        private void UpdateTargetUI()
+        {
+            if (currentScript == null)
+                return;
+
+            if (targetText != null)
+                targetText.text = "Target: " + currentScript.target_word;
+
+            UpdateTargetImage();
+        }
+
+        private void UpdateTargetImage()
+        {
+            if (targetImage == null)
+            {
+                Debug.LogWarning("CueController: targetImage is not assigned.");
+                return;
+            }
+
+            if (currentScript == null)
+                return;
+
+            string targetWordNormalized = NormalizeWord(currentScript.target_word);
+
+            foreach (var entry in targetImages)
+            {
+                if (entry == null || entry.image == null || string.IsNullOrWhiteSpace(entry.targetWord))
+                    continue;
+
+                if (NormalizeWord(entry.targetWord) == targetWordNormalized)
+                {
+                    targetImage.sprite = entry.image;
+                    targetImage.enabled = true;
+                    targetImage.preserveAspect = true;
+
+                    Debug.Log("Updated target image for: " + currentScript.target_word);
+                    return;
+                }
+            }
+
+            Debug.LogWarning("No image mapping found for target word: " + currentScript.target_word);
+            targetImage.sprite = null;
+            targetImage.enabled = false;
+        }
+
+        private string NormalizeWord(string word)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+                return "";
+
+            return word.Trim().ToLower();
+        }
+
         private bool CheckTargetWord(string patientResponse)
         {
-            if (string.IsNullOrEmpty(patientResponse) || currentScript == null) return false;
+            if (string.IsNullOrEmpty(patientResponse) || currentScript == null)
+                return false;
 
             string responseLower = patientResponse.ToLower();
             string targetLower = currentScript.target_word.ToLower();
@@ -270,7 +340,8 @@ namespace UI.Cues
 
         public void HandleResponse(string patientResponse)
         {
-            if (!cueingActive) return;
+            if (!cueingActive)
+                return;
 
             if (currentScript == null)
             {
@@ -291,11 +362,6 @@ namespace UI.Cues
             Debug.Log("Cached hint: " + lastComputedHint);
             Debug.Log("Semantic cue count: " + semanticCueCount);
             Debug.Log("Phonemic cue count: " + phonemicCueCount);
-
-            if (currentCueLevel != CueLevel.None)
-                Debug.Log("Student hint (cached): " + lastComputedHint);
-            else
-                Debug.Log("No hint needed");
         }
 
         public void ToggleCuePanel()
@@ -333,13 +399,13 @@ namespace UI.Cues
 
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
-                Debug.Log("Showing student hint for " + CueLevel.Model);
+                Debug.Log("Showing student hint for Model");
                 return;
             }
 
-            if (currentCueLevel != CueLevel.None
-                && pressedCueButton == currentCueLevel
-                && !string.IsNullOrEmpty(lastComputedHint))
+            if (currentCueLevel != CueLevel.None &&
+                pressedCueButton == currentCueLevel &&
+                !string.IsNullOrEmpty(lastComputedHint))
             {
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
@@ -348,9 +414,12 @@ namespace UI.Cues
             else
             {
                 hintBox.SetActive(false);
+
                 if (pressedCueButton != currentCueLevel)
+                {
                     Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: "
                         + pressedCueButton + " Current: " + currentCueLevel);
+                }
             }
         }
     }

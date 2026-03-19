@@ -15,33 +15,16 @@ public class TargetButtonUI : MonoBehaviour
     void Start()
     {
         UpdateButtonLabel();
-
-        // 确保一开始加载的是 Target 1
-        if (cueController != null)
-        {
-            cueController.SetCurrentScriptByNumber(currentTargetIndex);
-        }
-        else
-        {
-            Debug.LogError("TargetButtonUI: cueController not assigned.");
-        }
-    }
-
-    public int GetCurrentTargetIndex()
-    {
-        return currentTargetIndex;
     }
 
     public void OnTargetClicked()
     {
-        // 先推进到下一个 target
         currentTargetIndex++;
         if (currentTargetIndex > MaxTargetIndex)
             currentTargetIndex = 1;
 
         UpdateButtonLabel();
 
-        // 切换到新的 target word
         if (cueController != null)
         {
             cueController.SetCurrentScriptByNumber(currentTargetIndex);
@@ -52,7 +35,6 @@ public class TargetButtonUI : MonoBehaviour
             Debug.LogError("TargetButtonUI: cueController not assigned.");
         }
 
-        // warning system 立即恢复正常
         if (cueSkipGuard != null)
         {
             cueSkipGuard.ResetCueing();

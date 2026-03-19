@@ -129,6 +129,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6589122228608325122, guid: e75c45052bed688408cd901e1dd29b29, type: 3}
   m_PrefabInstance: {fileID: 407436627}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &13266927
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 13266930}
+  - component: {fileID: 13266929}
+  - component: {fileID: 13266928}
+  m_Layer: 5
+  m_Name: TargetImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &13266928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13266927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &13266929
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13266927}
+  m_CullTransparentMesh: 1
+--- !u!224 &13266930
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 13266927}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7493123059958747649}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 800, y: -80}
+  m_SizeDelta: {x: 300, y: 220}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &27384137
 GameObject:
   m_ObjectHideFlags: 0
@@ -4550,7 +4625,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -331.49997, y: 471.50037}
+  m_AnchoredPosition: {x: -331.50034, y: 471.50037}
   m_SizeDelta: {x: 680, y: 5000}
   m_Pivot: {x: 0, y: 1}
 --- !u!4 &730950017 stripped
@@ -6087,8 +6162,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 175523163}
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
-  m_Value: -0.0000017951323
-  m_Size: 0.4875127
+  m_Value: 0.000012565972
+  m_Size: 0.48751202
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -10747,9 +10822,97 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1322561882}
     - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImage
+      value: 
+      objectReference: {fileID: 13266928}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
       propertyPath: targetButtonUI
       value: 
       objectReference: {fileID: 927083707}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[0].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 7d2400584f5984d61a83c9c4273d4a88, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[1].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 0337f8430d351400ca1b5b69b083e561, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[2].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 16b6ec159030f41fab88c5f84359a615, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[3].image
+      value: 
+      objectReference: {fileID: 21300000, guid: c854bcacbff264eae95f053684f94df0, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[4].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 8075a96c887f640268381d8da3233197, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[5].image
+      value: 
+      objectReference: {fileID: 21300000, guid: e3e2f5f7fcb4a455080c1c1f1b89800e, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[6].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 9097568c701c543c18a86c8e58a4622f, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[7].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 9eefb63ee58d7456b8a660236edb5c86, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[8].image
+      value: 
+      objectReference: {fileID: 21300000, guid: f15eacce789a94e11a30a10bcc684ef5, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[9].image
+      value: 
+      objectReference: {fileID: 21300000, guid: 85d4c97cd09c4443587063f1b6b666e4, type: 3}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[0].targetWord
+      value: Coffee
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[1].targetWord
+      value: Daughter
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[2].targetWord
+      value: Shower
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[3].targetWord
+      value: Sandwich
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[4].targetWord
+      value: Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[5].targetWord
+      value: Shirt
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[6].targetWord
+      value: Sunny
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[7].targetWord
+      value: Television
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[8].targetWord
+      value: Pill
+      objectReference: {fileID: 0}
+    - target: {fileID: 5650874190023435851, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      propertyPath: targetImages.Array.data[9].targetWord
+      value: Tired
+      objectReference: {fileID: 0}
     - target: {fileID: 6409705852890440141, guid: 09c7922a310436f48b3899428d148533, type: 3}
       propertyPath: m_Name
       value: CueObject
@@ -10849,6 +11012,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8310351974201615870, guid: 09c7922a310436f48b3899428d148533, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1275290723}
+    - targetCorrespondingSourceObject: {fileID: 8310351974201615870, guid: 09c7922a310436f48b3899428d148533, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 13266930}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 09c7922a310436f48b3899428d148533, type: 3}
 --- !u!224 &7493123059958747649 stripped
