@@ -32,6 +32,7 @@ public class EmotionController : MonoBehaviour
     private int previousMotionCode = 0;
     private TimelineAsset cachedTimeline;
     private bool hasLoggedMissingTimeline;
+    private bool hasLoggedMissingFacialBridge;
 
     private static bool DirectorHasUsableTracks(PlayableDirector candidate)
     {
@@ -126,12 +127,32 @@ public class EmotionController : MonoBehaviour
 
     void Start()
     {
-        TryEnsureTimelineTracks("Start");
+        bool timelineReady = TryEnsureTimelineTracks("Start");
 
+        TryResolveFacialBridge();
+
+        Debug.Log($"[EmotionController] Startup: initialized on '{name}'. timelineReady={timelineReady}, trackCount={(allTracks != null ? allTracks.Count : 0)}");
+        Debug.Log($"[EmotionController] Startup: facial bridge {(facialExpressionBridge != null ? "found" : "not found")}");
+    }
+
+    private bool TryResolveFacialBridge()
+    {
+        if (facialExpressionBridge != null)
+        {
+            return true;
+        }
+
+        facialExpressionBridge = GetComponent<FacialExpressionRuntimeBridge>();
         if (facialExpressionBridge == null)
         {
-            facialExpressionBridge = GetComponent<FacialExpressionRuntimeBridge>();
+            facialExpressionBridge = GetComponentInChildren<FacialExpressionRuntimeBridge>(true);
         }
+        if (facialExpressionBridge == null)
+        {
+            facialExpressionBridge = GetComponentInParent<FacialExpressionRuntimeBridge>();
+        }
+
+        return facialExpressionBridge != null;
     }
     
     public void SyncAnimationsWithWordTimings(List<TTSManager.WordTiming> timings)
@@ -256,6 +277,18 @@ public class EmotionController : MonoBehaviour
         if (!setEmotionCode) { currentEmotionCode = emotionCode;}
         if (!setMotionCode) { currentMotionCode = motionCode; }
 
+        if (TryResolveFacialBridge())
+        {
+            hasLoggedMissingFacialBridge = false;
+            Debug.Log($"[EmotionController] Forwarding to facial bridge: emotionCode={currentEmotionCode}, motionCode={currentMotionCode}");
+            facialExpressionBridge.HandleEmotionAndMotion(currentEmotionCode, currentMotionCode);
+        }
+        else if (!hasLoggedMissingFacialBridge)
+        {
+            Debug.LogWarning($"[EmotionController] Facial bridge not found on '{name}'.");
+            hasLoggedMissingFacialBridge = true;
+        }
+
         int validEmotionIndex = ClampTrackIndex(currentEmotionCode, "HandleEmotionCode");
         if (validEmotionIndex < 0)
         {
@@ -277,12 +310,7 @@ public class EmotionController : MonoBehaviour
         if (!disableMotion)
         {
             animator.SetTrigger(motionNames[currentMotionCode]);
-            Debug.Log("Set trigger: " + motionNames[currentEmotionCode]);
-        }
-
-        if (facialExpressionBridge != null)
-        {
-            facialExpressionBridge.HandleEmotionAndMotion(currentEmotionCode, currentMotionCode);
+            Debug.Log("Set trigger: " + motionNames[currentMotionCode]);
         }
         
     }

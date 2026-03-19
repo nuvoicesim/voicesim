@@ -110,11 +110,13 @@ public class FacialExpressionTestController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float softSmileWeight = 0f;
     [SerializeField, Range(0f, 1f)] float eyeTensionWeight = 0f;
     [SerializeField, Range(0f, 1f)] float blinkPatternShiftWeight = 0f;
+    [SerializeField, Range(0f, 1f)] float idleBlinkPatternShiftWeight = 0.25f;
 
     [Header("Blink Pattern Shift")]
     [SerializeField, Range(0.1f, 5f)] float blinkPatternFrequency = 1.25f;
     [SerializeField, Range(0f, 100f)] float blinkPatternPulseWeight = 40f;
     [SerializeField, Range(0.05f, 0.45f)] float blinkPatternDutyCycle = 0.16f;
+    [SerializeField, Range(0f, 1f)] float baselineBlinkPulseScale = 0.58f;
 
     [Header("Speech-Aware Mouth Reduction")]
     [SerializeField, Range(0f, 1f)] float speechReductionStart = 0.1f;
@@ -546,7 +548,8 @@ public class FacialExpressionTestController : MonoBehaviour
         ApplyOverlayPreset(Overlay.BrowTension, browTensionWeight);
         ApplyOverlayPreset(Overlay.SoftSmile, softSmileWeight);
         ApplyOverlayPreset(Overlay.EyeTension, eyeTensionWeight);
-        ApplyBlinkPatternShift(blinkPatternShiftWeight);
+        float effectiveBlinkPatternShiftWeight = Mathf.Max(blinkPatternShiftWeight, idleBlinkPatternShiftWeight);
+        ApplyBlinkPatternShift(effectiveBlinkPatternShiftWeight);
 
         float blendStep = expressionBlendSpeed * Time.deltaTime;
         for (int i = 0; i < _controlledIndices.Count; ++i)
@@ -599,7 +602,9 @@ public class FacialExpressionTestController : MonoBehaviour
             pulse = 1f - Mathf.Abs((normalized * 2f) - 1f);
         }
 
-        float pulseWeight = pulse * blinkPatternPulseWeight * Mathf.Clamp01(layerWeight);
+        float speechSuppression = Mathf.Lerp(1f, 0.6f, _speechAmount);
+        float effectivePulseScale = Mathf.Max(Mathf.Clamp01(layerWeight), baselineBlinkPulseScale);
+        float pulseWeight = pulse * blinkPatternPulseWeight * effectivePulseScale * speechSuppression;
         if (_eyeBlinkLeftIndex >= 0)
         {
             _targetWeights[_eyeBlinkLeftIndex] += pulseWeight;
@@ -695,9 +700,9 @@ public class FacialExpressionTestController : MonoBehaviour
                     BS("cheekSquintRight", 14f),
                     BS("noseSneerLeft", 18f),
                     BS("noseSneerRight", 18f),
-                    BS("mouthFrownLeft", 28f, 0.55f),
-                    BS("mouthFrownRight", 28f, 0.55f),
-                    BS("jawForward", 8f, 0.5f))
+                    BS("mouthFrownLeft", 22f, 0.55f),
+                    BS("mouthFrownRight", 22f, 0.55f),
+                    BS("jawForward", 5f, 0.5f))
             }
         };
     }
@@ -734,10 +739,10 @@ public class FacialExpressionTestController : MonoBehaviour
                     BS("eyeSquintRight", 32f),
                     BS("cheekSquintLeft", 20f),
                     BS("cheekSquintRight", 20f),
-                    BS("mouthShrugUpper", 12f, 0.65f),
-                    BS("mouthFrownLeft", 46f, 0.4f),
-                    BS("mouthFrownRight", 46f, 0.4f),
-                    BS("jawOpen", 24f, 0.75f))
+                    BS("mouthShrugUpper", 8f, 0.65f),
+                    BS("mouthFrownLeft", 34f, 0.4f),
+                    BS("mouthFrownRight", 34f, 0.4f),
+                    BS("jawOpen", 15f, 0.75f))
             },
             new PeakReactionPreset
             {
@@ -766,9 +771,9 @@ public class FacialExpressionTestController : MonoBehaviour
                     BS("eyeSquintLeft", 14f),
                     BS("eyeWideRight", 18f),
                     BS("noseSneerLeft", 8f),
-                    BS("jawLeft", 8f, 0.65f),
-                    BS("mouthPucker", 16f, 0.72f),
-                    BS("mouthFrownLeft", 18f, 0.5f))
+                    BS("jawLeft", 6f, 0.65f),
+                    BS("mouthPucker", 11f, 0.72f),
+                    BS("mouthFrownLeft", 13f, 0.5f))
             }
         };
     }
