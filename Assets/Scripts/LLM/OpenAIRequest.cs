@@ -12,21 +12,27 @@ using Newtonsoft.Json;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UI.Cues;
+using UI.Cues.WarningSystem;
 
 public class OpenAIRequest : MonoBehaviour
 {
-    public static OpenAIRequest Instance; // Singleton instance
+    public static OpenAIRequest Instance;
     public string apiUrl = "https://api.openai.com/v1/chat/completions";
     public string apiKey;
     public string CurrentUserId { get; private set; }
-    [SerializeField] private string currentScenario = ""; // left empty until login sets it
+    [SerializeField] private string currentScenario = "";
     public string lostResponse = "umm... fast... uh... fast... ";
     public float maxSpeechSpeed = 200f;
+
     // Components
     private CharacterAnimationController animationController;
     private EmotionController emotionController;
     [SerializeField] private GameObject cueControllerObject;
     private CueController cueController;
+
+    [Header("Cue Warning System")]
+    [SerializeField] private CueSkipGuard cueSkipGuard;
+    [SerializeField] private TargetButtonUI targetButtonUI;
 
     // Internal state
     private float currentSpeechSpeed;
@@ -43,8 +49,6 @@ public class OpenAIRequest : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // Uncomment if you want this object to persist across scenes
-            // DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -54,24 +58,17 @@ public class OpenAIRequest : MonoBehaviour
 
     void Start()
     {
-        // --- Development-only SSL/TLS relaxations (avoid in production) ---
 #if UNITY_EDITOR && !UNITY_WEBGL
         try
         {
-            // Completely bypass SSL certificate validation (DEV ONLY)
             System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            // Support multiple security protocols
             System.Net.ServicePointManager.SecurityProtocol =
-                (System.Net.SecurityProtocolType)3072 | // Tls12
-                (System.Net.SecurityProtocolType)768  | // Tls11
-                (System.Net.SecurityProtocolType)192;   // Tls10
-
-            // Force HTTP/1.1 behavior tweaks
+                (System.Net.SecurityProtocolType)3072 |
+                (System.Net.SecurityProtocolType)768  |
+                (System.Net.SecurityProtocolType)192;
             System.Net.ServicePointManager.DefaultConnectionLimit = 10;
             System.Net.ServicePointManager.Expect100Continue = false;
             System.Net.ServicePointManager.UseNagleAlgorithm = false;
-
             Debug.Log("DEV SSL/TLS overrides configured");
             Debug.Log("✓ Enhanced SSL/TLS settings configured");
         }
@@ -81,19 +78,17 @@ public class OpenAIRequest : MonoBehaviour
         }
 #endif
 
-        // Load API key first, then run diagnostics
         LoadApiKey();
         StartCoroutine(NetworkDiagnostics());
 
-        // Initialize components
         animationController = GetComponent<CharacterAnimationController>();
         emotionController = GetComponent<EmotionController>();
 
         if (cueControllerObject == null)
-{
-    Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
-    return;
-}
+        {
+            Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
+            return;
+        }
 
         cueController = cueControllerObject.GetComponent<CueController>();
 
@@ -103,7 +98,12 @@ public class OpenAIRequest : MonoBehaviour
         if (cueController == null)
             Debug.LogError("CueController component not found on the UI GameObject.");
 
-        // Initialize prompts/chat only if a scenario is already set (e.g., via Inspector)
+        if (cueSkipGuard == null)
+            Debug.LogWarning("OpenAIRequest: cueSkipGuard not assigned. Cue order warnings will not fire.");
+
+        if (targetButtonUI == null)
+            Debug.LogWarning("OpenAIRequest: targetButtonUI not assigned. Target word will be empty.");
+
         if (!string.IsNullOrEmpty(currentScenario))
         {
             basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
@@ -121,7 +121,6 @@ public class OpenAIRequest : MonoBehaviour
     {
         Debug.Log("=== API KEY LOADING ===");
 
-        // Method 1: Environment variable
         apiKey = EnvironmentLoader.GetEnvVariable("OPENAI_API_KEY");
         if (!string.IsNullOrEmpty(apiKey))
         {
@@ -129,7 +128,6 @@ public class OpenAIRequest : MonoBehaviour
             return;
         }
 
-        // Method 2: StreamingAssets config
         string configPath = Path.Combine(Application.streamingAssetsPath, "config.json");
         Debug.Log($"Looking for config file at: {configPath}");
 
@@ -153,7 +151,6 @@ public class OpenAIRequest : MonoBehaviour
             }
         }
 
-        // Method 3: Inspector
         if (!string.IsNullOrEmpty(apiKey))
         {
             Debug.Log("✓ API key found in Inspector");
@@ -163,16 +160,11 @@ public class OpenAIRequest : MonoBehaviour
         Debug.LogError("✗ No API key found! Please set it via environment variable, config file, or Inspector");
     }
 
-    /// <summary>
-    /// Called by LoginPanel after successful login. Sets user and switches scenario based on simulationLevel.
-    /// Rebuilds basePath, re-creates the system prompt/chat, and reinitializes scoring for the scenario.
-    /// </summary>
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
         CurrentUserId = userId;
         Debug.Log($"[OpenAIRequest] Authenticated user: {CurrentUserId}");
 
-        // Map level → scenario
         switch (simulationLevel)
         {
             case 1: currentScenario = "task1"; break;
@@ -184,7 +176,6 @@ public class OpenAIRequest : MonoBehaviour
                 break;
         }
 
-        // Rebuild base path + reset prompt/chat + re-init scoring
         basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
         InitializeChat();
         if (ScoreManager.Instance != null)
@@ -197,7 +188,6 @@ public class OpenAIRequest : MonoBehaviour
     {
         Debug.Log("=== NETWORK DIAGNOSTICS START ===");
 
-        // Test 1: Basic connectivity
         Debug.Log("Testing basic internet connectivity...");
         UnityWebRequest testRequest = UnityWebRequest.Get("https://www.google.com");
         testRequest.timeout = 10;
@@ -212,7 +202,6 @@ public class OpenAIRequest : MonoBehaviour
             Debug.LogError($"Response Code: {testRequest.responseCode}");
         }
 
-        // Test 2: HTTPS
         Debug.Log("Testing HTTPS connection...");
         UnityWebRequest httpsTest = UnityWebRequest.Get("https://httpbin.org/get");
         httpsTest.timeout = 10;
@@ -227,16 +216,13 @@ public class OpenAIRequest : MonoBehaviour
             Debug.LogError($"Response Code: {httpsTest.responseCode}");
         }
 
-        // Wait a moment to ensure API key load completed
         yield return new WaitForSeconds(1f);
 
-        // Test 3: API key validity
         if (!string.IsNullOrEmpty(apiKey))
         {
             Debug.Log("Testing API key validity...");
             UnityWebRequest keyTest = UnityWebRequest.Get("https://api.openai.com/v1/models");
             keyTest.SetRequestHeader("Authorization", "Bearer " + apiKey.Trim());
-            //keyTest.SetRequestHeader("Authorization", "Bearer " + apiKey);
             keyTest.timeout = 15;
             yield return keyTest.SendWebRequest();
 
@@ -280,7 +266,6 @@ public class OpenAIRequest : MonoBehaviour
 
     private void InitializeChat()
     {
-        // If basePath is missing, fall back to a minimal system prompt to avoid null chat
         if (string.IsNullOrEmpty(basePath))
         {
             Debug.LogWarning("[OpenAIRequest] basePath not set; using minimal system prompt.");
@@ -318,7 +303,7 @@ public class OpenAIRequest : MonoBehaviour
         string motionInstructions = @"
             IMPORTANT: You will use the following animations based on the conversation. Then end EVERY response with corresponding motion codes after the emotion code:
             - [0] for neutral responses or statements
-            - [1] when unable to answer or feeling lost after doctor’s question
+            - [1] when unable to answer or feeling lost after doctor's question
             - [2] for strong affirmative or emphatic agreement
             - [3] for agreement with an attempt to add clarification
             - [4] for actively listening or confirming understanding
@@ -340,6 +325,14 @@ public class OpenAIRequest : MonoBehaviour
 
     public void ReceiveNurseTranscription(string transcribedText, float speechWpm)
     {
+        // Check cue order before sending to GPT
+        if (cueSkipGuard != null)
+        {
+            string targetWord = targetButtonUI != null ? targetButtonUI.CurrentTargetWord : "";
+            cueSkipGuard.CheckStudentUtterance(transcribedText, targetWord);
+            Debug.Log($"[OpenAIRequest] CueSkipGuard checked: text=\"{transcribedText}\" target=\"{targetWord}\"");
+        }
+
         NurseResponds(transcribedText, speechWpm);
     }
 
@@ -355,7 +348,6 @@ public class OpenAIRequest : MonoBehaviour
 
         StartCoroutine(PostRequest());
 
-        // Evaluate nurse's response
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.RecordTurn(currentPatientResponse, nurseMessage);
     }
@@ -385,7 +377,6 @@ public class OpenAIRequest : MonoBehaviour
         string requestBody = BuildRequestBody();
         Debug.Log($"Request Body Length: {requestBody.Length}");
 
-        // Use UnityWebRequest.PostWwwForm to create a POST, then replace the body with JSON
         var request = UnityWebRequest.PostWwwForm(apiUrl, "");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(requestBody);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
@@ -414,7 +405,6 @@ public class OpenAIRequest : MonoBehaviour
             Debug.LogError($"Response Code: {request.responseCode}");
             Debug.LogError($"Response Body: {request.downloadHandler.text}");
 
-            // If 421 (misdirected request), try the alternative method
             if (request.responseCode == 421)
             {
                 Debug.LogWarning("Got 421 error, trying alternative request...");
@@ -432,10 +422,10 @@ public class OpenAIRequest : MonoBehaviour
                 var jsonResponse = JObject.Parse(request.downloadHandler.text);
                 var messageContent = jsonResponse["choices"][0]["message"]["content"].ToString();
                 Debug.Log($"Received message: {messageContent.Substring(0, Math.Min(100, messageContent.Length))}...");
-            
+
                 var match = EmotionMotionRegex.Match(messageContent);
                 string ttsText = messageContent;
-                
+
                 int emotionCode;
                 int motionCode;
 
@@ -446,7 +436,7 @@ public class OpenAIRequest : MonoBehaviour
                 }
                 if (!match.Success)
                 {
-                    Debug.LogWarning("No emotion/motion codes found in alternative response, using defaults");
+                    Debug.LogWarning("No emotion/motion codes found in response, using defaults");
                     emotionCode = 0;
                     motionCode = 0;
                 }
@@ -458,9 +448,8 @@ public class OpenAIRequest : MonoBehaviour
                     ttsText = messageContent.Substring(0, messageContent.Length - 6).Trim();
                     Debug.Log($"TTS Text: {ttsText}");
                 }
-                
+
                 HandlePatientResponse(ttsText, emotionCode, motionCode);
-                
             }
             catch (Exception e)
             {
@@ -475,7 +464,6 @@ public class OpenAIRequest : MonoBehaviour
         }
     }
 
-    // Alternative POST method for certain edge-case HTTP errors
     private IEnumerator TryAlternativeRequest(string requestBody)
     {
         Debug.Log("=== TRYING ALTERNATIVE REQUEST METHOD ===");
@@ -485,7 +473,6 @@ public class OpenAIRequest : MonoBehaviour
 
         var request = UnityWebRequest.Post(apiUrl, form);
 
-        // Replace body with JSON
         request.uploadHandler.Dispose();
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(requestBody));
 
@@ -510,7 +497,7 @@ public class OpenAIRequest : MonoBehaviour
 
                 var match = EmotionMotionRegex.Match(messageContent);
                 string ttsText = messageContent;
-                
+
                 int emotionCode;
                 int motionCode;
 
@@ -533,7 +520,7 @@ public class OpenAIRequest : MonoBehaviour
                     ttsText = messageContent.Substring(0, messageContent.Length - 6).Trim();
                     Debug.Log($"TTS Text: {ttsText}");
                 }
-                
+
                 HandlePatientResponse(ttsText, emotionCode, motionCode);
             }
             catch (Exception e)
@@ -590,7 +577,7 @@ public class OpenAIRequest : MonoBehaviour
 
     private void HandlePatientResponse(string responseText, int emotionCode, int motionCode)
     {
-        currentPatientResponse = responseText; // for scoring
+        currentPatientResponse = responseText;
 
         chatMessages.Add(new Dictionary<string, string> { { "role", "assistant" }, { "content", responseText } });
         PrintChatMessage(chatMessages);
@@ -629,7 +616,6 @@ public class OpenAIRequest : MonoBehaviour
         string role = latestMessage["role"];
         string content = latestMessage["content"];
 
-        // Extract emotion/motion codes if present
         string emotionCode = "";
         string motionCode = "";
         var match = EmotionMotionRegex.Match(content);
@@ -641,28 +627,16 @@ public class OpenAIRequest : MonoBehaviour
 
         Debug.Log($"[{role.ToUpper()}]{emotionCode}{motionCode}\n{content}\n");
     }
-       
 
-    // =================
-    // AWS集成相关的公共方法
-    // =================
-
-    // 获取聊天消息的公共方法
     public List<Dictionary<string, string>> GetChatMessages()
     {
         return chatMessages;
     }
 
-    // 保存当前对话到AWS的方法（现在不做任何操作，等待report生成时一起发送）
     public void SaveConversationToAWS()
     {
-        // 不再立即保存，等待evaluation report生成时一起发送
         Debug.Log("🔄 Conversation will be saved with evaluation report");
     }
-
-    // =================
-    // 手动触发保存的方法（用于测试）
-    // =================
 
     [ContextMenu("Debug Chat Messages")]
     public void DebugChatMessages()

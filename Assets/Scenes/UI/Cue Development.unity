@@ -806,6 +806,8 @@ MonoBehaviour:
   lostResponse: 'um... fast... uh... too... fast...  '
   maxSpeechSpeed: 170
   cueControllerObject: {fileID: 900251393}
+  cueSkipGuard: {fileID: 1275290724}
+  targetButtonUI: {fileID: 927083707}
 --- !u!95 &85079553 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 482709129696049257, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
@@ -2446,7 +2448,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1120805673}
   m_Direction: 2
   m_Value: 0.9999999
-  m_Size: 0.094299965
+  m_Size: 0.18859993
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4625,7 +4627,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -331.50034, y: 471.50037}
+  m_AnchoredPosition: {x: -331.5004, y: 471.50037}
   m_SizeDelta: {x: 680, y: 5000}
   m_Pivot: {x: 0, y: 1}
 --- !u!4 &730950017 stripped
@@ -6163,7 +6165,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 175523162}
   m_Direction: 0
   m_Value: 0.000012565972
-  m_Size: 0.48751202
+  m_Size: 0.97499985
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7696,6 +7698,10 @@ MonoBehaviour:
   warningCooldownSeconds: 1
   defaultPauseSeconds: 10
   _cueController: {fileID: 900251394}
+  semanticThreshold: 2
+  phonemicThreshold: 2
+  modelThreshold: 3
+  enableVerboseClassifierLog: 1
 --- !u!1001 &1288509233
 PrefabInstance:
   m_ObjectHideFlags: 0
