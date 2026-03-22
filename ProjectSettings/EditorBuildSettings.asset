@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/POC/POC_MainSimulation.unity
     guid: b98ccd4011669490983b46ded6666e0a
+  - enabled: 0
+    path: Assets/Scenes/GameScenarios/BrocasAphasiaScenario_FacialTakeoverTest.unity
+    guid: a55a48a20f944575a7d0903d32c57e8f
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 092f2de8c92414530ad38ed7d9e5dd49, type: 2}
   m_UseUCBPForAssetBundles: 0
