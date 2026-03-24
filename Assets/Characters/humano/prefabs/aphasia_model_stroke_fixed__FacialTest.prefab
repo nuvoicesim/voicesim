@@ -2123,10 +2123,10 @@ MonoBehaviour:
   elevenLabsApiKey: 
   voiceId: Bz0vsNJm8uY1hbd4c4AE
   modelId: eleven_multilingual_v2
-  stability: 0.4
-  similarityBoost: 0.75
-  styleExaggeration: 0.3
-  speed: 1
+  stability: 0.8
+  similarityBoost: 0.8
+  styleExaggeration: 0.4
+  speed: 0.7
   useAudio2Face: 0
   deleteCachedFiles: 0
   useBloodEffectController: 0
@@ -2173,10 +2173,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   director: {fileID: 0}
   animator: {fileID: 7918357289444049983}
-  setEmotionCode: 1
+  setEmotionCode: 0
   setMotionCode: 0
   disableMotion: 0
-  currentEmotionCode: 6
+  currentEmotionCode: 0
   currentMotionCode: 0
   emotionNames:
   - Neutral
@@ -2187,6 +2187,8 @@ MonoBehaviour:
   - Anger
   - Frustrated
   - Thinking
+  - Apologetic
+  - Cry
   motionNames:
   - Neutral
   - Confused
@@ -2218,15 +2220,15 @@ MonoBehaviour:
   baseStateWeight: 1
   activePeakReaction: 0
   peakReactionWeight: 0
-  fadePeakReaction: 1
+  fadePeakReaction: 0
   peakFadeSpeed: 0.7
   browTensionWeight: 0
   softSmileWeight: 0
   eyeTensionWeight: 0
   blinkPatternShiftWeight: 0
   idleBlinkPatternShiftWeight: 0.25
-  blinkPatternFrequency: 0.55
-  blinkPatternPulseWeight: 38
+  blinkPatternFrequency: 0.5
+  blinkPatternPulseWeight: 60
   blinkPatternDutyCycle: 0.11
   baselineBlinkPulseScale: 0.58
   speechReductionStart: 0.1

@@ -786,11 +786,11 @@ public class FacialExpressionTestController : MonoBehaviour
             {
                 state = Overlay.BrowTension,
                 preset = Preset(1f,
-                    BS("browDownLeft", 28f),
-                    BS("browDownRight", 28f),
-                    BS("browInnerUp", 16f),
-                    BS("browOuterUpLeft", 8f),
-                    BS("browOuterUpRight", 8f))
+                    BS("browDownLeft", 32f),
+                    BS("browDownRight", 32f),
+                    BS("browInnerUp", 22f),
+                    BS("browOuterUpLeft", 25f),
+                    BS("browOuterUpRight", 17f))
             },
             new OverlayPreset
             {
@@ -807,12 +807,12 @@ public class FacialExpressionTestController : MonoBehaviour
             {
                 state = Overlay.EyeTension,
                 preset = Preset(1f,
-                    BS("eyeLookInLeft", 8f),
-                    BS("eyeLookInRight", 8f),
-                    BS("eyeSquintLeft", 30f),
-                    BS("eyeSquintRight", 30f),
-                    BS("cheekSquintLeft", 14f),
-                    BS("cheekSquintRight", 14f))
+                    BS("eyeLookInLeft", 6f),
+                    BS("eyeLookInRight", 6f),
+                    BS("eyeSquintLeft", 22f),
+                    BS("eyeSquintRight", 22f),
+                    BS("cheekSquintLeft", 10f),
+                    BS("cheekSquintRight", 10f))
             },
             new OverlayPreset
             {

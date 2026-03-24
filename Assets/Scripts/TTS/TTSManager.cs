@@ -90,13 +90,33 @@ public class TTSManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            Debug.Log($"[TTSManager] Instance assigned to '{BuildHierarchyPath(transform)}' (scene='{gameObject.scene.name}')");
             // If you need to maintain this during scene transitions, please uncomment the following line.
             // DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject);
+            Debug.LogWarning(
+                $"[TTSManager] Duplicate detected on '{BuildHierarchyPath(transform)}' (scene='{gameObject.scene.name}'). " +
+                $"Keeping existing instance '{BuildHierarchyPath(Instance.transform)}' (scene='{Instance.gameObject.scene.name}') " +
+                "and removing only the duplicate TTSManager component.");
+            Destroy(this);
         }
+    }
+
+    private static string BuildHierarchyPath(Transform node)
+    {
+        if (node == null) return "<null>";
+
+        string path = node.name;
+        Transform current = node.parent;
+        while (current != null)
+        {
+            path = current.name + "/" + path;
+            current = current.parent;
+        }
+
+        return path;
     }
 
     void Start()
