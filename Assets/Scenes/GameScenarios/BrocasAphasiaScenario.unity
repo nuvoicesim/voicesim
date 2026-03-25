@@ -788,78 +788,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: Humano_Aphasia
       objectReference: {fileID: 0}
+    - target: {fileID: 85079652, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
+      propertyPath: cueControllerObject
+      value: 
+      objectReference: {fileID: 1284981255}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 335689851042734832, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 85079552}
-    - targetCorrespondingSourceObject: {fileID: 335689851042734832, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 85079566}
-    - targetCorrespondingSourceObject: {fileID: 335689851042734832, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 85079565}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
 --- !u!1 &85079551 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 335689851042734832, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
   m_PrefabInstance: {fileID: 85079550}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &85079552
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85079551}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a66d412a206a6be4580f4a134fa450c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  apiUrl: https://api.openai.com/v1/chat/completions
-  apiKey: 
-  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
-  dialoguePath: /llm-dialogue
-  maxRetries: 2
-  requestTimeoutSeconds: 45
-  currentScenario: task1
-  lostResponse: 'um... fast... uh... too... fast...  '
-  maxSpeechSpeed: 170
-  cueControllerObject: {fileID: 1284981255}
 --- !u!95 &85079553 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 482709129696049257, guid: da9dbf664a1ca9548b970686b74da42e, type: 3}
   m_PrefabInstance: {fileID: 85079550}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &85079565
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85079551}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a5e3eefea68847789642833bc724829, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WebGLTextBridge
-  defaultSpeechWpm: 0
---- !u!114 &85079566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 85079551}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5054f570d13e427d97f5ca83557aff5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WebGLMockResponder
-  animator: {fileID: 85079553}
 --- !u!1 &85949098
 GameObject:
   m_ObjectHideFlags: 0

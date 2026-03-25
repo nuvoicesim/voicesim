@@ -2231,8 +2231,8 @@ MonoBehaviour:
   blinkPatternPulseWeight: 60
   blinkPatternDutyCycle: 0.11
   baselineBlinkPulseScale: 0.58
-  speechReductionStart: 0.1
-  speechReductionFull: 0.45
+  speechReductionStart: 0.16
+  speechReductionFull: 0.6
   speechSmoothingSpeed: 8
   expressionBlendSpeed: 220
 --- !u!114 &1573346482229067111
@@ -2251,10 +2251,10 @@ MonoBehaviour:
   emotionController: {fileID: 6668925248582050730}
   autoResolveReferences: 1
   registerWithEmotionController: 1
-  happyOverlayIntensity: 0.55
-  stressOverlayIntensity: 0.6
-  confusedPeakIntensity: 0.75
-  happyPeakIntensity: 0.65
+  happyOverlayIntensity: 0.65
+  stressOverlayIntensity: 0.7
+  confusedPeakIntensity: 0.82
+  happyPeakIntensity: 0.75
   cryPeakIntensity: 0.95
   reliefPeakIntensity: 0.6
   resetOverlaysBeforeApply: 1
