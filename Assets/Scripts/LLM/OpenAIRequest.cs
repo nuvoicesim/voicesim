@@ -95,18 +95,18 @@ public class OpenAIRequest : MonoBehaviour
 
     void Start()
     {
-        emotionController = GetComponent<EmotionController>();
+        TryResolveEmotionController();
 
         if (cueControllerObject == null)
-{
-    Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
-    return;
-}
+        {
+            Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
+            return;
+        }
 
         cueController = cueControllerObject.GetComponent<CueController>();
 
         if (emotionController == null)
-            Debug.LogError("EmotionController component not found on the GameObject.");
+            Debug.LogError("OpenAIRequest: EmotionController not found on this object, children, or parent.");
 
         if (cueController == null)
             Debug.LogError("CueController component not found on the UI GameObject.");
@@ -115,6 +115,20 @@ public class OpenAIRequest : MonoBehaviour
             InitializeChat();
         else
             Debug.LogWarning("[OpenAIRequest] currentScenario is empty at Start; will initialize after login via ApplyLoginContext.");
+    }
+
+    private bool TryResolveEmotionController()
+    {
+        if (emotionController != null)
+            return true;
+
+        emotionController = GetComponent<EmotionController>();
+        if (emotionController == null)
+            emotionController = GetComponentInChildren<EmotionController>(true);
+        if (emotionController == null)
+            emotionController = GetComponentInParent<EmotionController>();
+
+        return emotionController != null;
     }
 
     public void ApplyLoginContext(string userId, int simulationLevel)
@@ -348,8 +362,14 @@ public class OpenAIRequest : MonoBehaviour
         else
             Debug.LogError("TTSManager instance not found.");
 
-        if (emotionController != null)
+        if (emotionController == null && !TryResolveEmotionController())
+        {
+            Debug.LogError("[OpenAIRequest] EmotionController not found; skipping HandleEmotionCode.");
+        }
+        else
+        {
             emotionController.HandleEmotionCode(emotionCode, motionCode);
+        }
 
         if (cueController != null)
             cueController.HandleResponse(responseText);
