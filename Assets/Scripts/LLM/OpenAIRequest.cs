@@ -18,7 +18,7 @@ public class OpenAIRequest : MonoBehaviour
     public string apiKey = "";
 
     [Header("LLM Backend")]
-    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
+    [SerializeField] private string backendBaseUrl = "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod";
     [SerializeField] private string dialoguePath = "/llm-dialogue";
     [SerializeField, Range(1, 3)] private int maxRetries = 2;
     [SerializeField] private int requestTimeoutSeconds = 45;

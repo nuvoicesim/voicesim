@@ -19,7 +19,7 @@ public class TTSManager : MonoBehaviour
 
     [Header("TTS Configuration")]
     [Tooltip("AWS backend base URL for TTS")]
-    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
+    [SerializeField] private string backendBaseUrl = "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod";
 
     [Tooltip("Path for the TTS endpoint")]
     [SerializeField] private string ttsPath = "/tts";
