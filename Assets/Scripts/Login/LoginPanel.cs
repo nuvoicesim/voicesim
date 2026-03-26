@@ -21,7 +21,7 @@ public class LoginPanel : MonoBehaviour
     [Header("Network Settings")]
     [SerializeField]
     private string loginUrl =
-        "https://gu6dg3g185.execute-api.us-west-2.amazonaws.com/dev/auth/login";
+        "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod/auth/login";
     [Tooltip("Total seconds before the request times out.")]
     [SerializeField, Range(5, 120)] private int requestTimeoutSeconds = 20;
 

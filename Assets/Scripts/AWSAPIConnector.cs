@@ -11,7 +11,7 @@ public class AWSAPIConnector : MonoBehaviour
     public static AWSAPIConnector Instance;
 
     [Header("AWS API Configuration")]
-    public string awsApiUrl = "https://dxa66vt2tl.execute-api.us-east-1.amazonaws.com/dev/chat-history";
+    public string awsApiUrl = "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod/chat-history";
 
     [Header("Test Configuration")]
     [Tooltip("Hard-coded user ID for testing")]

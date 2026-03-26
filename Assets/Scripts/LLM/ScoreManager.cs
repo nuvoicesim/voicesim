@@ -24,7 +24,7 @@ public class ScoreManager : MonoBehaviour
     private string currentScenario = "";
     private List<ConversationTurn> conversationTurns = new List<ConversationTurn>();
     [Header("LLM Scoring Backend")]
-    [SerializeField] private string fallbackScoringUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev/llm-scoring";
+    [SerializeField] private string fallbackScoringUrl = "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod/llm-scoring";
     [SerializeField] private int scoringTimeoutSeconds = 60;
 
     void Awake()
