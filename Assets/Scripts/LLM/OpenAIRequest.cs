@@ -1,25 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Text;
-using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Linq;
-using System.Text.RegularExpressions;
 using UI.Cues;
 using UI.Cues.WarningSystem;
 
 public class OpenAIRequest : MonoBehaviour
 {
     public static OpenAIRequest Instance;
-    public string apiUrl = "https://api.openai.com/v1/chat/completions";
-    public string apiKey;
-    public string CurrentUserId { get; private set; }
+
+    [Header("Legacy (Do Not Use)")]
+    public string apiUrl = "";
+    public string apiKey = "";
+
+    [Header("LLM Backend")]
+    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
+    [SerializeField] private string dialoguePath = "/llm-dialogue";
+    [SerializeField, Range(1, 3)] private int maxRetries = 2;
+    [SerializeField] private int requestTimeoutSeconds = 45;
+
+    [Header("Conversation Settings")]
     [SerializeField] private string currentScenario = "";
     public string lostResponse = "umm... fast... uh... fast... ";
     public float maxSpeechSpeed = 200f;
@@ -38,11 +43,55 @@ public class OpenAIRequest : MonoBehaviour
     private float currentSpeechSpeed;
     private string basePath;
     private List<Dictionary<string, string>> chatMessages;
-    private string currentPatientResponse = "";
+    public string CurrentUserId { get; private set; }
+    public int CurrentSimulationLevel { get; private set; } = 1;
 
-    // Precompiled regex for emotion/motion code extraction
-    private static readonly Regex EmotionMotionRegex =
-        new Regex(@"\[(\d+)\]\[(\d+)\]", RegexOptions.Compiled);
+    private readonly List<Dictionary<string, string>> chatMessages = new List<Dictionary<string, string>>();
+    private string currentPatientResponse = "";
+    private string pendingNurseMessage = "";
+    private string sessionId = "";
+    private int turnIndex = 0;
+
+    [Serializable]
+    private class StructuredDialogueResponse
+    {
+        public string responseText;
+        public int emotionCode;
+        public int motionCode;
+    }
+
+    [Serializable]
+    private class DialogueMetadata
+    {
+        public string sessionId;
+        public int turnIndex;
+        public string client;
+    }
+
+    [Serializable]
+    private class DialogueOptions
+    {
+        public float temperature;
+        public int maxOutputTokens;
+    }
+
+    [Serializable]
+    private class DialogueRequestPayload
+    {
+        public string userID;
+        public int simulationLevel;
+        public List<Dictionary<string, string>> messages;
+        public DialogueMetadata metadata;
+        public DialogueOptions options;
+    }
+
+    [Serializable]
+    private class ErrorEnvelope
+    {
+        public string error;
+        public string requestId;
+        public bool retryable;
+    }
 
     void Awake()
     {
@@ -58,31 +107,7 @@ public class OpenAIRequest : MonoBehaviour
 
     void Start()
     {
-#if UNITY_EDITOR && !UNITY_WEBGL
-        try
-        {
-            System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-            System.Net.ServicePointManager.SecurityProtocol =
-                (System.Net.SecurityProtocolType)3072 |
-                (System.Net.SecurityProtocolType)768  |
-                (System.Net.SecurityProtocolType)192;
-            System.Net.ServicePointManager.DefaultConnectionLimit = 10;
-            System.Net.ServicePointManager.Expect100Continue = false;
-            System.Net.ServicePointManager.UseNagleAlgorithm = false;
-            Debug.Log("DEV SSL/TLS overrides configured");
-            Debug.Log("✓ Enhanced SSL/TLS settings configured");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Failed to configure SSL/TLS: {e.Message}");
-        }
-#endif
-
-        LoadApiKey();
-        StartCoroutine(NetworkDiagnostics());
-
-        animationController = GetComponent<CharacterAnimationController>();
-        emotionController = GetComponent<EmotionController>();
+        TryResolveEmotionController();
 
         if (cueControllerObject == null)
         {
@@ -93,7 +118,7 @@ public class OpenAIRequest : MonoBehaviour
         cueController = cueControllerObject.GetComponent<CueController>();
 
         if (emotionController == null)
-            Debug.LogError("EmotionController component not found on the GameObject.");
+            Debug.LogError("OpenAIRequest: EmotionController not found on this object, children, or parent.");
 
         if (cueController == null)
             Debug.LogError("CueController component not found on the UI GameObject.");
@@ -105,222 +130,52 @@ public class OpenAIRequest : MonoBehaviour
             Debug.LogWarning("OpenAIRequest: targetButtonUI not assigned. Target word will be empty.");
 
         if (!string.IsNullOrEmpty(currentScenario))
-        {
-            basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
-            if (ScoreManager.Instance != null)
-                ScoreManager.Instance.Initialize(currentScenario);
             InitializeChat();
-        }
         else
-        {
             Debug.LogWarning("[OpenAIRequest] currentScenario is empty at Start; will initialize after login via ApplyLoginContext.");
-        }
     }
 
-    private void LoadApiKey()
+    private bool TryResolveEmotionController()
     {
-        Debug.Log("=== API KEY LOADING ===");
+        if (emotionController != null)
+            return true;
 
-        apiKey = EnvironmentLoader.GetEnvVariable("OPENAI_API_KEY");
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            Debug.Log("✓ API key loaded from environment variables");
-            return;
-        }
+        emotionController = GetComponent<EmotionController>();
+        if (emotionController == null)
+            emotionController = GetComponentInChildren<EmotionController>(true);
+        if (emotionController == null)
+            emotionController = GetComponentInParent<EmotionController>();
 
-        string configPath = Path.Combine(Application.streamingAssetsPath, "config.json");
-        Debug.Log($"Looking for config file at: {configPath}");
-
-        if (File.Exists(configPath))
-        {
-            try
-            {
-                string configContent = File.ReadAllText(configPath);
-                var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(configContent);
-
-                if (config != null && config.ContainsKey("openai_api_key"))
-                {
-                    apiKey = config["openai_api_key"];
-                    Debug.Log("✓ API key loaded from config file");
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error reading config file: {e.Message}");
-            }
-        }
-
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            Debug.Log("✓ API key found in Inspector");
-            return;
-        }
-
-        Debug.LogError("✗ No API key found! Please set it via environment variable, config file, or Inspector");
+        return emotionController != null;
     }
 
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
         CurrentUserId = userId;
-        Debug.Log($"[OpenAIRequest] Authenticated user: {CurrentUserId}");
+        CurrentSimulationLevel = Mathf.Clamp(simulationLevel, 1, 3);
+        sessionId = $"{CurrentUserId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        turnIndex = 0;
 
-        switch (simulationLevel)
+        switch (CurrentSimulationLevel)
         {
             case 1: currentScenario = "task1"; break;
             case 2: currentScenario = "task2"; break;
             case 3: currentScenario = "task3"; break;
-            default:
-                Debug.LogWarning($"[OpenAIRequest] Unknown simulationLevel {simulationLevel}, defaulting to task1");
-                currentScenario = "task1";
-                break;
+            default: currentScenario = "task1"; break;
         }
 
-        basePath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario);
         InitializeChat();
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.Initialize(currentScenario);
 
-        Debug.Log($"[OpenAIRequest] Scenario set to '{currentScenario}'. basePath: {basePath}");
-    }
-
-    private IEnumerator NetworkDiagnostics()
-    {
-        Debug.Log("=== NETWORK DIAGNOSTICS START ===");
-
-        Debug.Log("Testing basic internet connectivity...");
-        UnityWebRequest testRequest = UnityWebRequest.Get("https://www.google.com");
-        testRequest.timeout = 10;
-        yield return testRequest.SendWebRequest();
-
-        if (testRequest.result == UnityWebRequest.Result.Success)
-            Debug.Log("✓ Basic internet connection: OK");
-        else
-        {
-            Debug.LogError("✗ Basic internet connection: FAILED");
-            Debug.LogError($"Error: {testRequest.error}");
-            Debug.LogError($"Response Code: {testRequest.responseCode}");
-        }
-
-        Debug.Log("Testing HTTPS connection...");
-        UnityWebRequest httpsTest = UnityWebRequest.Get("https://httpbin.org/get");
-        httpsTest.timeout = 10;
-        yield return httpsTest.SendWebRequest();
-
-        if (httpsTest.result == UnityWebRequest.Result.Success)
-            Debug.Log("✓ HTTPS connection: OK");
-        else
-        {
-            Debug.LogError("✗ HTTPS connection: FAILED");
-            Debug.LogError($"Error: {httpsTest.error}");
-            Debug.LogError($"Response Code: {httpsTest.responseCode}");
-        }
-
-        yield return new WaitForSeconds(1f);
-
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            Debug.Log("Testing API key validity...");
-            UnityWebRequest keyTest = UnityWebRequest.Get("https://api.openai.com/v1/models");
-            keyTest.SetRequestHeader("Authorization", "Bearer " + apiKey.Trim());
-            keyTest.timeout = 15;
-            yield return keyTest.SendWebRequest();
-
-            if (keyTest.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("✓ API key validation: OK");
-                Debug.Log($"Available models response length: {keyTest.downloadHandler.text.Length}");
-            }
-            else
-            {
-                Debug.LogError("✗ API key validation: FAILED");
-                Debug.LogError($"Error: {keyTest.error}");
-                Debug.LogError($"Response Code: {keyTest.responseCode}");
-                Debug.LogError($"Response: {keyTest.downloadHandler.text}");
-            }
-        }
-        else
-        {
-            Debug.LogError("✗ API key: NOT FOUND - Skipping API key validation");
-        }
-
-        Debug.Log("=== NETWORK DIAGNOSTICS END ===");
-    }
-
-    private string LoadPromptFromFile(string fileName)
-    {
-        if (string.IsNullOrEmpty(basePath))
-        {
-            Debug.LogWarning("[OpenAIRequest] basePath is not set; cannot load prompts.");
-            return "";
-        }
-
-        string filePath = Path.Combine(basePath, fileName);
-        if (!File.Exists(filePath))
-        {
-            Debug.LogError("Prompt file not found: " + filePath);
-            return "";
-        }
-        return File.ReadAllText(filePath);
+        Debug.Log($"[OpenAIRequest] Login context applied. userID={CurrentUserId}, simulationLevel={CurrentSimulationLevel}, scenario={currentScenario}");
     }
 
     private void InitializeChat()
     {
-        if (string.IsNullOrEmpty(basePath))
-        {
-            Debug.LogWarning("[OpenAIRequest] basePath not set; using minimal system prompt.");
-            chatMessages = new List<Dictionary<string, string>>
-            {
-                new Dictionary<string, string> { { "role", "system" }, { "content", "You are a patient. Keep replies concise. End with [0][0]." } }
-            };
-            return;
-        }
-
-        string baseInstructions = LoadPromptFromFile("baseInstructions.txt");
-        if (string.IsNullOrEmpty(baseInstructions))
-        {
-            Debug.LogError("[OpenAIRequest] baseInstructions is empty; creating minimal system prompt.");
-            chatMessages = new List<Dictionary<string, string>>
-            {
-                new Dictionary<string, string> { { "role", "system" }, { "content", "You are a patient. Keep replies concise. End with [0][0]." } }
-            };
-            return;
-        }
-
-        string emotionInstructions = @"
-            IMPORTANT: You will analysis your emotion based on the conversation. Then end EVERY response with corresponding emotion codes:
-            - Use [0] for neutral responses or statements
-            - Use [1] for responses involving minor pain or discomfort
-            - Use [2] for positive responses, gratitude, or when feeling better
-            - Use [3] for pain
-            - Use [4] for sad
-            - Use [5] for anger
-            - Use [6] for frustration due to speech block or not being understood
-            - Use [7] for thinking or processing information
-            - Use [8] for an apologetic grimace
-            - Use [9] for crying in frustration when unable to communicate";
-
-        string motionInstructions = @"
-            IMPORTANT: You will use the following animations based on the conversation. Then end EVERY response with corresponding motion codes after the emotion code:
-            - [0] for neutral responses or statements
-            - [1] when unable to answer or feeling lost after doctor's question
-            - [2] for strong affirmative or emphatic agreement
-            - [3] for agreement with an attempt to add clarification
-            - [4] for actively listening or confirming understanding
-            - [5] for passive or minimal acknowledgment
-            - [6] for disagreement, denial, or inability to answer
-            - [7] for intense frustration when unable to express words
-            - [8] for expressing impatience, agitation, or urging the doctor during conversation
-            - [9] for struggling to recall words or thinking of a response";
-
-        string systemPrompt = $"{baseInstructions}\n{emotionInstructions}\n{motionInstructions}";
-
-        chatMessages = new List<Dictionary<string, string>>
-        {
-            new Dictionary<string, string> { { "role", "system" }, { "content", systemPrompt } }
-        };
-
-        Debug.Log("System: " + systemPrompt);
+        chatMessages.Clear();
+        currentPatientResponse = "";
+        Debug.Log("[OpenAIRequest] Chat initialized without system message. Backend owns system prompt.");
     }
 
     public void ReceiveNurseTranscription(string transcribedText, float speechWpm)
@@ -338,299 +193,239 @@ public class OpenAIRequest : MonoBehaviour
 
     private void NurseResponds(string nurseMessage, float speechWpm)
     {
-        if (chatMessages == null || chatMessages.Count == 0)
+        if (string.IsNullOrWhiteSpace(nurseMessage))
+        {
+            Debug.LogWarning("[OpenAIRequest] Empty nurse message ignored.");
+            return;
+        }
+
+        if (chatMessages.Count == 0 && !string.IsNullOrEmpty(currentScenario))
             InitializeChat();
 
-        chatMessages.Add(new Dictionary<string, string> { { "role", "user" }, { "content", nurseMessage } });
+        chatMessages.Add(new Dictionary<string, string>
+        {
+            { "role", "user" },
+            { "content", nurseMessage.Trim() }
+        });
         PrintChatMessage(chatMessages);
-        currentSpeechSpeed = speechWpm;
-        Debug.Log("speech speed:" + currentSpeechSpeed);
+        pendingNurseMessage = nurseMessage.Trim();
 
-        StartCoroutine(PostRequest());
+        turnIndex++;
 
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.RecordTurn(currentPatientResponse, nurseMessage);
-    }
-
-    IEnumerator PostRequest()
-    {
-        Debug.Log("=== STARTING API REQUEST ===");
-        Debug.Log($"API URL: {apiUrl}");
-        Debug.Log($"API Key exists: {!string.IsNullOrEmpty(apiKey)}");
-
-        if (!string.IsNullOrEmpty(apiKey))
-            Debug.Log($"API Key preview: {apiKey.Substring(0, Math.Min(10, apiKey.Length))}...");
-
-        if (currentSpeechSpeed > maxSpeechSpeed)
+        if (speechWpm > maxSpeechSpeed)
         {
-            Debug.Log($"Speech too fast ({currentSpeechSpeed} > {maxSpeechSpeed}), using lost response");
+            Debug.Log($"[OpenAIRequest] Speech too fast ({speechWpm} > {maxSpeechSpeed}). Using fallback text.");
             HandlePatientResponse(lostResponse, 5, 1);
-            yield break;
-        }
-
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            Debug.LogError("Cannot make API request: No API key available");
-            yield break;
-        }
-
-        string requestBody = BuildRequestBody();
-        Debug.Log($"Request Body Length: {requestBody.Length}");
-
-        var request = UnityWebRequest.PostWwwForm(apiUrl, "");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(requestBody);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", "Bearer " + apiKey.Trim());
-
-        request.timeout = 45;
-
-        Debug.Log("Sending request to OpenAI...");
-        yield return request.SendWebRequest();
-
-        Debug.Log("=== API RESPONSE ===");
-        Debug.Log($"Response Code: {request.responseCode}");
-        Debug.Log($"Request Result: {request.result}");
-        Debug.Log($"Error: {request.error ?? "None"}");
-        Debug.Log($"Response Body Length: {request.downloadHandler?.text?.Length ?? 0}");
-
-        if (request.result == UnityWebRequest.Result.ConnectionError ||
-            request.result == UnityWebRequest.Result.ProtocolError)
-        {
-            Debug.LogError("=== API REQUEST FAILED ===");
-            Debug.LogError($"Error Type: {request.result}");
-            Debug.LogError($"Error Message: {request.error}");
-            Debug.LogError($"Response Code: {request.responseCode}");
-            Debug.LogError($"Response Body: {request.downloadHandler.text}");
-
-            if (request.responseCode == 421)
-            {
-                Debug.LogWarning("Got 421 error, trying alternative request...");
-                yield return StartCoroutine(TryAlternativeRequest(requestBody));
-                yield break;
-            }
-
-            ShowDetailedError(request);
-        }
-        else if (request.responseCode == 200)
-        {
-            Debug.Log("=== API REQUEST SUCCESS ===");
-            try
-            {
-                var jsonResponse = JObject.Parse(request.downloadHandler.text);
-                var messageContent = jsonResponse["choices"][0]["message"]["content"].ToString();
-                Debug.Log($"Received message: {messageContent.Substring(0, Math.Min(100, messageContent.Length))}...");
-
-                var match = EmotionMotionRegex.Match(messageContent);
-                string ttsText = messageContent;
-
-                int emotionCode;
-                int motionCode;
-
-                if (emotionController == null)
-                {
-                    Debug.LogError("EmotionController is null");
-                    yield break;
-                }
-                if (!match.Success)
-                {
-                    Debug.LogWarning("No emotion/motion codes found in response, using defaults");
-                    emotionCode = 0;
-                    motionCode = 0;
-                }
-                else
-                {
-                    emotionCode = int.Parse(match.Groups[1].Value);
-                    motionCode = int.Parse(match.Groups[2].Value);
-                    Debug.Log($"Extracted emotion code: {emotionCode}, motion code: {motionCode}");
-                    ttsText = messageContent.Substring(0, messageContent.Length - 6).Trim();
-                    Debug.Log($"TTS Text: {ttsText}");
-                }
-
-                HandlePatientResponse(ttsText, emotionCode, motionCode);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error parsing API response: {e.Message}");
-                Debug.LogError($"Response was: {request.downloadHandler.text}");
-            }
         }
         else
         {
-            Debug.LogError($"Unexpected response code: {request.responseCode}");
-            Debug.LogError($"Response: {request.downloadHandler.text}");
+            StartCoroutine(PostDialogueRequest());
         }
+
     }
 
-    private IEnumerator TryAlternativeRequest(string requestBody)
+    private IEnumerator PostDialogueRequest()
     {
-        Debug.Log("=== TRYING ALTERNATIVE REQUEST METHOD ===");
+        string requestBody = BuildDialogueRequestBody();
+        string requestUrl = $"{backendBaseUrl.TrimEnd('/')}{dialoguePath}";
+        int attempts = Mathf.Max(1, maxRetries);
 
-        var form = new WWWForm();
-        form.AddField("data", requestBody);
-
-        var request = UnityWebRequest.Post(apiUrl, form);
-
-        request.uploadHandler.Dispose();
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(requestBody));
-
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", "Bearer " + apiKey.Trim());
-        request.SetRequestHeader("User-Agent", "UnityPlayer");
-
-        request.timeout = 45;
-
-        yield return request.SendWebRequest();
-
-        Debug.Log($"Alternative request result: {request.result}");
-        Debug.Log($"Alternative response code: {request.responseCode}");
-
-        if (request.result == UnityWebRequest.Result.Success && request.responseCode == 200)
+        for (int attempt = 1; attempt <= attempts; attempt++)
         {
-            Debug.Log("=== ALTERNATIVE REQUEST SUCCESS ===");
-            try
+            using (var request = new UnityWebRequest(requestUrl, "POST"))
             {
-                var jsonResponse = JObject.Parse(request.downloadHandler.text);
-                var messageContent = jsonResponse["choices"][0]["message"]["content"].ToString();
+                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(requestBody));
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.timeout = requestTimeoutSeconds;
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Accept", "application/json");
+                request.SetRequestHeader("X-Request-ID", $"{sessionId}-turn-{turnIndex}-try-{attempt}");
 
-                var match = EmotionMotionRegex.Match(messageContent);
-                string ttsText = messageContent;
+                yield return request.SendWebRequest();
 
-                int emotionCode;
-                int motionCode;
-
-                if (emotionController == null)
+                bool success = request.result == UnityWebRequest.Result.Success && request.responseCode == 200;
+                if (success)
                 {
-                    Debug.LogError("EmotionController is null");
+                    if (TryExtractDialogueResponse(request.downloadHandler.text, out string ttsText, out int emotionCode, out int motionCode))
+                    {
+                        HandlePatientResponse(ttsText, emotionCode, motionCode);
+                    }
+                    else
+                    {
+                        Debug.LogError("[OpenAIRequest] Could not parse dialogue response. Using neutral fallback.");
+                        HandlePatientResponse("I... I am not sure...", 0, 0);
+                    }
                     yield break;
                 }
-                if (!match.Success)
+
+                bool retryable = IsRetryableResponse(request.responseCode, request.downloadHandler.text);
+                Debug.LogError($"[OpenAIRequest] Dialogue request failed (attempt {attempt}/{attempts}). code={request.responseCode}, error={request.error}, retryable={retryable}, body={request.downloadHandler.text}");
+
+                if (!retryable || attempt >= attempts)
                 {
-                    Debug.LogWarning("No emotion/motion codes found in alternative response, using defaults");
-                    emotionCode = 0;
-                    motionCode = 0;
-                }
-                else
-                {
-                    emotionCode = int.Parse(match.Groups[1].Value);
-                    motionCode = int.Parse(match.Groups[2].Value);
-                    Debug.Log($"Extracted emotion code: {emotionCode}, motion code: {motionCode}");
-                    ttsText = messageContent.Substring(0, messageContent.Length - 6).Trim();
-                    Debug.Log($"TTS Text: {ttsText}");
+                    HandlePatientResponse("I... I am not sure...", 0, 0);
+                    yield break;
                 }
 
-                HandlePatientResponse(ttsText, emotionCode, motionCode);
+                yield return new WaitForSeconds(0.35f * attempt);
             }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error parsing alternative response: {e.Message}");
-            }
-        }
-        else
-        {
-            Debug.LogError("Alternative request also failed");
-            Debug.LogError($"Error: {request.error}");
-            Debug.LogError($"Response: {request.downloadHandler.text}");
         }
     }
 
-    private void ShowDetailedError(UnityWebRequest request)
+    private bool IsRetryableResponse(long responseCode, string responseBody)
     {
-        string errorDetails = "=== DETAILED ERROR ANALYSIS ===\n";
+        if (responseCode == 408 || responseCode == 425 || responseCode == 429)
+            return true;
 
-        switch (request.result)
+        if (responseCode >= 500)
+            return true;
+
+        if (string.IsNullOrWhiteSpace(responseBody))
+            return false;
+
+        try
         {
-            case UnityWebRequest.Result.ConnectionError:
-                errorDetails += "CONNECTION ERROR - Possible causes:\n";
-                errorDetails += "• No internet connection\n";
-                errorDetails += "• Firewall blocking the application\n";
-                errorDetails += "• Antivirus software blocking network access\n";
-                errorDetails += "• DNS resolution issues\n";
-                break;
-
-            case UnityWebRequest.Result.ProtocolError:
-                errorDetails += "PROTOCOL ERROR - Possible causes:\n";
-                if (request.responseCode == 401)
-                    errorDetails += "• Invalid or expired API key\n";
-                else if (request.responseCode == 403)
-                    errorDetails += "• API access forbidden (check billing/limits)\n";
-                else if (request.responseCode == 429)
-                    errorDetails += "• Rate limit exceeded\n";
-                else if (request.responseCode >= 500)
-                    errorDetails += "• Server error (try again later)\n";
-                else
-                    errorDetails += $"• HTTP {request.responseCode} error\n";
-                break;
+            var error = JsonConvert.DeserializeObject<ErrorEnvelope>(responseBody);
+            return error != null && error.retryable;
         }
+        catch
+        {
+            return false;
+        }
+    }
 
-        errorDetails += "\nTROUBLESHOOTING STEPS:\n";
-        errorDetails += "1. Check your internet connection\n";
-        errorDetails += "2. Verify your API key is correct\n";
-        errorDetails += "3. Try running the application as administrator\n";
-        errorDetails += "4. Check Windows Firewall/antivirus settings\n";
-        errorDetails += "5. Try again in a few minutes\n";
+    private string BuildDialogueRequestBody()
+    {
+        var filteredMessages = chatMessages
+            .Where(m =>
+                m.ContainsKey("role") &&
+                m.ContainsKey("content") &&
+                (m["role"] == "user" || m["role"] == "assistant") &&
+                !string.IsNullOrWhiteSpace(m["content"]))
+            .Select(m => new Dictionary<string, string>
+            {
+                { "role", m["role"] },
+                { "content", m["content"] }
+            })
+            .ToList();
 
-        Debug.LogError(errorDetails);
+        var payload = new DialogueRequestPayload
+        {
+            userID = string.IsNullOrWhiteSpace(CurrentUserId) ? "anonymous-user" : CurrentUserId,
+            simulationLevel = Mathf.Clamp(CurrentSimulationLevel, 1, 3),
+            messages = filteredMessages,
+            metadata = new DialogueMetadata
+            {
+                sessionId = sessionId,
+                turnIndex = turnIndex,
+                client = "unity"
+            },
+            options = new DialogueOptions
+            {
+                temperature = 0.2f,
+                maxOutputTokens = 220
+            }
+        };
+
+        return JsonConvert.SerializeObject(payload);
+    }
+
+    private bool TryExtractDialogueResponse(string responseBody, out string responseText, out int emotionCode, out int motionCode)
+    {
+        responseText = "";
+        emotionCode = 0;
+        motionCode = 0;
+
+        try
+        {
+            var jsonResponse = JObject.Parse(responseBody);
+            string messageContent = jsonResponse["choices"]?[0]?["message"]?["content"]?.ToString();
+            if (string.IsNullOrWhiteSpace(messageContent))
+            {
+                Debug.LogError("[OpenAIRequest] Missing choices[0].message.content");
+                return false;
+            }
+
+            var parsed = JsonConvert.DeserializeObject<StructuredDialogueResponse>(messageContent);
+            if (parsed == null || string.IsNullOrWhiteSpace(parsed.responseText))
+            {
+                Debug.LogError("[OpenAIRequest] Structured dialogue payload is missing responseText.");
+                return false;
+            }
+
+            responseText = parsed.responseText.Trim();
+            emotionCode = Mathf.Clamp(parsed.emotionCode, 0, 9);
+            motionCode = Mathf.Clamp(parsed.motionCode, 0, 9);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[OpenAIRequest] Exception while parsing dialogue response: {ex.Message}");
+            return false;
+        }
     }
 
     private void HandlePatientResponse(string responseText, int emotionCode, int motionCode)
     {
         currentPatientResponse = responseText;
 
-        chatMessages.Add(new Dictionary<string, string> { { "role", "assistant" }, { "content", responseText } });
+        var assistantPayload = new StructuredDialogueResponse
+        {
+            responseText = responseText,
+            emotionCode = Mathf.Clamp(emotionCode, 0, 9),
+            motionCode = Mathf.Clamp(motionCode, 0, 9)
+        };
+
+        chatMessages.Add(new Dictionary<string, string>
+        {
+            { "role", "assistant" },
+            { "content", JsonConvert.SerializeObject(assistantPayload) }
+        });
         PrintChatMessage(chatMessages);
 
         if (TTSManager.Instance != null)
-            TTSManager.Instance.ConvertTextToSpeech(responseText);
+            TTSManager.Instance.ConvertTextToSpeech(responseText, motionCode);
         else
             Debug.LogError("TTSManager instance not found.");
 
-        if (emotionController != null)
+        if (emotionController == null && !TryResolveEmotionController())
+        {
+            Debug.LogError("[OpenAIRequest] EmotionController not found; skipping HandleEmotionCode.");
+        }
+        else
+        {
             emotionController.HandleEmotionCode(emotionCode, motionCode);
+        }
 
         if (cueController != null)
             cueController.HandleResponse(responseText);
-    }
 
-    private string BuildRequestBody()
-    {
-        if (chatMessages == null || chatMessages.Count == 0)
-            InitializeChat();
-
-        var requestObject = new
+        if (ScoreManager.Instance != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
         {
-            model = "gpt-4o-2024-08-06",
-            messages = chatMessages,
-            temperature = 0.8f
-        };
-        return JsonConvert.SerializeObject(requestObject, Formatting.Indented);
+            ScoreManager.Instance.RecordTurn(currentPatientResponse, pendingNurseMessage);
+            pendingNurseMessage = "";
+        }
     }
 
     public static void PrintChatMessage(List<Dictionary<string, string>> messages)
     {
-        if (messages.Count == 0) return;
+        if (messages == null || messages.Count == 0)
+            return;
 
         var latestMessage = messages[messages.Count - 1];
-        string role = latestMessage["role"];
-        string content = latestMessage["content"];
-
-        string emotionCode = "";
-        string motionCode = "";
-        var match = EmotionMotionRegex.Match(content);
-        if (match.Success)
-        {
-            emotionCode = $" (Emotion: {match.Groups[1].Value})";
-            motionCode = $" (Motion: {match.Groups[2].Value})";
-        }
-
-        Debug.Log($"[{role.ToUpper()}]{emotionCode}{motionCode}\n{content}\n");
+        string role = latestMessage.ContainsKey("role") ? latestMessage["role"] : "unknown";
+        string content = latestMessage.ContainsKey("content") ? latestMessage["content"] : "";
+        Debug.Log($"[{role.ToUpper()}]\n{content}\n");
     }
 
     public List<Dictionary<string, string>> GetChatMessages()
     {
         return chatMessages;
+    }
+
+    public string GetScoringEndpointUrl()
+    {
+        return $"{backendBaseUrl.TrimEnd('/')}/llm-scoring";
     }
 
     public void SaveConversationToAWS()
@@ -641,27 +436,20 @@ public class OpenAIRequest : MonoBehaviour
     [ContextMenu("Debug Chat Messages")]
     public void DebugChatMessages()
     {
-        Debug.Log($"=== CHAT MESSAGES DEBUG ({chatMessages?.Count ?? 0} messages) ===");
-        if (chatMessages != null)
+        Debug.Log($"=== CHAT MESSAGES DEBUG ({chatMessages.Count} messages) ===");
+        for (int i = 0; i < chatMessages.Count; i++)
         {
-            for (int i = 0; i < chatMessages.Count; i++)
-            {
-                var msg = chatMessages[i];
-                Debug.Log($"{i}: [{msg["role"]}] {msg["content"]}");
-            }
-        }
-        else
-        {
-            Debug.Log("Chat messages is null");
+            var msg = chatMessages[i];
+            Debug.Log($"{i}: [{msg["role"]}] {msg["content"]}");
         }
     }
 
     [ContextMenu("Test Save Current Conversation")]
     public void TestSaveCurrentConversation()
     {
-        if (AWSAPIConnector.Instance != null && chatMessages != null && chatMessages.Count > 0)
+        if (AWSAPIConnector.Instance != null && chatMessages.Count > 0)
         {
-            Debug.Log("🧪 Testing immediate chat history save...");
+            Debug.Log("Testing immediate chat history save...");
             AWSAPIConnector.Instance.SaveChatHistory(chatMessages);
         }
         else

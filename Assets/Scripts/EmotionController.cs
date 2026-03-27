@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Serialization;
 using UnityEngine.Timeline;
-using Xceed.Document.NET;
 
 public class EmotionController : MonoBehaviour
 {
@@ -22,27 +21,138 @@ public class EmotionController : MonoBehaviour
     public int currentMotionCode;
     public string[] emotionNames = {"Neutral", "Discomfort", "Happy", "Pain", "Sad", "Anger", "Frustrated", "Thinking", "Apologetic", "Cry"};
     public string[] motionNames = { "Neutral", "Confused", "Nod 1", "Nod 2", "Nod 3", "Nod 4", "Head Shake 1", "Head Shake 2", "Tap Table", "Struggling"};
+
+    [Header("Facial Expression Integration")]
+    public FacialExpressionRuntimeBridge facialExpressionBridge;
     
     private List<TrackAsset> allTracks = new();
     private List<TTSManager.WordTiming> charTimings;
     private List<TTSManager.WordTiming> wordTimings;
     private int previousEmotionCode = 0;
     private int previousMotionCode = 0;
+    private TimelineAsset cachedTimeline;
+    private bool hasLoggedMissingTimeline;
+    private bool hasLoggedMissingFacialBridge;
 
-    void Start()
+    private static bool DirectorHasUsableTracks(PlayableDirector candidate)
+    {
+        if (candidate == null) return false;
+        TimelineAsset timeline = candidate.playableAsset as TimelineAsset;
+        if (timeline == null) return false;
+        return timeline.GetOutputTracks().Any();
+    }
+
+    private PlayableDirector ResolveFallbackDirector()
+    {
+        var candidates = FindObjectsOfType<PlayableDirector>();
+
+        foreach (var candidate in candidates)
+        {
+            if (DirectorHasUsableTracks(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        // Fallback to any director if none expose tracks yet.
+        return candidates.FirstOrDefault();
+    }
+
+    private bool TryEnsureTimelineTracks(string context)
     {
         if (director == null)
         {
-            Debug.LogError("PlayableDirector not assigned.");
+            director = GetComponent<PlayableDirector>();
+            if (director == null) director = GetComponentInChildren<PlayableDirector>();
+            if (director == null) director = GetComponentInParent<PlayableDirector>();
+            if (director == null) director = ResolveFallbackDirector();
         }
-        
+
+        if (director == null)
+        {
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"PlayableDirector not assigned in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
+        }
+
         TimelineAsset timeline = director.playableAsset as TimelineAsset;
         if (timeline == null)
         {
-            Debug.LogError("No TimelineAsset assigned to the PlayableDirector.");
-            return;
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"No TimelineAsset assigned to PlayableDirector in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
         }
-        allTracks = timeline.GetOutputTracks().ToList();
+
+        if (cachedTimeline != timeline || allTracks == null || allTracks.Count == 0)
+        {
+            cachedTimeline = timeline;
+            allTracks = timeline.GetOutputTracks().ToList();
+        }
+
+        if (allTracks == null || allTracks.Count == 0)
+        {
+            if (!hasLoggedMissingTimeline)
+            {
+                Debug.LogError($"Timeline '{timeline.name}' has no output tracks in {context}.");
+                hasLoggedMissingTimeline = true;
+            }
+            return false;
+        }
+
+        hasLoggedMissingTimeline = false;
+        return true;
+    }
+
+    private int ClampTrackIndex(int requestedIndex, string context)
+    {
+        if (!TryEnsureTimelineTracks(context))
+        {
+            return -1;
+        }
+
+        int clampedIndex = Mathf.Clamp(requestedIndex, 0, allTracks.Count - 1);
+        if (clampedIndex != requestedIndex)
+        {
+            Debug.LogWarning($"Track index {requestedIndex} out of bounds in {context}. Auto-corrected to {clampedIndex}.");
+        }
+
+        return clampedIndex;
+    }
+
+    void Start()
+    {
+        bool timelineReady = TryEnsureTimelineTracks("Start");
+
+        TryResolveFacialBridge();
+
+        Debug.Log($"[EmotionController] Startup: initialized on '{name}'. timelineReady={timelineReady}, trackCount={(allTracks != null ? allTracks.Count : 0)}");
+        Debug.Log($"[EmotionController] Startup: facial bridge {(facialExpressionBridge != null ? "found" : "not found")}");
+    }
+
+    private bool TryResolveFacialBridge()
+    {
+        if (facialExpressionBridge != null)
+        {
+            return true;
+        }
+
+        facialExpressionBridge = GetComponent<FacialExpressionRuntimeBridge>();
+        if (facialExpressionBridge == null)
+        {
+            facialExpressionBridge = GetComponentInChildren<FacialExpressionRuntimeBridge>(true);
+        }
+        if (facialExpressionBridge == null)
+        {
+            facialExpressionBridge = GetComponentInParent<FacialExpressionRuntimeBridge>();
+        }
+
+        return facialExpressionBridge != null;
     }
     
     public void SyncAnimationsWithWordTimings(List<TTSManager.WordTiming> timings)
@@ -107,7 +217,13 @@ public class EmotionController : MonoBehaviour
             int emotionCode = MapWordToEmotion(wordTiming.Word);
             if (emotionCode != 0)
             {
-                TrackAsset selectedTrack = allTracks[emotionCode];
+                int mappedIndex = ClampTrackIndex(emotionCode, "TriggerAnimationsWithTiming(mapped emotion)");
+                if (mappedIndex < 0)
+                {
+                    yield break;
+                }
+
+                TrackAsset selectedTrack = allTracks[mappedIndex];
                 foreach (var track in allTracks.Where(track => track.name != "Blink Track"))
                 {
                     track.muted = (track != selectedTrack);
@@ -118,7 +234,13 @@ public class EmotionController : MonoBehaviour
                 var animationDelay = selectedTrack.duration;
                 yield return new WaitForSeconds((float)animationDelay);
                 
-                selectedTrack = allTracks[currentEmotionCode];
+                int currentIndex = ClampTrackIndex(currentEmotionCode, "TriggerAnimationsWithTiming(current emotion)");
+                if (currentIndex < 0)
+                {
+                    yield break;
+                }
+
+                selectedTrack = allTracks[currentIndex];
                 foreach (var track in allTracks.Where(track => track.name != "Blink Track"))
                 {
                     track.muted = (track != selectedTrack);
@@ -155,11 +277,24 @@ public class EmotionController : MonoBehaviour
         if (!setEmotionCode) { currentEmotionCode = emotionCode;}
         if (!setMotionCode) { currentMotionCode = motionCode; }
 
-        if (currentEmotionCode < 0 || currentEmotionCode >= allTracks.Count)
+        if (TryResolveFacialBridge())
         {
-            Debug.LogError("Track index out of bounds.");
+            hasLoggedMissingFacialBridge = false;
+            Debug.Log($"[EmotionController] Forwarding to facial bridge: emotionCode={currentEmotionCode}, motionCode={currentMotionCode}");
+            facialExpressionBridge.HandleEmotionAndMotion(currentEmotionCode, currentMotionCode);
+        }
+        else if (!hasLoggedMissingFacialBridge)
+        {
+            Debug.LogWarning($"[EmotionController] Facial bridge not found on '{name}'.");
+            hasLoggedMissingFacialBridge = true;
+        }
+
+        int validEmotionIndex = ClampTrackIndex(currentEmotionCode, "HandleEmotionCode");
+        if (validEmotionIndex < 0)
+        {
             return;
         }
+        currentEmotionCode = validEmotionIndex;
         
         TrackAsset selectedTrack = allTracks[currentEmotionCode];
         
@@ -175,13 +310,15 @@ public class EmotionController : MonoBehaviour
         if (!disableMotion)
         {
             animator.SetTrigger(motionNames[currentMotionCode]);
-            Debug.Log("Set trigger: " + motionNames[currentEmotionCode]);
+            Debug.Log("Set trigger: " + motionNames[currentMotionCode]);
         }
         
     }
 
     public void PlayEmotion()
     {
+        if (!TryEnsureTimelineTracks("PlayEmotion")) return;
+
         director.RebuildGraph();
         director.Play();
     }

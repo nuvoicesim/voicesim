@@ -85,6 +85,12 @@ public class VoiceProfileManager : MonoBehaviour
         {
             facialAnimationController = FindObjectOfType<CSVFacialAnimationController>();
         }
+
+        // Re-apply after dependencies are found in Start; Awake may run before scene wiring is ready.
+        if (currentProfile != null)
+        {
+            ApplyProfileSettings(currentProfile);
+        }
     }
     
     /// <summary>
@@ -157,6 +163,7 @@ public class VoiceProfileManager : MonoBehaviour
             ttsManager.stability = profile.stability;
             ttsManager.similarityBoost = profile.similarityBoost;
             ttsManager.styleExaggeration = profile.styleExaggeration;
+            ttsManager.speed = Mathf.Clamp(profile.playbackSpeed, 0.7f, 1.2f);
         }
         
         // Apply settings to facial animation controller

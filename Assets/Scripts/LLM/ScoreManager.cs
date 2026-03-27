@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -22,9 +21,11 @@ public class ScoreManager : MonoBehaviour
     [Header("Progress Bar")]
     public MedicalProgressBarUI progressBarUI;
 
-    private string scoringPrompt = "";
     private string currentScenario = "";
     private List<ConversationTurn> conversationTurns = new List<ConversationTurn>();
+    [Header("LLM Scoring Backend")]
+    [SerializeField] private string fallbackScoringUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev/llm-scoring";
+    [SerializeField] private int scoringTimeoutSeconds = 60;
 
     void Awake()
     {
@@ -46,20 +47,7 @@ public class ScoreManager : MonoBehaviour
     public void Initialize(string scenario)
     {
         currentScenario = scenario;
-        LoadScoringPrompt();
-    }
-
-    private void LoadScoringPrompt()
-    {
-        string promptPath = Path.Combine(Application.streamingAssetsPath, "Prompts", currentScenario, "scoringPrompt.txt");
-        if (!File.Exists(promptPath))
-        {
-            Debug.LogError("Scoring prompt file not found: " + promptPath);
-            scoringPrompt = "";
-            return;
-        }
-        scoringPrompt = File.ReadAllText(promptPath);
-        Debug.Log("Scoring prompt loaded successfully.");
+        Debug.Log($"[ScoreManager] Initialized for scenario={currentScenario}. Backend owns scoring prompt.");
     }
 
     public void RecordTurn(string patientResponse, string nurseResponse)
@@ -148,70 +136,41 @@ public class ScoreManager : MonoBehaviour
 
     private IEnumerator EvaluateFullConversationCoroutine()
     {
-        if (string.IsNullOrEmpty(scoringPrompt))
-        {
-            Debug.LogWarning("Scoring prompt not loaded.");
-            if (progressBarUI != null)
-                progressBarUI.HideProgressBar();
-            yield break;
-        }
-
         if (progressBarUI != null)
             progressBarUI.UpdateProgress(0.1f, "Analyzing patient conversation...");
         yield return new WaitForSeconds(0.5f);
-
-        StringBuilder conversationBuilder = new StringBuilder();
-        for (int i = 0; i < conversationTurns.Count; i++)
-        {
-            conversationBuilder.AppendLine($"Turn {i + 1}:");
-            conversationBuilder.AppendLine($"Patient: \"{conversationTurns[i].Patient}\"");
-            conversationBuilder.AppendLine($"Nursing Student: \"{conversationTurns[i].Nurse}\"");
-            conversationBuilder.AppendLine();
-        }
 
         if (progressBarUI != null)
             progressBarUI.UpdateProgress(0.3f, "Preparing clinical assessment...");
         yield return new WaitForSeconds(0.3f);
 
-        string userPrompt = $"Now analyze the following full simulated conversation between the patient and a SLP student:\n\n{conversationBuilder}";
-
-        Debug.Log($"Prompt length: {scoringPrompt.Length + userPrompt.Length} characters");
-
-        var requestBody = new
+        string scoringUrl = fallbackScoringUrl;
+        if (OpenAIRequest.Instance != null)
         {
-            model = "gpt-4o-2024-08-06",
-            messages = new List<Dictionary<string, string>>()
+            scoringUrl = OpenAIRequest.Instance.GetScoringEndpointUrl();
+        }
+
+        string userId = "anonymous-user";
+        int simulationLevel = 1;
+        if (OpenAIRequest.Instance != null)
+        {
+            if (!string.IsNullOrWhiteSpace(OpenAIRequest.Instance.CurrentUserId))
+                userId = OpenAIRequest.Instance.CurrentUserId;
+            simulationLevel = Mathf.Clamp(OpenAIRequest.Instance.CurrentSimulationLevel, 1, 3);
+        }
+
+        var requestBody = new ScoringRequestPayload
+        {
+            userID = userId,
+            simulationLevel = simulationLevel,
+            conversationTurns = conversationTurns
+                .ConvertAll(turn => new ScoringTurn { patient = turn.Patient ?? "", nurse = turn.Nurse ?? "" }),
+            metadata = new ScoringMetadata
             {
-                new Dictionary<string, string>() { { "role", "system" }, { "content", scoringPrompt } },
-                new Dictionary<string, string>() { { "role", "user" }, { "content", userPrompt } }
-            },
-            temperature = 0.3,
-            max_tokens = 3000,
-            response_format = new { type = "json_schema", json_schema = new {
-                name = "evaluation_schema",
-                schema = new {
-                    type = "object",
-                    properties = new {
-                        criteria = new {
-                            type = "array",
-                            items = new {
-                                type = "object",
-                                properties = new {
-                                    name = new { type = "string" },
-                                    score = new { type = "integer" },
-                                    maxScore = new { type = "integer" },
-                                    explanation = new { type = "string" }
-                                },
-                                required = new[] { "name", "score", "maxScore", "explanation" }
-                            }
-                        },
-                        totalScore = new { type = "integer" },
-                        performanceLevel = new { type = "string" },
-                        overallExplanation = new { type = "string" }
-                    },
-                    required = new[] { "criteria", "totalScore", "performanceLevel", "overallExplanation" }
-                }
-            }}
+                sessionId = $"{userId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
+                turnIndex = conversationTurns.Count,
+                client = "unity"
+            }
         };
 
         string jsonBody = JsonConvert.SerializeObject(requestBody);
@@ -220,14 +179,15 @@ public class ScoreManager : MonoBehaviour
             progressBarUI.UpdateProgress(0.5f, "Consulting evaluation system...");
         yield return new WaitForSeconds(0.2f);
 
-        var request = new UnityWebRequest(OpenAIRequest.Instance.apiUrl, "POST");
+        var request = new UnityWebRequest(scoringUrl, "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", "Bearer " + OpenAIRequest.Instance.apiKey);
+        request.SetRequestHeader("Accept", "application/json");
+        request.timeout = scoringTimeoutSeconds;
 
-        Debug.Log("Submitting full conversation for evaluation...");
+        Debug.Log($"[ScoreManager] Submitting conversation to scoring endpoint: {scoringUrl}");
 
         var operation = request.SendWebRequest();
 
@@ -275,14 +235,13 @@ public class ScoreManager : MonoBehaviour
         try
         {
             var jsonResponse = JObject.Parse(responseText);
-            string responseContent = jsonResponse["choices"][0]["message"]["content"].ToString();
+            var reportToken = jsonResponse["report"];
+            if (reportToken == null)
+                throw new Exception("Missing `report` in scoring response.");
 
-            Debug.Log("=== 提取的content ===");
-            Debug.Log($"Content长度: {responseContent.Length} 字符");
-            Debug.Log($"Content内容: {responseContent}");
-            Debug.Log("==================");
-
-            var evaluation = JsonConvert.DeserializeObject<DynamicEvaluationResult>(responseContent);
+            var evaluation = reportToken.ToObject<DynamicEvaluationResult>();
+            if (evaluation == null)
+                throw new Exception("Failed to deserialize scoring report.");
 
             if (progressBarUI != null)
                 progressBarUI.HideProgressBar();
@@ -440,6 +399,30 @@ public class ConversationTurn
 {
     public string Patient;
     public string Nurse;
+}
+
+[Serializable]
+public class ScoringTurn
+{
+    public string patient;
+    public string nurse;
+}
+
+[Serializable]
+public class ScoringMetadata
+{
+    public string sessionId;
+    public int turnIndex;
+    public string client;
+}
+
+[Serializable]
+public class ScoringRequestPayload
+{
+    public string userID;
+    public int simulationLevel;
+    public List<ScoringTurn> conversationTurns;
+    public ScoringMetadata metadata;
 }
 
 [Serializable]

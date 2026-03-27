@@ -298,6 +298,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8594120209666061134}
+  - component: {fileID: 85079652}
+  - component: {fileID: 85079665}
+  - component: {fileID: 85079666}
   m_Layer: 0
   m_Name: Humano_Aphasia
   m_TagString: Untagged
@@ -323,6 +326,53 @@ Transform:
   - {fileID: 5279289655877508783}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &85079652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8603941499062760594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a66d412a206a6be4580f4a134fa450c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiUrl: https://api.openai.com/v1/chat/completions
+  apiKey: 
+  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
+  dialoguePath: /llm-dialogue
+  maxRetries: 2
+  requestTimeoutSeconds: 45
+  currentScenario: task1
+  lostResponse: 'um... fast... uh... too... fast...  '
+  maxSpeechSpeed: 170
+--- !u!114 &85079665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8603941499062760594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5e3eefea68847789642833bc724829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WebGLTextBridge
+  defaultSpeechWpm: 0
+--- !u!114 &85079666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8603941499062760594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5054f570d13e427d97f5ca83557aff5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WebGLMockResponder
+  animator: {fileID: 482709129696049257}
 --- !u!1001 &7733038336283966550
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -331,59 +381,63 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8594120209666061134}
     m_Modifications:
-    - target: {fileID: 5437261093811342694, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 482709129696049257, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_CullingMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5437261093811342694, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: emotionController
       value: 
       objectReference: {fileID: 4025528995871399932}
-    - target: {fileID: 6668925248582050730, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 6668925248582050730, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: director
       value: 
       objectReference: {fileID: 3442431403785319770}
-    - target: {fileID: 6668925248582050730, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 6668925248582050730, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: currentEmotionCode
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.x
       value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.y
       value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8068719081323617958, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+    - target: {fileID: 8068719081323617958, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_Name
       value: aphasia_model_stroke_fixed (1)
       objectReference: {fileID: 0}
@@ -391,20 +445,20 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
 --- !u!95 &482709129696049257 stripped
 Animator:
-  m_CorrespondingSourceObject: {fileID: 7918357289444049983, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7918357289444049983, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
   m_PrefabInstance: {fileID: 7733038336283966550}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1144842879641548874 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 7255872866112341020, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
   m_PrefabInstance: {fileID: 7733038336283966550}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &4025528995871399932 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6668925248582050730, guid: 2cfa25961a6763346a3f984614e109d1, type: 3}
+  m_CorrespondingSourceObject: {fileID: 6668925248582050730, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
   m_PrefabInstance: {fileID: 7733038336283966550}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

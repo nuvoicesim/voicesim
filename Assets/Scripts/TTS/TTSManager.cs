@@ -2,12 +2,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using UnityEngine.Audio;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using System.Text;
 // for animation
@@ -22,8 +18,14 @@ public class TTSManager : MonoBehaviour
     public AudioSource audioSource;
 
     [Header("TTS Configuration")]
-    [Tooltip("API key for ElevenLabs (loaded from environment variable by default)")]
-    [SerializeField] private string elevenLabsApiKey;
+    [Tooltip("AWS backend base URL for TTS")]
+    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
+
+    [Tooltip("Path for the TTS endpoint")]
+    [SerializeField] private string ttsPath = "/tts";
+
+    [SerializeField, Range(1, 3)] private int maxRetries = 2;
+    [SerializeField] private int requestTimeoutSeconds = 45;
 
     [Tooltip("Voice ID for ElevenLabs")]
     public string voiceId = "Bz0vsNJm8uY1hbd4c4AE";
@@ -60,37 +62,67 @@ public class TTSManager : MonoBehaviour
     [Tooltip("Reference to the BloodEffectController for blood effects")]
     public bool useBloodEffectController = true;
 
-    // API endpoints
-    private static readonly string ttsEndpoint = "https://api.elevenlabs.io/v1/text-to-speech";
+    // Runtime request context
+    public string CurrentUserId { get; private set; }
+    public int CurrentSimulationLevel { get; private set; } = 1;
+    public string CurrentScenario { get; private set; } = "task1";
+
+    private string sessionId = "";
+    private int turnIndex = 0;
 
     // Component references
     private CharacterAnimationController animationController;
+    private Animator motionAnimator;
     private BloodEffectController bloodEffectController;
     private BloodTextController bloodTextController;
     private Audio2FaceManager audio2FaceManager;
     public EmotionController emotionController;
+    private bool hasLoggedMissingMotionTarget;
+    private int previousDirectMotionCode = -1;
+    private static readonly string[] OriginalMotionTriggers =
+    {
+        "Neutral", "Confused", "Nod 1", "Nod 2", "Nod 3",
+        "Nod 4", "Head Shake 1", "Head Shake 2", "Tap Table", "Struggling"
+    };
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            Debug.Log($"[TTSManager] Instance assigned to '{BuildHierarchyPath(transform)}' (scene='{gameObject.scene.name}')");
             // If you need to maintain this during scene transitions, please uncomment the following line.
             // DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject);
+            Debug.LogWarning(
+                $"[TTSManager] Duplicate detected on '{BuildHierarchyPath(transform)}' (scene='{gameObject.scene.name}'). " +
+                $"Keeping existing instance '{BuildHierarchyPath(Instance.transform)}' (scene='{Instance.gameObject.scene.name}') " +
+                "and removing only the duplicate TTSManager component.");
+            Destroy(this);
         }
+    }
+
+    private static string BuildHierarchyPath(Transform node)
+    {
+        if (node == null) return "<null>";
+
+        string path = node.name;
+        Transform current = node.parent;
+        while (current != null)
+        {
+            path = current.name + "/" + path;
+            current = current.parent;
+        }
+
+        return path;
     }
 
     void Start()
     {
-        // 修复API密钥加载逻辑
-        LoadElevenLabsApiKey();
-
         // Get references to required components
-        animationController = GetComponent<CharacterAnimationController>();
+        TryResolveMotionTargets();
 
         // Find the Audio2FaceManager if we're using it
         if (useAudio2Face)
@@ -129,67 +161,91 @@ public class TTSManager : MonoBehaviour
         }
     }
 
+    private bool TryResolveMotionTargets()
+    {
+        if (animationController != null || motionAnimator != null)
+        {
+            return true;
+        }
+
+        animationController = GetComponent<CharacterAnimationController>();
+        if (animationController == null)
+        {
+            animationController = GetComponentInChildren<CharacterAnimationController>();
+        }
+        if (animationController == null)
+        {
+            animationController = GetComponentInParent<CharacterAnimationController>();
+        }
+        if (animationController == null && emotionController != null && emotionController.animator != null)
+        {
+            animationController = emotionController.animator.GetComponent<CharacterAnimationController>();
+        }
+        if (animationController == null)
+        {
+            animationController = FindObjectOfType<CharacterAnimationController>();
+        }
+
+        if (motionAnimator == null)
+        {
+            motionAnimator = GetComponent<Animator>();
+        }
+        if (motionAnimator == null)
+        {
+            motionAnimator = GetComponentInChildren<Animator>();
+        }
+        if (motionAnimator == null)
+        {
+            motionAnimator = GetComponentInParent<Animator>();
+        }
+        if (motionAnimator == null && emotionController != null)
+        {
+            motionAnimator = emotionController.animator;
+        }
+        if (motionAnimator == null)
+        {
+            motionAnimator = FindObjectOfType<Animator>();
+        }
+
+        if (animationController == null && motionAnimator == null)
+        {
+            if (!hasLoggedMissingMotionTarget)
+            {
+                Debug.LogWarning("Cannot update motion: no CharacterAnimationController or Animator was found");
+                hasLoggedMissingMotionTarget = true;
+            }
+            return false;
+        }
+
+        hasLoggedMissingMotionTarget = false;
+        return true;
+    }
+
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
-        switch (simulationLevel)
+        CurrentUserId = userId;
+        CurrentSimulationLevel = Mathf.Clamp(simulationLevel, 1, 3);
+        CurrentScenario = BuildScenarioFromSimulationLevel(CurrentSimulationLevel);
+        sessionId = $"{CurrentUserId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        turnIndex = 0;
+
+        switch (CurrentSimulationLevel)
         {
             case 1: voiceId = "QXFI3J7JB0fOlMwKDUxE"; break;
             case 2: voiceId = "KjIBD4QnlzAqKHmoYfdZ"; break;
             case 3: voiceId = "nlPFgtYJ0K18Hij3YdiX"; break;
         }
-        Debug.Log($"[TTSManager] voiceId set to '{voiceId}' for simulationLevel={simulationLevel} (userId={userId}).");
-    }
-
-    // 新的API密钥加载方法
-    private void LoadElevenLabsApiKey()
-    {
-        Debug.Log("=== ELEVENLABS API KEY LOADING ===");
-
-        // 方法1: 从环境变量加载
-        elevenLabsApiKey = EnvironmentLoader.GetEnvVariable("ELEVENLABS_API_KEY");
-
-        if (!string.IsNullOrEmpty(elevenLabsApiKey))
-        {
-            Debug.Log("✓ ElevenLabs API key loaded from environment variables");
-            return;
-        }
-
-        // 方法2: 从StreamingAssets配置文件加载
-        string configPath = Path.Combine(Application.streamingAssetsPath, "config.json");
-        Debug.Log($"Looking for ElevenLabs config file at: {configPath}");
-
-        if (File.Exists(configPath))
-        {
-            try
-            {
-                string configContent = File.ReadAllText(configPath);
-                var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(configContent);
-
-                if (config != null && config.ContainsKey("ELEVENLABS_API_KEY"))
-                {
-                    elevenLabsApiKey = config["ELEVENLABS_API_KEY"];
-                    Debug.Log("✓ ElevenLabs API key loaded from config file");
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error reading config file for ElevenLabs: {e.Message}");
-            }
-        }
-
-        // 方法3: 检查是否直接在Inspector中设置了
-        if (!string.IsNullOrEmpty(elevenLabsApiKey))
-        {
-            Debug.Log("✓ ElevenLabs API key found in Inspector");
-            return;
-        }
-
-        Debug.LogError("✗ No ElevenLabs API key found! Please set it via environment variable, config file, or Inspector");
+        Debug.Log($"[TTSManager] context userID={CurrentUserId}, simulationLevel={CurrentSimulationLevel}, scenario={CurrentScenario}, voiceId={voiceId}");
     }
 
     // Public method to be called to convert text to speech
-    public async void ConvertTextToSpeech(string text)
+    public void ConvertTextToSpeech(string text)
+    {
+        ConvertTextToSpeech(text, null);
+    }
+
+    // Optional motionCode supports structured dialogue outputs where code is separate from text.
+    public void ConvertTextToSpeech(string text, int? motionCode)
     {
         if (string.IsNullOrEmpty(text))
         {
@@ -197,131 +253,195 @@ public class TTSManager : MonoBehaviour
             return;
         }
 
-        // 检查API密钥
-        if (string.IsNullOrEmpty(elevenLabsApiKey))
-        {
-            Debug.LogError("TTS Manager: ElevenLabs API key not available. Cannot process TTS request.");
-            return;
-        }
-
-        //text = "With tenure, Suzie'd have all the more leisure for yachting, but her publications are no good.";
-
-        // Strip emotion code for TTS but keep original text for animation
-        //string ttsText = text;
-
         Debug.Log($"TTS Manager: Processing text: '{text}'");
+        StartCoroutine(ConvertTextToSpeechRoutine(text, motionCode));
+    }
 
-        // Get audio data from ElevenLabs TTS service
-        (byte[] audioData, List<WordTiming> wordTimings) = await GetElevenLabsTTSAudio(
-            text,
-            voiceId,
-            modelId,
-            stability,
-            similarityBoost,
-            styleExaggeration,
-            speed
-        );
+    private IEnumerator ConvertTextToSpeechRoutine(string inputText, int? motionCode)
+    {
+        string endpoint = $"{backendBaseUrl.TrimEnd('/')}{ttsPath}";
+        int attempts = Mathf.Max(1, maxRetries);
+        if (string.IsNullOrWhiteSpace(sessionId))
+            sessionId = $"tts-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        turnIndex++;
 
-        //Debug.LogWarning("Word Timings List: " + (wordTimings != null ? string.Join(", ", wordTimings.Select(w => $"{w.Word} ({w.StartTime}-{w.EndTime})")) : "null"));
-
-        if (audioData != null && wordTimings != null)
+        for (int attempt = 1; attempt <= attempts; attempt++)
         {
-            ProcessAudioBytes(audioData, wordTimings, text);
+            string requestId = $"{sessionId}-tts-{turnIndex}-try-{attempt}";
+            string jsonContent = JsonConvert.SerializeObject(BuildTTSRequestPayload(inputText));
+
+            using (var request = new UnityWebRequest(endpoint, "POST"))
+            {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonContent);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.timeout = Mathf.Max(5, requestTimeoutSeconds);
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Accept", "application/json");
+                request.SetRequestHeader("X-Request-ID", requestId);
+
+                Debug.Log("=== AWS TTS REQUEST ===");
+                Debug.Log("POST endpoint: " + endpoint);
+                Debug.Log("X-Request-ID: " + requestId);
+                Debug.Log("Request body:\n" + jsonContent);
+
+                yield return request.SendWebRequest();
+
+                string responseBody = request.downloadHandler?.text ?? string.Empty;
+                bool success = request.result == UnityWebRequest.Result.Success && request.responseCode == 200;
+                Debug.Log($"Response Status: {request.responseCode}");
+
+                if (success)
+                {
+                    Debug.Log("JSON response preview: " + responseBody.Substring(0, Math.Min(responseBody.Length, 500)));
+                    AwsTTSResponse parsed = null;
+                    try
+                    {
+                        parsed = JsonConvert.DeserializeObject<AwsTTSResponse>(responseBody);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"Failed to parse AWS /tts response JSON: {ex.Message}");
+                    }
+
+                    if (parsed?.AudioBase64 == null || parsed.Alignment == null)
+                    {
+                        Debug.LogError("TTS response missing audio data or alignment.");
+                        yield break;
+                    }
+
+                    byte[] audioBytes = null;
+                    try
+                    {
+                        audioBytes = Convert.FromBase64String(parsed.AudioBase64);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"Failed to decode audio_base64 from AWS /tts: {ex.Message}");
+                        yield break;
+                    }
+
+                    var wordTimings = BuildWordTimings(parsed.Alignment);
+                    if (wordTimings == null || wordTimings.Count == 0)
+                    {
+                        Debug.LogError("TTS response had empty or invalid alignment arrays.");
+                        yield break;
+                    }
+
+                    Debug.Log($"[TTSManager] AWS TTS success: {audioBytes.Length} bytes, requestId={parsed.RequestId}");
+                    ProcessAudioBytes(audioBytes, wordTimings, inputText, motionCode);
+                    yield break;
+                }
+
+                bool retryableResponse = IsRetryableResponse((int)request.responseCode, responseBody);
+                ErrorEnvelope errorEnvelope = null;
+                try { errorEnvelope = JsonConvert.DeserializeObject<ErrorEnvelope>(responseBody); } catch { }
+
+                Debug.LogError(
+                    $"[TTSManager] AWS /tts failed (attempt {attempt}/{attempts}). " +
+                    $"status={(int)request.responseCode}, transport={request.error}, retryable={retryableResponse}, " +
+                    $"requestId={errorEnvelope?.requestId ?? requestId}, body={responseBody}");
+
+                if (!retryableResponse || attempt >= attempts)
+                    break;
+            }
+
+            yield return new WaitForSeconds(0.35f * attempt);
         }
-        else
+
+        Debug.LogError("TTS Manager: Failed to get audio data from AWS /tts");
+    }
+
+    private object BuildTTSRequestPayload(string inputText)
+    {
+        return new TTSRequestPayload
         {
-            Debug.LogError("TTS Manager: Failed to get audio data from ElevenLabs");
+            userID = string.IsNullOrWhiteSpace(CurrentUserId) ? "anonymous-user" : CurrentUserId,
+            simulationLevel = Mathf.Clamp(CurrentSimulationLevel, 1, 3),
+            scenario = string.IsNullOrWhiteSpace(CurrentScenario)
+                ? BuildScenarioFromSimulationLevel(Mathf.Clamp(CurrentSimulationLevel, 1, 3))
+                : CurrentScenario,
+            text = inputText,
+            voiceProfile = new TTSVoiceProfile
+            {
+                profileId = $"sim-{Mathf.Clamp(CurrentSimulationLevel, 1, 3)}",
+                voiceId = voiceId,
+                modelId = modelId,
+                stability = stability,
+                similarityBoost = similarityBoost,
+                styleExaggeration = styleExaggeration,
+                speed = speed
+            },
+            options = new TTSOptions
+            {
+                format = "pcm_16000",
+                includeAlignment = true
+            },
+            metadata = new TTSMetadata
+            {
+                sessionId = string.IsNullOrWhiteSpace(sessionId)
+                    ? $"tts-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
+                    : sessionId,
+                turnIndex = turnIndex,
+                client = "unity"
+            }
+        };
+    }
+
+    private static string BuildScenarioFromSimulationLevel(int simulationLevel)
+    {
+        switch (Mathf.Clamp(simulationLevel, 1, 3))
+        {
+            case 2: return "task2";
+            case 3: return "task3";
+            default: return "task1";
         }
     }
 
-    // Method to get TTS audio from ElevenLabs
-    private async Task<(byte[] audioData, List<WordTiming> wordTimings)> GetElevenLabsTTSAudio(
-        string inputText,
-        string voiceId,
-        string modelId,
-        float stability = 0.4f,
-        float similarityBoost = 0.75f,
-        float styleExaggeration = 0.3f,
-        float speed = 1.0f)
+    private static List<WordTiming> BuildWordTimings(Alignment alignment)
     {
+        if (alignment?.Characters == null ||
+            alignment.CharacterStartTimesSeconds == null ||
+            alignment.CharacterEndTimesSeconds == null)
+            return null;
 
-        string endpoint = $"{ttsEndpoint}/{voiceId}/with-timestamps?output_format=pcm_16000";
+        int count = Math.Min(
+            alignment.Characters.Count,
+            Math.Min(alignment.CharacterStartTimesSeconds.Count, alignment.CharacterEndTimesSeconds.Count));
 
-        using (HttpClient client = new HttpClient())
+        if (count == 0)
+            return null;
+
+        var timings = new List<WordTiming>(count);
+        for (int i = 0; i < count; i++)
         {
-            try
+            timings.Add(new WordTiming
             {
-                // 清理和验证API密钥
-                if (string.IsNullOrEmpty(elevenLabsApiKey))
-                {
-                    Debug.LogError("ElevenLabs API key is null or empty");
-                    return (null, null);
-                }
+                Word = alignment.Characters[i],
+                StartTime = alignment.CharacterStartTimesSeconds[i],
+                EndTime = alignment.CharacterEndTimesSeconds[i]
+            });
+        }
 
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("xi-api-key", elevenLabsApiKey.Trim());
+        return timings;
+    }
 
-                var requestBody = new
-                {
-                    text = inputText,
-                    model_id = modelId,
-                    voice_settings = new
-                    {
-                        stability,
-                        similarity_boost = similarityBoost,
-                        style_exaggeration = styleExaggeration,
-                        speed
-                    }
-                };
+    private static bool IsRetryableResponse(int statusCode, string responseBody)
+    {
+        if (statusCode == 408 || statusCode == 425 || statusCode == 429 || statusCode >= 500)
+            return true;
 
-                string jsonContent = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        if (string.IsNullOrWhiteSpace(responseBody))
+            return false;
 
-                Debug.Log("=== ELEVENLABS TTS REQUEST ===");
-                Debug.Log("POST endpoint: " + endpoint);
-                Debug.Log($"API Key preview: {elevenLabsApiKey.Substring(0, Math.Min(10, elevenLabsApiKey.Length))}...");
-                Debug.Log("Request body:\n" + jsonContent);
-
-                HttpResponseMessage response = await client.PostAsync(endpoint, content);
-
-                Debug.Log($"Response Status: {response.StatusCode}");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    string error = await response.Content.ReadAsStringAsync();
-                    Debug.LogError($"TTS API Error: {response.StatusCode} — {error}");
-                    return (null, null);
-                }
-
-                string jsonResponse = await response.Content.ReadAsStringAsync();
-                Debug.Log("JSON response preview: " + jsonResponse.Substring(0, Math.Min(jsonResponse.Length, 500)));
-
-                var parsed = JsonConvert.DeserializeObject<ElevenLabsResponse>(jsonResponse);
-
-                if (parsed?.AudioBase64 == null || parsed.Alignment == null)
-                {
-                    Debug.LogError("TTS response missing audio data or word timings.");
-                    return (null, null);
-                }
-
-                byte[] audioBytes = Convert.FromBase64String(parsed.AudioBase64);
-                Debug.Log($"✓ ElevenLabs TTS success: {audioBytes.Length} bytes of audio data received");
-
-                return (audioBytes, parsed.Alignment.Characters
-                    .Select((word, index) => new WordTiming
-                    {
-                        Word = word,
-                        StartTime = parsed.Alignment.CharacterStartTimesSeconds[index],
-                        EndTime = parsed.Alignment.CharacterEndTimesSeconds[index]
-                    })
-                    .ToList());
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Exception in GetElevenLabsTTSAudio: {ex.Message}");
-                Debug.LogError($"Stack Trace: {ex.StackTrace}");
-                return (null, null);
-            }
+        try
+        {
+            var error = JsonConvert.DeserializeObject<ErrorEnvelope>(responseBody);
+            return error != null && error.retryable;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -362,89 +482,115 @@ public class TTSManager : MonoBehaviour
 
 
     // Method to process and play the audio bytes received
-    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent)
+    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent, int? motionCode)
     {
-        // Save the audio data as a .wav file locally
-        string filePath = Path.Combine(Application.persistentDataPath, "audio.wav");
-        if (File.Exists(filePath))
+        AudioClip audioClip = CreateAudioClipFromPcm16(audioData, 16000, 1, "tts_audio");
+        if (audioClip == null)
         {
-            File.Delete(filePath);
-            Debug.Log("Deleted existing audio file");
+            Debug.LogError("Failed to create AudioClip from PCM data.");
+            return;
         }
-        // File.WriteAllBytes(filePath, audioData);
-        AddWavHeaderAndSave(audioData, filePath);
 
-        // Start coroutine to load and play the audio file
-        StartCoroutine(LoadAndPlayAudio(wordTimings, filePath, messageContent));
+        StartCoroutine(PlayAudioClip(audioClip, wordTimings, messageContent, motionCode));
     }
 
-    // Coroutine to load and play the audio file
-    private IEnumerator LoadAndPlayAudio(List<WordTiming> wordTimings, string filePath, string messageContent)
+    private AudioClip CreateAudioClipFromPcm16(byte[] pcmData, int sampleRate, int channels, string clipName)
     {
-        // Create a UnityWebRequest to load the audio file
-        using UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file://" + filePath, AudioType.WAV);
-        yield return www.SendWebRequest();
+        if (pcmData == null || pcmData.Length < 2 || (pcmData.Length % 2) != 0)
+            return null;
 
-        if (www.result == UnityWebRequest.Result.Success)
+        int totalSamples = pcmData.Length / 2;
+        int sampleFrames = totalSamples / channels;
+        if (sampleFrames <= 0)
+            return null;
+
+        float[] samples = new float[totalSamples];
+        for (int i = 0; i < totalSamples; i++)
         {
-            // If the file is successfully loaded, get the audio clip and play it
-            AudioClip audioClip = DownloadHandlerAudioClip.GetContent(www);
-            audioSource.clip = audioClip;
-            audioSource.Play();
+            short sample = BitConverter.ToInt16(pcmData, i * 2);
+            samples[i] = sample / 32768f;
+        }
 
-            // If the file is successfully loaded, play emotion animation
-            if (emotionController == null)
-            {
-                Debug.LogError("EmotionController not found in the scene. Make sure it exists!");
-            }
-            else
-            {
-                emotionController.SyncAnimationsWithWordTimings(wordTimings);
-                emotionController.PlayEmotion();
-            }
+        AudioClip clip = AudioClip.Create(clipName, sampleFrames, channels, sampleRate, false);
+        clip.SetData(samples, 0);
+        return clip;
+    }
 
-            // Update animation based on emotion code
-            UpdateAnimation(messageContent);
+    // Coroutine to play audio clip directly from memory (WebGL-safe).
+    private IEnumerator PlayAudioClip(AudioClip audioClip, List<WordTiming> wordTimings, string messageContent, int? motionCode)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
 
-            float waitTime = audioClip.length + 0.5f;
-            Debug.Log($"Audio playing, will wait {waitTime} seconds for completion");
-            yield return new WaitForSeconds(waitTime);
-
-            Debug.Log("Audio playback completed");
+        // If the file is successfully loaded, play emotion animation
+        if (emotionController == null)
+        {
+            Debug.LogError("EmotionController not found in the scene. Make sure it exists!");
         }
         else
         {
-            // Log error if the file loading fails
-            Debug.LogError("Audio file loading error: " + www.error);
+            emotionController.SyncAnimationsWithWordTimings(wordTimings);
+            emotionController.PlayEmotion();
         }
 
-        // Optionally delete the file after playing
-        if (deleteCachedFiles && File.Exists(filePath))
+        // Update motion based on explicit code first, then legacy suffix if present.
+        if (motionCode.HasValue)
         {
-            // Wait until audio is done playing to delete
-            yield return new WaitForSeconds(audioSource.clip.length + 0.5f);
-            try
-            {
-                File.Delete(filePath);
-                Debug.Log("Deleted cached audio file");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"Failed to delete cached audio file: {ex.Message}");
-            }
+            UpdateMotion(motionCode.Value);
         }
+        else
+        {
+            UpdateMotionFromLegacySuffix(messageContent);
+        }
+
+        float waitTime = audioClip.length + 0.5f;
+        Debug.Log($"Audio playing, will wait {waitTime} seconds for completion");
+        yield return new WaitForSeconds(waitTime);
+
+        Debug.Log("Audio playback completed");
     }
 
     [Serializable]
-    public class ElevenLabsTTSRequest
+    public class TTSRequestPayload
     {
+        public string userID { get; set; }
+        public int simulationLevel { get; set; }
+        public string scenario { get; set; }
         public string text { get; set; }
-        public string model_id { get; set; }
-        public VoiceSettings voice_settings { get; set; }
+        public TTSVoiceProfile voiceProfile { get; set; }
+        public TTSOptions options { get; set; }
+        public TTSMetadata metadata { get; set; }
     }
 
     [Serializable]
-    public class ElevenLabsResponse
+    public class TTSVoiceProfile
+    {
+        public string profileId { get; set; }
+        public string voiceId { get; set; }
+        public string modelId { get; set; }
+        public float stability { get; set; }
+        public float similarityBoost { get; set; }
+        public float styleExaggeration { get; set; }
+        public float speed { get; set; }
+    }
+
+    [Serializable]
+    public class TTSOptions
+    {
+        public string format { get; set; }
+        public bool includeAlignment { get; set; }
+    }
+
+    [Serializable]
+    public class TTSMetadata
+    {
+        public string sessionId { get; set; }
+        public int turnIndex { get; set; }
+        public string client { get; set; }
+    }
+
+    [Serializable]
+    public class AwsTTSResponse
     {
         [JsonProperty("audio_base64")]
         public string AudioBase64 { get; set; }
@@ -454,6 +600,12 @@ public class TTSManager : MonoBehaviour
 
         [JsonProperty("normalized_alignment")]
         public Alignment NormalizedAlignment { get; set; }
+
+        [JsonProperty("provider")]
+        public string Provider { get; set; }
+
+        [JsonProperty("requestId")]
+        public string RequestId { get; set; }
     }
 
     [Serializable]
@@ -483,72 +635,125 @@ public class TTSManager : MonoBehaviour
     }
 
     [Serializable]
-    public class VoiceSettings
+    public class ErrorEnvelope
     {
-        public float stability { get; set; }
-        public float similarity_boost { get; set; }
-        public float style_exaggeration { get; set; }
-        public float speed { get; set; }
+        public string error { get; set; }
+        public string requestId { get; set; }
+        public bool retryable { get; set; }
     }
 
-    public void UpdateAnimation(string message)
+    public void UpdateMotionFromLegacySuffix(string message)
     {
-        if (animationController == null)
+        if (!TryResolveMotionTargets()) return;
+
+        Match match = Regex.Match(message ?? string.Empty, @"\[([0-9]|10)\]$");
+        if (!match.Success)
         {
-            Debug.LogWarning("Cannot update animation: animationController is null");
+            Debug.Log($"No legacy animation code suffix found. Skipping TTSManager.UpdateMotionFromLegacySuffix for message: {message}");
             return;
         }
 
-        Match match = Regex.Match(message, @"\[([0-9]|10)\]$");
-        if (match.Success)
+        int motionCode = int.Parse(match.Groups[1].Value);
+        UpdateMotion(motionCode);
+    }
+
+    public void UpdateMotion(int motionCode)
+    {
+        if (!TryResolveMotionTargets()) return;
+
+        if (animationController != null)
         {
-            int emotionCode = int.Parse(match.Groups[1].Value);
-            switch (emotionCode)
-            {
-                case 0:
-                    animationController.PlayIdle();
-                    break;
-                case 1:
-                    animationController.PlayHeadPain();
-                    Debug.Log("changing to pain");
-                    break;
-                case 2:
-                    animationController.PlayHappy();
-                    break;
-                case 3:
-                    animationController.PlayShrug();
-                    break;
-                case 4:
-                    animationController.PlayHeadNod();
-                    break;
-                case 5:
-                    animationController.PlayHeadShake();
-                    break;
-                case 6:
-                    animationController.PlayWrithingInPain();
-                    break;
-                case 7:
-                    animationController.PlaySad();
-                    break;
-                case 8:
-                    animationController.PlayArmStretch();
-                    break;
-                case 9:
-                    animationController.PlayNeckStretch();
-                    break;
-                case 10:
-                    animationController.PlayBloodPressure();
-                    if (bloodEffectController != null)
-                        bloodEffectController.SetBloodVisibility(true);
-                    if (bloodTextController != null)
-                        bloodTextController.SetBloodTextVisibility(true);
-                    break;
-            }
+            ApplyMotionViaController(motionCode);
+            return;
         }
-        else
+
+        ApplyMotionDirectly(motionCode);
+    }
+
+    private void ApplyMotionViaController(int motionCode)
+    {
+        if (animationController == null)
         {
-            Debug.LogWarning($"No emotion code found: {message}");
-            animationController.PlayIdle();
+            return;
         }
+
+        switch (motionCode)
+        {
+            case 0:
+                animationController.PlayIdle();
+                break;
+            case 1:
+                animationController.PlayHeadPain();
+                break;
+            case 2:
+                animationController.PlayHappy();
+                break;
+            case 3:
+                animationController.PlayShrug();
+                break;
+            case 4:
+                animationController.PlayHeadNod();
+                break;
+            case 5:
+                animationController.PlayHeadShake();
+                break;
+            case 6:
+                animationController.PlayWrithingInPain();
+                break;
+            case 7:
+                animationController.PlaySad();
+                break;
+            case 8:
+                animationController.PlayArmStretch();
+                break;
+            case 9:
+                animationController.PlayNeckStretch();
+                break;
+            case 10:
+                animationController.PlayBloodPressure();
+                if (bloodEffectController != null)
+                    bloodEffectController.SetBloodVisibility(true);
+                if (bloodTextController != null)
+                    bloodTextController.SetBloodTextVisibility(true);
+                break;
+            default:
+                Debug.LogWarning($"Unsupported motion code: {motionCode}");
+                break;
+        }
+    }
+
+    private void ApplyMotionDirectly(int motionCode)
+    {
+        if (motionAnimator == null)
+        {
+            Debug.LogWarning("Cannot update motion directly: Animator is null");
+            return;
+        }
+
+        if (motionCode < 0 || motionCode >= OriginalMotionTriggers.Length)
+        {
+            Debug.LogWarning($"Unsupported motion code for original mapping: {motionCode}");
+            return;
+        }
+
+        if (previousDirectMotionCode >= 0 && previousDirectMotionCode < OriginalMotionTriggers.Length)
+        {
+            motionAnimator.ResetTrigger(OriginalMotionTriggers[previousDirectMotionCode]);
+        }
+
+        string trigger = OriginalMotionTriggers[motionCode];
+        motionAnimator.SetTrigger(trigger);
+        previousDirectMotionCode = motionCode;
+    }
+
+    // Backward-compatible wrappers for existing callers.
+    public void UpdateAnimation(string message)
+    {
+        UpdateMotionFromLegacySuffix(message);
+    }
+
+    public void UpdateAnimation(int code)
+    {
+        UpdateMotion(code);
     }
 }

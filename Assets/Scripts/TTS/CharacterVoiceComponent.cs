@@ -86,6 +86,7 @@ public class CharacterVoiceComponent : MonoBehaviour
         ttsManager.stability = voiceProfile.stability;
         ttsManager.similarityBoost = voiceProfile.similarityBoost;
         ttsManager.styleExaggeration = voiceProfile.styleExaggeration;
+        ttsManager.speed = Mathf.Clamp(voiceProfile.playbackSpeed, 0.7f, 1.2f);
         
         // Apply animation settings if we have a facial animation controller
         if (facialAnimationController != null)
