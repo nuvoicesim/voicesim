@@ -42,7 +42,6 @@ public class OpenAIRequest : MonoBehaviour
     // Internal state
     private float currentSpeechSpeed;
     private string basePath;
-    private List<Dictionary<string, string>> chatMessages;
     public string CurrentUserId { get; private set; }
     public int CurrentSimulationLevel { get; private set; } = 1;
 
@@ -110,10 +109,7 @@ public class OpenAIRequest : MonoBehaviour
         TryResolveEmotionController();
 
         if (cueControllerObject == null)
-        {
             Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
-            return;
-        }
 
         cueController = cueControllerObject.GetComponent<CueController>();
 

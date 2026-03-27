@@ -49,7 +49,7 @@ public class TargetButtonUI : MonoBehaviour
 
         if (cueController != null)
         {
-            cueController.SetCurrentScriptByNumber(currentTargetIndex);
+            //cueController.SetCurrentScriptByNumber(currentTargetIndex);
             cueController.ResetCueing();
         }
         else

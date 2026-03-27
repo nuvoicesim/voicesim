@@ -10,7 +10,7 @@ using UnityEngine.Timeline;
 
 public class EmotionController : MonoBehaviour
 {
-    public PlayableDirector director;
+    //public PlayableDirector director;
     public Animator animator;
     
     [Header("Debug Settings")]
@@ -57,9 +57,10 @@ public class EmotionController : MonoBehaviour
         // Fallback to any director if none expose tracks yet.
         return candidates.FirstOrDefault();
     }
-
+    /*
     private bool TryEnsureTimelineTracks(string context)
     {
+        
         if (director == null)
         {
             director = GetComponent<PlayableDirector>();
@@ -77,6 +78,7 @@ public class EmotionController : MonoBehaviour
             }
             return false;
         }
+        
 
         TimelineAsset timeline = director.playableAsset as TimelineAsset;
         if (timeline == null)
@@ -107,6 +109,7 @@ public class EmotionController : MonoBehaviour
 
         hasLoggedMissingTimeline = false;
         return true;
+       
     }
 
     private int ClampTrackIndex(int requestedIndex, string context)
@@ -124,14 +127,15 @@ public class EmotionController : MonoBehaviour
 
         return clampedIndex;
     }
+    */
 
     void Start()
     {
-        bool timelineReady = TryEnsureTimelineTracks("Start");
+        //bool timelineReady = TryEnsureTimelineTracks("Start");
 
         TryResolveFacialBridge();
 
-        Debug.Log($"[EmotionController] Startup: initialized on '{name}'. timelineReady={timelineReady}, trackCount={(allTracks != null ? allTracks.Count : 0)}");
+        //Debug.Log($"[EmotionController] Startup: initialized on '{name}'. timelineReady={timelineReady}, trackCount={(allTracks != null ? allTracks.Count : 0)}");
         Debug.Log($"[EmotionController] Startup: facial bridge {(facialExpressionBridge != null ? "found" : "not found")}");
     }
 
@@ -215,13 +219,16 @@ public class EmotionController : MonoBehaviour
             yield return new WaitForSeconds(delay);
             
             int emotionCode = MapWordToEmotion(wordTiming.Word);
+            /*
             if (emotionCode != 0)
             {
+                
                 int mappedIndex = ClampTrackIndex(emotionCode, "TriggerAnimationsWithTiming(mapped emotion)");
                 if (mappedIndex < 0)
                 {
                     yield break;
                 }
+                
 
                 TrackAsset selectedTrack = allTracks[mappedIndex];
                 foreach (var track in allTracks.Where(track => track.name != "Blink Track"))
@@ -251,7 +258,10 @@ public class EmotionController : MonoBehaviour
             //float delay = wordTiming.EndTime - wordTiming.StartTime;
             //Debug.Log($"Triggering animation for word: {wordTiming.Word} after delay: {delay}");
             //yield return new WaitForSeconds(delay);
+            */
+
         }
+
     }
 
 
@@ -288,13 +298,14 @@ public class EmotionController : MonoBehaviour
             Debug.LogWarning($"[EmotionController] Facial bridge not found on '{name}'.");
             hasLoggedMissingFacialBridge = true;
         }
-
+        /*
         int validEmotionIndex = ClampTrackIndex(currentEmotionCode, "HandleEmotionCode");
         if (validEmotionIndex < 0)
         {
             return;
         }
         currentEmotionCode = validEmotionIndex;
+        */
         
         TrackAsset selectedTrack = allTracks[currentEmotionCode];
         
@@ -314,7 +325,7 @@ public class EmotionController : MonoBehaviour
         }
         
     }
-
+    /*
     public void PlayEmotion()
     {
         if (!TryEnsureTimelineTracks("PlayEmotion")) return;
@@ -322,4 +333,5 @@ public class EmotionController : MonoBehaviour
         director.RebuildGraph();
         director.Play();
     }
+    */
 }
