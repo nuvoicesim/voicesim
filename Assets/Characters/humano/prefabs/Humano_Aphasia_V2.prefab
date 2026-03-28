@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5752878431675143409}
-  - component: {fileID: 5054488452084983793}
   - component: {fileID: 6799997880101995117}
   - component: {fileID: 3105797198347473381}
+  - component: {fileID: 466856138570796862}
   m_Layer: 0
   m_Name: Humano_Aphasia_V2
   m_TagString: Untagged
@@ -35,30 +35,6 @@ Transform:
   - {fileID: 5174144027810062520}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5054488452084983793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2346179727496980237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a66d412a206a6be4580f4a134fa450c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  apiUrl: https://api.openai.com/v1/chat/completions
-  apiKey: 
-  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
-  dialoguePath: /llm-dialogue
-  maxRetries: 2
-  requestTimeoutSeconds: 45
-  currentScenario: task1
-  lostResponse: 'um... fast... uh... too... fast...  '
-  maxSpeechSpeed: 170
-  cueControllerObject: {fileID: 0}
-  cueSkipGuard: {fileID: 0}
-  targetButtonUI: {fileID: 0}
 --- !u!114 &6799997880101995117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,6 +61,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebGLMockResponder
   animator: {fileID: 0}
+--- !u!114 &466856138570796862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2346179727496980237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a66d412a206a6be4580f4a134fa450c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiUrl: https://api.openai.com/v1/chat/completions
+  apiKey: 
+  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
+  dialoguePath: /llm-dialogue
+  maxRetries: 2
+  requestTimeoutSeconds: 45
+  currentScenario: task1
+  lostResponse: 'um... fast... uh... too... fast...  '
+  maxSpeechSpeed: 170
+  cueControllerObject: {fileID: 0}
+  cueSkipGuard: {fileID: 0}
+  targetButtonUI: {fileID: 0}
 --- !u!1001 &2556999476410999972
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -107,19 +107,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.06010136
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.00723053
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.99102026
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.11922475
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

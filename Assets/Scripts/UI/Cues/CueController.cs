@@ -151,6 +151,7 @@ namespace UI.Cues
 
             if (path.Contains("://"))
             {
+                Debug.LogError("ENTERING FIRST IF");
                 using (UnityWebRequest request = UnityWebRequest.Get(path))
                 {
                     yield return request.SendWebRequest();
@@ -160,7 +161,7 @@ namespace UI.Cues
                         Debug.LogError("Failed to load target_words.json from StreamingAssets: " + request.error + " Path: " + path);
                         yield break;
                     }
-
+                    Debug.LogError("printing path" + path);
                     LoadAllScripts(request.downloadHandler.text);
                     Debug.Log("Loaded scripts from StreamingAssets via UnityWebRequest");
                 }
@@ -170,6 +171,7 @@ namespace UI.Cues
 
             if (!File.Exists(path))
             {
+                Debug.LogError("ENTERING SECOND IF");
                 Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
                 yield break;
             }
