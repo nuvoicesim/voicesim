@@ -8,7 +8,7 @@ namespace UI.Cues.WarningSystem
     {
         [SerializeField] private GameObject root;   // Panel root
         [SerializeField] private TMP_Text text;
-        [SerializeField] private float seconds = 2.5f;
+        private float seconds = 8f;
 
         private Coroutine running;
 
