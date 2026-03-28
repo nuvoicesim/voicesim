@@ -175,7 +175,7 @@ namespace UI.Cues
         /// Sets the current script based on the given script number.
         /// </summary>
         /// <param name="scriptNumber">The script number to select</param>
-        private bool SetCurrentScript(int scriptNumber)
+        public bool SetCurrentScript(int scriptNumber)
         {
             if (allScripts == null || allScripts.scripts == null)
             {
