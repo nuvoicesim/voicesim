@@ -176,6 +176,8 @@ public class OpenAIRequest : MonoBehaviour
 
     public void ReceiveNurseTranscription(string transcribedText, float speechWpm)
     {
+        Debug.LogError($"[OpenAIRequest] ReceiveNurseTranscription text=\"{transcribedText}\" wpm={speechWpm:0.##}");
+
         // Check cue order before sending to GPT
         if (cueSkipGuard != null)
         {
@@ -195,6 +197,8 @@ public class OpenAIRequest : MonoBehaviour
             return;
         }
 
+        Debug.LogError($"[OpenAIRequest] NurseResponds accepted message=\"{nurseMessage.Trim()}\" chatCountBefore={chatMessages.Count}");
+
         if (chatMessages.Count == 0 && !string.IsNullOrEmpty(currentScenario))
             InitializeChat();
 
@@ -205,8 +209,10 @@ public class OpenAIRequest : MonoBehaviour
         });
         PrintChatMessage(chatMessages);
         pendingNurseMessage = nurseMessage.Trim();
+        Debug.LogError($"[OpenAIRequest] pendingNurseMessage set. turnIndex(before increment)={turnIndex}");
 
         turnIndex++;
+        Debug.LogError($"[OpenAIRequest] turnIndex incremented to {turnIndex}");
 
         if (speechWpm > maxSpeechSpeed)
         {
@@ -363,6 +369,7 @@ public class OpenAIRequest : MonoBehaviour
 
     private void HandlePatientResponse(string responseText, int emotionCode, int motionCode)
     {
+        Debug.LogError($"[OpenAIRequest] HandlePatientResponse text=\"{responseText}\" emotion={emotionCode} motion={motionCode} pendingNurseMessage=\"{pendingNurseMessage}\"");
         currentPatientResponse = responseText;
 
         var assistantPayload = new StructuredDialogueResponse
@@ -398,8 +405,14 @@ public class OpenAIRequest : MonoBehaviour
 
         if (ScoreManager.Instance != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
         {
+            Debug.LogError($"[OpenAIRequest] Recording turn into ScoreManager. patient=\"{currentPatientResponse}\" nurse=\"{pendingNurseMessage}\"");
             ScoreManager.Instance.RecordTurn(currentPatientResponse, pendingNurseMessage);
             pendingNurseMessage = "";
+            Debug.LogError("[OpenAIRequest] pendingNurseMessage cleared after RecordTurn.");
+        }
+        else
+        {
+            Debug.LogWarning($"[OpenAIRequest] Skipped RecordTurn. ScoreManager.Instance null? {ScoreManager.Instance == null}, pendingNurseMessage empty? {string.IsNullOrWhiteSpace(pendingNurseMessage)}");
         }
     }
 

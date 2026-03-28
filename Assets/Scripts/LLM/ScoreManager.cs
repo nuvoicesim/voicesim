@@ -52,16 +52,18 @@ public class ScoreManager : MonoBehaviour
 
     public void RecordTurn(string patientResponse, string nurseResponse)
     {
+        Debug.LogError($"[ScoreManager] RecordTurn called. patient=\"{patientResponse}\" nurse=\"{nurseResponse}\"");
         conversationTurns.Add(new ConversationTurn
         {
             Patient = patientResponse,
             Nurse = nurseResponse
         });
-        Debug.Log($"Turn {conversationTurns.Count} recorded.");
+        Debug.LogError($"[ScoreManager] Turn {conversationTurns.Count} recorded.");
     }
 
     public void SubmitEvaluation()
     {
+        Debug.LogError($"[ScoreManager] SubmitEvaluation called. conversationTurns.Count={conversationTurns.Count}");
         if (conversationTurns.Count == 0)
         {
             Debug.LogWarning("No conversation turns recorded. Creating a placeholder report.");
