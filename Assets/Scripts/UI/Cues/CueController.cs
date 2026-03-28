@@ -91,19 +91,6 @@ namespace UI.Cues
 
         private IEnumerator Start()
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "Cues/target_words.json");
-
-            if (File.Exists(path))
-            {
-                string jsonText = File.ReadAllText(path);
-                LoadAllScripts(jsonText);
-                Debug.Log("Loaded scripts from StreamingAssets");
-            }
-            else
-            {
-                Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
-            }
-
             if (semanticCueButton != null)
                 semanticCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Semantic));
 
@@ -151,7 +138,6 @@ namespace UI.Cues
 
             if (path.Contains("://"))
             {
-                Debug.LogError("ENTERING FIRST IF");
                 using (UnityWebRequest request = UnityWebRequest.Get(path))
                 {
                     yield return request.SendWebRequest();
@@ -171,7 +157,6 @@ namespace UI.Cues
 
             if (!File.Exists(path))
             {
-                Debug.LogError("ENTERING SECOND IF");
                 Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
                 yield break;
             }
