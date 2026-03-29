@@ -369,7 +369,6 @@ public class OpenAIRequest : MonoBehaviour
 
     private void HandlePatientResponse(string responseText, int emotionCode, int motionCode)
     {
-        Debug.LogError($"[OpenAIRequest] HandlePatientResponse text=\"{responseText}\" emotion={emotionCode} motion={motionCode} pendingNurseMessage=\"{pendingNurseMessage}\"");
         currentPatientResponse = responseText;
 
         var assistantPayload = new StructuredDialogueResponse
@@ -405,14 +404,8 @@ public class OpenAIRequest : MonoBehaviour
 
         if (ScoreManager.Instance != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
         {
-            Debug.LogError($"[OpenAIRequest] Recording turn into ScoreManager. patient=\"{currentPatientResponse}\" nurse=\"{pendingNurseMessage}\"");
             ScoreManager.Instance.RecordTurn(currentPatientResponse, pendingNurseMessage);
             pendingNurseMessage = "";
-            Debug.LogError("[OpenAIRequest] pendingNurseMessage cleared after RecordTurn.");
-        }
-        else
-        {
-            Debug.LogWarning($"[OpenAIRequest] Skipped RecordTurn. ScoreManager.Instance null? {ScoreManager.Instance == null}, pendingNurseMessage empty? {string.IsNullOrWhiteSpace(pendingNurseMessage)}");
         }
     }
 
