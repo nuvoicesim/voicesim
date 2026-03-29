@@ -1,10 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UI.Cues;
 
 namespace UI.Cues.WarningSystem
 {
-    //public enum CueLevel { None = 0, Semantic = 1, Phonemic = 2, Model = 3 }
-
     public class CueSkipGuard : MonoBehaviour
     {
         [Header("Assign in Inspector")]
@@ -21,46 +22,154 @@ namespace UI.Cues.WarningSystem
         [Tooltip("Default seconds to pause warnings after a target is marked correct / patient succeeds")]
         [SerializeField] private float defaultPauseSeconds = 10f;
 
+        [Header("Cue source")]
+        [SerializeField] private CueController _cueController;
+
+        [Header("Classifier thresholds")]
+        [Tooltip("Minimum score needed to classify as Semantic")]
+        [SerializeField] private int semanticThreshold = 2;
+
+        [Tooltip("Minimum score needed to classify as Phonemic")]
+        [SerializeField] private int phonemicThreshold = 2;
+
+        [Tooltip("Minimum score needed to classify as Model")]
+        [SerializeField] private int modelThreshold = 3;
+
+        [Tooltip("Whether to print detailed classifier reasoning in Console")]
+        [SerializeField] private bool enableVerboseClassifierLog = true;
+
         private float _lastWarningTime = -999f;
         private string _lastWarningKey = "";
-
         private float _pauseUntilTime = 0f;
+        private bool _targetSucceeded = false;
+        private bool _levelInitialized = false; // 新增：标记是否已从 CueController 初始化过
+
         public bool WarningsPaused => Time.time < _pauseUntilTime;
 
-        [SerializeField] private CueController _cueController;
+        // -----------------------------
+        // Regex patterns
+        // -----------------------------
+
+        private static readonly Regex[] ModelStrongPatterns =
+        {
+            new Regex(@"\brepeat after me\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bplease repeat\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bjust say\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsay it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsay the word\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bcan you say\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\btry saying\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] ModelWeakPatterns =
+        {
+            new Regex(@"\bsay\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\brepeat\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] PhonemicPatterns =
+        {
+            new Regex(@"\bstarts?\s+with\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bbegins?\s+with\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bfirst\s+(sound|letter|syllable)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\binitial\s+(sound|letter|syllable)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bwhat\s+sound\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\brhymes?\s+with\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsounds?\s+like\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"/[a-z]+/", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\b[a-z]+-[a-z]+\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bthe\s+(first|second|next)\s+syllable\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsound\s+it\s+out\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] SemanticStrongPatterns =
+        {
+            new Regex(@"\byou use it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bused for\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\ba kind of\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\ba type of\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsomething you\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bit helps\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byou can use it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byou drink it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byou eat it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byou wear it\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bit'?s\s+(hot|warm|cold|soft|hard|sweet|sour|round|flat|small|large|heavy|light)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bhas\s+(caffeine|buttons|wheels|screens?|legs?|wings?|handle)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byou\s+(swallow|stand\s+under|take\s+for|wear\s+on|watch\s+on|sit\s+in|drive)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bcovers?\s+your\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bin\s+the\s+(middle|bathroom|kitchen|bedroom|living room)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bwith\s+(meat|cheese|bread|water|milk|butter)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bfor\s+(watching|eating|drinking|sleeping|washing|driving)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bno\s+(clouds?|energy|strength)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsun\s+is\s+shining\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\blow\s+energy\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bneed\s+rest\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bfour\s+wheels?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bstand\s+under\s+water\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\b(she'?s?|he'?s?)\s+(female|male|young|old|your child)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\byour\s+(child|son|daughter|family|relative)\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] SemanticWeakPatterns =
+        {
+            new Regex(@"\bbathroom\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bhot\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bcold\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bsweet\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bcaffeine\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bexhausted\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bvehicle\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bscreen\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\btablets?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            new Regex(@"\bblood\s+pressure\b", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
 
         public void ResetCueing()
         {
             Debug.Log("CueSkipGuard: Resetting cueing level.");
-            _cueController.ResetCueing();
-            expectedLevel = UI.Cues.CueLevel.Semantic;
+
+            _targetSucceeded = false;
+            _levelInitialized = false; // 重置初始化标记，允许下次重新从 CueController 同步
+
+            if (_cueController != null)
+            {
+                _cueController.ResetCueing();
+                Debug.Log("CueSkipGuard: CueController reset called.");
+            }
+            else
+            {
+                Debug.LogWarning("CueSkipGuard: _cueController is null during ResetCueing().");
+            }
+
+            expectedLevel = CueLevel.Semantic;
             Debug.Log("CueSkipGuard: expectedLevel reset to Semantic.");
-            Debug.Log("CueSkipGuard: CueController current level after reset: " + _cueController.GetCurrentCueLevel());
+
+            if (_cueController != null)
+            {
+                Debug.Log("CueSkipGuard: CueController current level after reset: " + _cueController.GetCurrentCueLevel());
+            }
         }
 
-        /// <summary>
-        /// Pause all warning checks temporarily (e.g., after patient successfully produces target word).
-        /// </summary>
         public void PauseWarnings(float seconds = -1f)
         {
             if (seconds == 0f)
             {
-                _pauseUntilTime = 0f; // 立即恢复
+                _pauseUntilTime = 0f;
                 return;
             }
 
-            if (seconds < 0f) seconds = defaultPauseSeconds;
+            if (seconds < 0f)
+                seconds = defaultPauseSeconds;
+
             _pauseUntilTime = Time.time + seconds;
         }
 
-        /// <summary>
-        /// Convenience method: call this when target is successful.
-        /// Resets expected level and pauses warnings for a short time.
-        /// </summary>
         public void OnTargetSuccess(float pauseSeconds = -1f)
         {
-            ResetCueing();
+            _targetSucceeded = true;
             PauseWarnings(pauseSeconds);
+            Debug.Log("CueSkipGuard: Target succeeded. Warnings permanently suppressed until ResetCueing() is called.");
         }
 
         public void CheckStudentUtterance(string studentText, string targetWord = "")
@@ -68,11 +177,12 @@ namespace UI.Cues.WarningSystem
             if (string.IsNullOrWhiteSpace(studentText))
                 return;
 
-            // Filter out STT error placeholder
-            if (studentText.Trim().Equals("Error in transcription", System.StringComparison.OrdinalIgnoreCase))
+            if (studentText.Trim().Equals("Error in transcription", StringComparison.OrdinalIgnoreCase))
                 return;
 
-            // If we are paused (e.g., patient already succeeded), skip checks
+            if (_targetSucceeded)
+                return;
+
             if (WarningsPaused)
                 return;
 
@@ -82,29 +192,38 @@ namespace UI.Cues.WarningSystem
                 return;
             }
 
+            // 方案B：只在首次（未初始化时）从 CueController 同步，之后由 CueSkipGuard 自己维护状态
+            if (!_levelInitialized)
+            {
+                CueLevel controllerLevel = _cueController.GetCurrentCueLevel();
+                expectedLevel = (controllerLevel == CueLevel.None) ? CueLevel.Semantic : controllerLevel;
+                _levelInitialized = true;
+                Debug.Log($"CueSkipGuard: Initialized expectedLevel from CueController => {expectedLevel}");
+            }
 
-            Debug.Log("expectedLevel before CueController check: " + expectedLevel);
-            Debug.Log("Setting expectedLevel from CueController: " + _cueController.GetCurrentCueLevel());
+            ClassificationResult result = ClassifyDetailed(studentText, targetWord);
+            CueLevel used = result.Level;
 
-            expectedLevel = _cueController.GetCurrentCueLevel();
+            if (enableVerboseClassifierLog)
+            {
+                Debug.Log(
+                    $"CueSkipGuard Classify: raw=\"{studentText}\" | normalized=\"{result.NormalizedText}\" | " +
+                    $"target=\"{result.NormalizedTarget}\" | semantic={result.SemanticScore} phonemic={result.PhonemicScore} model={result.ModelScore} | " +
+                    $"used={used} expected={expectedLevel} | reasons=[{string.Join("; ", result.Reasons)}]");
+            }
+            else
+            {
+                Debug.Log($"CueSkipGuard: text=\"{studentText}\" | used={used} expected={expectedLevel} bannerNull={(banner == null)} paused={WarningsPaused}");
+            }
 
-            Debug.Log("expectedLevel after CueController check: " + expectedLevel);
-
-            UI.Cues.CueLevel used = Classify(studentText, targetWord);
-
-            // Helpful debug (you can remove later)
-            Debug.Log($"CueSkipGuard: text=\"{studentText}\" | used={used} expected={expectedLevel} bannerNull={(banner == null)} paused={WarningsPaused}");
-
-            if (used == UI.Cues.CueLevel.None)
+            if (used == CueLevel.None)
                 return;
 
-            // If student skips ahead, warn
             if (used > expectedLevel)
             {
                 string msg = BuildWarning(expectedLevel, used);
-
-                // simple anti-spam cooldown (same warning within cooldown window won't repeat)
                 string key = $"{expectedLevel}->{used}";
+
                 if (Time.time - _lastWarningTime > warningCooldownSeconds || key != _lastWarningKey)
                 {
                     banner?.Show(msg);
@@ -112,102 +231,218 @@ namespace UI.Cues.WarningSystem
                     _lastWarningKey = key;
                 }
 
-                // Practice mode: advance expected to reduce repeated warnings
                 expectedLevel = NextLevel(used);
                 return;
             }
 
-            // If student used the expected cue level, advance to next level
             if (used == expectedLevel)
             {
                 expectedLevel = NextLevel(expectedLevel);
             }
         }
 
-        private UI.Cues.CueLevel NextLevel(UI.Cues.CueLevel level)
+        private CueLevel NextLevel(CueLevel level)
         {
-            if (level == UI.Cues.CueLevel.Semantic) return UI.Cues.CueLevel.Phonemic;
-            if (level == UI.Cues.CueLevel.Phonemic) return UI.Cues.CueLevel.Model;
-            return UI.Cues.CueLevel.Model;
+            if (level == CueLevel.Semantic) return CueLevel.Phonemic;
+            if (level == CueLevel.Phonemic) return CueLevel.Model;
+            return CueLevel.Model;
         }
 
-        private string BuildWarning(UI.Cues.CueLevel expected, UI.Cues.CueLevel used)
+        private string BuildWarning(CueLevel expected, CueLevel used)
         {
-            if (expected == UI.Cues.CueLevel.Semantic && used == UI.Cues.CueLevel.Phonemic)
+            if (expected == CueLevel.Semantic && used == CueLevel.Phonemic)
                 return "Please try a Semantic cue first before moving to a Phonemic cue.";
-            if (expected == UI.Cues.CueLevel.Semantic && used == UI.Cues.CueLevel.Model)
+
+            if (expected == CueLevel.Semantic && used == CueLevel.Model)
                 return "Please try Semantic → Phonemic cues before providing the Model cue.";
-            if (expected == UI.Cues.CueLevel.Phonemic && used == UI.Cues.CueLevel.Model)
+
+            if (expected == CueLevel.Phonemic && used == CueLevel.Model)
                 return "Please try a Phonemic cue before providing the Model cue.";
+
             return "Please use cues in order: Semantic → Phonemic → Model.";
         }
 
-        // Rule-based classifier (MVP)
-        private UI.Cues.CueLevel Classify(string text, string targetWord)
+        private ClassificationResult ClassifyDetailed(string text, string targetWord)
         {
-            if (string.IsNullOrWhiteSpace(text)) return UI.Cues.CueLevel.None;
-
-            string t = text.ToLowerInvariant().Trim();
-            string target = (targetWord ?? "").ToLowerInvariant().Trim();
-
-            // --- Model cue: do NOT require targetWord (works even when targetWord="")
-            // Examples: "repeat after me", "say 'coffee'", "say: coffee"
-            if (ContainsAny(t,
-                    "repeat after me",
-                    "repeat after",
-                    "say:",
-                    "say '",
-                    "say \"",
-                    "please repeat",
-                    "just say"))
+            ClassificationResult result = new ClassificationResult
             {
-                return UI.Cues.CueLevel.Model;
+                RawText = text ?? "",
+                RawTarget = targetWord ?? "",
+                NormalizedText = NormalizeText(text),
+                NormalizedTarget = NormalizeText(targetWord)
+            };
+
+            string t = result.NormalizedText;
+            string target = result.NormalizedTarget;
+
+            if (string.IsNullOrWhiteSpace(t))
+            {
+                result.Level = CueLevel.None;
+                result.Reasons.Add("Empty normalized text.");
+                return result;
             }
 
-            // If targetWord is known, explicit quoting of target is also model-like
-            if (!string.IsNullOrEmpty(target) && (t.Contains($"\"{target}\"") || t.Contains($"'{target}'")))
+            foreach (var regex in ModelStrongPatterns)
             {
-                return UI.Cues.CueLevel.Model;
+                if (regex.IsMatch(t))
+                {
+                    result.ModelScore += 3;
+                    result.Reasons.Add($"Model +3: matched strong pattern [{regex}]");
+                }
             }
 
-            // --- Phonemic cue
-            if (ContainsAny(t,
-                    "starts with",
-                    "begins with",
-                    "first sound",
-                    "first letter",
-                    "/k/",
-                    "/t/",
-                    "/s/",
-                    "sounds like",
-                    "rhymes with"))
+            foreach (var regex in ModelWeakPatterns)
             {
-                return UI.Cues.CueLevel.Phonemic;
+                if (regex.IsMatch(t))
+                {
+                    result.ModelScore += 1;
+                    result.Reasons.Add($"Model +1: matched weak pattern [{regex}]");
+                }
             }
 
-            // --- Semantic cue (light heuristic)
-            if (ContainsAny(t,
-                    "it's",
-                    "it is",
-                    "you use it",
-                    "used for",
-                    "a kind of",
-                    "a type of",
-                    "something you",
-                    "it helps",
-                    "you can"))
+            if (!string.IsNullOrEmpty(target))
             {
-                return UI.Cues.CueLevel.Semantic;
+                if (ContainsWholePhrase(t, target))
+                {
+                    result.ModelScore += 3;
+                    result.Reasons.Add($"Model +3: utterance directly contains target word [{target}]");
+                }
+
+                if (Regex.IsMatch(t, $@"[""']\s*{Regex.Escape(target)}\s*[""']", RegexOptions.IgnoreCase))
+                {
+                    result.ModelScore += 3;
+                    result.Reasons.Add($"Model +3: target word appears quoted [{target}]");
+                }
+
+                if (Regex.IsMatch(t, $@"\b(say|repeat|try saying|can you say)\b.*\b{Regex.Escape(target)}\b", RegexOptions.IgnoreCase))
+                {
+                    result.ModelScore += 4;
+                    result.Reasons.Add($"Model +4: directive + target pattern matched [{target}]");
+                }
             }
 
-            return UI.Cues.CueLevel.None;
+            foreach (var regex in PhonemicPatterns)
+            {
+                if (regex.IsMatch(t))
+                {
+                    int add = regex.ToString() == @"/[a-z]/" ? 3 : 2;
+                    result.PhonemicScore += add;
+                    result.Reasons.Add($"Phonemic +{add}: matched pattern [{regex}]");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(target) && target.Length > 0)
+            {
+                char firstChar = target[0];
+
+                if (Regex.IsMatch(t, $@"\b(first|initial)\s+letter\s+is\s+{Regex.Escape(firstChar.ToString())}\b", RegexOptions.IgnoreCase))
+                {
+                    result.PhonemicScore += 3;
+                    result.Reasons.Add($"Phonemic +3: initial letter matches target [{firstChar}]");
+                }
+
+                if (Regex.IsMatch(t, $@"\bstarts?\s+with\s+{Regex.Escape(firstChar.ToString())}\b", RegexOptions.IgnoreCase))
+                {
+                    result.PhonemicScore += 3;
+                    result.Reasons.Add($"Phonemic +3: starts-with-letter matches target [{firstChar}]");
+                }
+            }
+
+            foreach (var regex in SemanticStrongPatterns)
+            {
+                if (regex.IsMatch(t))
+                {
+                    result.SemanticScore += 2;
+                    result.Reasons.Add($"Semantic +2: matched strong pattern [{regex}]");
+                }
+            }
+
+            foreach (var regex in SemanticWeakPatterns)
+            {
+                if (regex.IsMatch(t))
+                {
+                    result.SemanticScore += 1;
+                    result.Reasons.Add($"Semantic +1: matched weak pattern [{regex}]");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(target))
+            {
+                if (Regex.IsMatch(t, $@"\b(it'?s|it\s+is)\s+{Regex.Escape(target)}\b", RegexOptions.IgnoreCase))
+                {
+                    result.ModelScore += 4;
+                    result.Reasons.Add($"Model +4: direct answer pattern matched [it's {target}]");
+                }
+            }
+
+            if (result.ModelScore >= modelThreshold &&
+                result.ModelScore >= result.PhonemicScore &&
+                result.ModelScore >= result.SemanticScore)
+            {
+                result.Level = CueLevel.Model;
+                result.Reasons.Add($"Final => Model (score {result.ModelScore} >= threshold {modelThreshold})");
+                return result;
+            }
+
+            if (result.PhonemicScore >= phonemicThreshold &&
+                result.PhonemicScore >= result.SemanticScore)
+            {
+                result.Level = CueLevel.Phonemic;
+                result.Reasons.Add($"Final => Phonemic (score {result.PhonemicScore} >= threshold {phonemicThreshold})");
+                return result;
+            }
+
+            if (result.SemanticScore >= semanticThreshold)
+            {
+                result.Level = CueLevel.Semantic;
+                result.Reasons.Add($"Final => Semantic (score {result.SemanticScore} >= threshold {semanticThreshold})");
+                return result;
+            }
+
+            result.Level = CueLevel.None;
+            result.Reasons.Add("Final => None (all scores below threshold)");
+            return result;
         }
 
-        private bool ContainsAny(string t, params string[] keys)
+        private string NormalizeText(string input)
         {
-            foreach (var k in keys)
-                if (t.Contains(k)) return true;
-            return false;
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            string t = input.ToLowerInvariant().Trim();
+            t = Regex.Replace(t, @"[^\w\s\/'""-]", " ");
+            t = Regex.Replace(t, @"\s+", " ").Trim();
+            t = t.Replace("wanna", "want to");
+            t = t.Replace("gonna", "going to");
+
+            return t;
+        }
+
+        private bool ContainsWholePhrase(string text, string phrase)
+        {
+            if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(phrase))
+                return false;
+
+            return Regex.IsMatch(
+                text,
+                $@"\b{Regex.Escape(phrase)}\b",
+                RegexOptions.IgnoreCase);
+        }
+
+        [Serializable]
+        private class ClassificationResult
+        {
+            public string RawText;
+            public string RawTarget;
+            public string NormalizedText;
+            public string NormalizedTarget;
+
+            public int SemanticScore;
+            public int PhonemicScore;
+            public int ModelScore;
+
+            public CueLevel Level = CueLevel.None;
+            public List<string> Reasons = new List<string>();
         }
     }
 }

@@ -57,7 +57,6 @@ public class ScoreManager : MonoBehaviour
             Patient = patientResponse,
             Nurse = nurseResponse
         });
-        Debug.Log($"Turn {conversationTurns.Count} recorded.");
     }
 
     public void SubmitEvaluation()

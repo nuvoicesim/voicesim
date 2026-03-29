@@ -245,7 +245,7 @@ PrefabInstance:
       value: 0.3121418
       objectReference: {fileID: 0}
     - target: {fileID: -8017449571587430431, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 98a20ee6c2cde7347b9faeb46337c09b, type: 2}
     - target: {fileID: -7992674326983369830, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
@@ -557,95 +557,95 @@ PrefabInstance:
       value: 0.3131837
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 98a20ee6c2cde7347b9faeb46337c09b, type: 2}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[0]
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
       value: 1.296479
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[3]
+      propertyPath: 'm_BlendShapeWeights.Array.data[3]'
       value: 2.1623347
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[4]
+      propertyPath: 'm_BlendShapeWeights.Array.data[4]'
       value: 2.2333255
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[8]
+      propertyPath: 'm_BlendShapeWeights.Array.data[8]'
       value: 2.8088176
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[15]
+      propertyPath: 'm_BlendShapeWeights.Array.data[15]'
       value: 0.8190629
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[16]
+      propertyPath: 'm_BlendShapeWeights.Array.data[16]'
       value: 0.82052964
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[17]
+      propertyPath: 'm_BlendShapeWeights.Array.data[17]'
       value: 13.615719
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[18]
+      propertyPath: 'm_BlendShapeWeights.Array.data[18]'
       value: 13.639918
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[20]
+      propertyPath: 'm_BlendShapeWeights.Array.data[20]'
       value: 0.594136
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[21]
+      propertyPath: 'm_BlendShapeWeights.Array.data[21]'
       value: 0.832534
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[24]
+      propertyPath: 'm_BlendShapeWeights.Array.data[24]'
       value: 3.0488377
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[25]
+      propertyPath: 'm_BlendShapeWeights.Array.data[25]'
       value: 0.29204154
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[28]
+      propertyPath: 'm_BlendShapeWeights.Array.data[28]'
       value: 1.0265199
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[29]
+      propertyPath: 'm_BlendShapeWeights.Array.data[29]'
       value: 2.390328
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[32]
+      propertyPath: 'm_BlendShapeWeights.Array.data[32]'
       value: 0.7688985
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[33]
+      propertyPath: 'm_BlendShapeWeights.Array.data[33]'
       value: 0.64595574
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[36]
+      propertyPath: 'm_BlendShapeWeights.Array.data[36]'
       value: 3.3488407
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[39]
+      propertyPath: 'm_BlendShapeWeights.Array.data[39]'
       value: 0.52638674
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[45]
+      propertyPath: 'm_BlendShapeWeights.Array.data[45]'
       value: 1.2167729
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[46]
+      propertyPath: 'm_BlendShapeWeights.Array.data[46]'
       value: 1.2046968
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[49]
+      propertyPath: 'm_BlendShapeWeights.Array.data[49]'
       value: 1.0257497
       objectReference: {fileID: 0}
     - target: {fileID: -2641288237696090860, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      propertyPath: m_BlendShapeWeights.Array.data[50]
+      propertyPath: 'm_BlendShapeWeights.Array.data[50]'
       value: 1.1734234
       objectReference: {fileID: 0}
     - target: {fileID: -2385040709125883805, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
@@ -914,7 +914,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
       propertyPath: m_Name
-      value: aphasia_model_stroke_fixed (1)
+      value: patient_1_model
       objectReference: {fileID: 0}
     - target: {fileID: 1060488247194963973, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1690,9 +1690,6 @@ PrefabInstance:
       addedObject: {fileID: 7918357289444049983}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 885023498517610482}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 4562407809376896915}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b26b8aafa335f4f229008027ac838bd4, type: 3}
       insertIndex: -1
@@ -1737,7 +1734,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &7918357289444049983
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1751,86 +1748,12 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &885023498517610482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8068719081323617958}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db8052edd37c5da4ba56c08244eb648a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Mapper: {fileID: 11400000, guid: a57a578c9d39cd0479f3877cc0c2eedf, type: 2}
-  m_EnabledChannels: 15
-  m_BlendShapes:
-    BrowDownLeft: 0
-    BrowDownRight: 0
-    BrowInnerUp: 0.01296479
-    BrowOuterUpLeft: 0.021623347
-    BrowOuterUpRight: 0.022333255
-    CheekPuff: 0
-    CheekSquintLeft: 0.00594136
-    CheekSquintRight: 0.00832534
-    EyeBlinkLeft: 0
-    EyeBlinkRight: 0
-    EyeLookDownLeft: 0
-    EyeLookDownRight: 0
-    EyeLookInLeft: 0
-    EyeLookInRight: 0.028088177
-    EyeLookOutLeft: 0
-    EyeLookOutRight: 0
-    EyeLookUpLeft: 0
-    EyeLookUpRight: 0
-    EyeSquintLeft: 0.008190629
-    EyeSquintRight: 0.0082052965
-    EyeWideLeft: 0.13615718
-    EyeWideRight: 0.13639918
-    JawForward: 0.0029204155
-    JawLeft: 0
-    JawOpen: 0.030488377
-    JawRight: 0
-    MouthClose: 0.033488408
-    MouthDimpleLeft: 0
-    MouthDimpleRight: 0
-    MouthFrownLeft: 0.0052638673
-    MouthFrownRight: 0
-    MouthFunnel: 0.010265199
-    MouthLeft: 0
-    MouthLowerDownLeft: 0.012167729
-    MouthLowerDownRight: 0.012046968
-    MouthPressLeft: 0
-    MouthPressRight: 0
-    MouthPucker: 0.02390328
-    MouthRight: 0
-    MouthRollLower: 0.0064595575
-    MouthRollUpper: 0.0076889847
-    MouthShrugLower: 0
-    MouthShrugUpper: 0
-    MouthSmileLeft: 0
-    MouthSmileRight: 0
-    MouthStretchLeft: 0.010257497
-    MouthStretchRight: 0.011734234
-    MouthUpperUpLeft: 0
-    MouthUpperUpRight: 0
-    NoseSneerLeft: 0
-    NoseSneerRight: 0
-    TongueOut: 0
-  m_HeadPosition: {x: 0.01220677, y: -0.035456352, z: -0.45600277}
-  m_HeadOrientation: {x: 1.8244389, y: 359.4904, z: 359.02707}
-  m_LeftEyeOrientation: {x: 2.8991716, y: 358.10922, z: 359.90433}
-  m_RightEyeOrientation: {x: 2.899943, y: 2.3157444, z: 0.11722172}
-  m_BlendShapesEnabled: 1
-  m_HeadPositionEnabled: 1
-  m_HeadOrientationEnabled: 1
-  m_EyeOrientationEnabled: 1
 --- !u!82 &4562407809376896915
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1842,6 +1765,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -1973,6 +1897,8 @@ MonoBehaviour:
         m_CallState: 2
   outputSoundGain: 1
   audioSourceProxy: {fileID: 0}
+  autoAudioSyncOnWebGL: 1
+  audioSyncOffsetTime: 0
 --- !u!114 &1285412733453230144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2120,7 +2046,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 4562407809376896915}
-  elevenLabsApiKey: 
+  backendBaseUrl: https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev
+  ttsPath: /tts
+  maxRetries: 2
+  requestTimeoutSeconds: 45
   voiceId: Bz0vsNJm8uY1hbd4c4AE
   modelId: eleven_multilingual_v2
   stability: 0.8
@@ -2158,6 +2087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d87a583482af435996cc006517c6753b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cueSkipGuard: {fileID: 0}
   transcriptText: {fileID: 0}
 --- !u!114 &6668925248582050730
 MonoBehaviour:
@@ -2171,7 +2101,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a150137ffaacba4c9ede0797f2e1000, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  director: {fileID: 0}
   animator: {fileID: 7918357289444049983}
   setEmotionCode: 0
   setMotionCode: 0
@@ -2235,6 +2164,320 @@ MonoBehaviour:
   speechReductionFull: 0.6
   speechSmoothingSpeed: 8
   expressionBlendSpeed: 220
+  baseStatePresets:
+  - state: 0
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 2
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideLeft
+        weight: 3
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 3
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthClose
+        weight: 2
+        mouthReduceDuringSpeech: 0.8
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browOuterUpLeft
+        weight: 9
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 9
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 28
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthSmileRight
+        weight: 28
+        mouthReduceDuringSpeech: 0.65
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browDownLeft
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: browInnerUp
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerLeft
+        weight: 18
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerRight
+        weight: 18
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthFrownLeft
+        weight: 22
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: mouthFrownRight
+        weight: 22
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: jawForward
+        weight: 5
+        mouthReduceDuringSpeech: 0.5
+  peakReactionPresets:
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browOuterUpLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 34
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 34
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthDimpleLeft
+        weight: 20
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: mouthDimpleRight
+        weight: 20
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: mouthSmileLeft
+        weight: 58
+        mouthReduceDuringSpeech: 0.6
+      - blendShape: mouthSmileRight
+        weight: 58
+        mouthReduceDuringSpeech: 0.6
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 58
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthShrugUpper
+        weight: 8
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthFrownLeft
+        weight: 34
+        mouthReduceDuringSpeech: 0.4
+      - blendShape: mouthFrownRight
+        weight: 34
+        mouthReduceDuringSpeech: 0.4
+      - blendShape: jawOpen
+        weight: 15
+        mouthReduceDuringSpeech: 0.75
+  - state: 3
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpLeft
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 10
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 10
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 32
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthSmileRight
+        weight: 32
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: jawOpen
+        weight: 14
+        mouthReduceDuringSpeech: 0.8
+  - state: 4
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownLeft
+        weight: 18
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 26
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookInLeft
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookOutRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 18
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerLeft
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: jawLeft
+        weight: 6
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthPucker
+        weight: 11
+        mouthReduceDuringSpeech: 0.72
+      - blendShape: mouthFrownLeft
+        weight: 13
+        mouthReduceDuringSpeech: 0.5
+  overlayPresets:
+  - state: 0
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browDownLeft
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: browInnerUp
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpLeft
+        weight: 25
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 17
+        mouthReduceDuringSpeech: 0
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeSquintLeft
+        weight: 6
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 6
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0.7
+      - blendShape: mouthSmileRight
+        weight: 24
+        mouthReduceDuringSpeech: 0.7
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeLookInLeft
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookInRight
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 30
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 30
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+  - state: 3
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeSquintLeft
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeBlinkLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeBlinkRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
 --- !u!114 &1573346482229067111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2258,3 +2501,4 @@ MonoBehaviour:
   cryPeakIntensity: 0.95
   reliefPeakIntensity: 0.6
   resetOverlaysBeforeApply: 1
+  enableBridgeLogs: 1

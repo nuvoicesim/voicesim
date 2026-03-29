@@ -530,7 +530,7 @@ public class TTSManager : MonoBehaviour
         else
         {
             emotionController.SyncAnimationsWithWordTimings(wordTimings);
-            emotionController.PlayEmotion();
+            //emotionController.PlayEmotion();
         }
 
         // Update motion based on explicit code first, then legacy suffix if present.

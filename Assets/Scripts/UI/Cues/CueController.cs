@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.IO;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
@@ -9,9 +10,6 @@ using UI.Cues.WarningSystem;
 
 namespace UI.Cues
 {
-    // ----------------------------
-    // Data Classes
-    // ----------------------------
     [System.Serializable]
     public class ScriptEntry
     {
@@ -40,59 +38,68 @@ namespace UI.Cues
         public ScriptEntry[] scripts;
     }
 
-    // ----------------------------
-    // Cue Enum
-    // ----------------------------
     public enum CueLevel
     {
-        None = 0,      
-        Semantic = 1,   
-        Phonemic = 2,   
-        Model = 3      
+        None = 0,
+        Semantic = 1,
+        Phonemic = 2,
+        Model = 3
     }
 
-    // ----------------------------
-    // Main Class
-    // ----------------------------
+    // 这个类用来在 Inspector 里配置：
+    // targetWord -> sprite
+    [System.Serializable]
+    public class TargetImageEntry
+    {
+        public string targetWord;
+        public Sprite image;
+    }
+
     public class CueController : MonoBehaviour
     {
         public bool cueingActive = false;
 
-        public int scriptNum = 1;                               // The active script number
-        public ScriptEntry currentScript;                       // The active script
-        private ScriptData allScripts;                          // All scripts loaded from JSON
+        public int scriptNum = 1;
+        public ScriptEntry currentScript;
+        private ScriptData allScripts;
 
         private CueLevel lastCueLevel = CueLevel.None;
         private CueLevel currentCueLevel = CueLevel.None;
-        
-        private int maxCueCount = 2;                            // Maximum number of cues before escalating to the next level
-        private int semanticCueCount = 0;                       // Tracks how many times the student has received a semantic cue for the current target word.
-        private int phonemicCueCount = 0;                       // Tracks how many times the student has received a phonemic cue for the current target word.
 
-        private CueLevel pressedCueButton = CueLevel.None;      // Tracks which cue button the student most recently pressed.
-        private string lastComputedHint = "";                   // Stores the most recently computed hint for the currentCueLevel.
+        private int maxCueCount = 2;
+        private int semanticCueCount = 0;
+        private int phonemicCueCount = 0;
 
-        [SerializeField] private GameObject cueButtonPanel;     // Panel containing the cue buttons
-        [SerializeField] private Button hintButton;             // Brings up the cueButtonPanel when pressed
-        [SerializeField] private Button semanticCueButton;      // Button that triggers the Semantic Cue hint
-        [SerializeField] private Button phonemicCueButton;      // Button that triggers the Phonemic Cue hint
-        [SerializeField] private Button modelCueButton;         // Button that triggers the Model Cue hint
-        [SerializeField] private GameObject hintBox;            // Box with the student hint Text as a child element. This is what pops up when the student clicks on a cue button.
-        [SerializeField] private TextMeshProUGUI hintText;      // Text element to display the student hint
-        [SerializeField] private TextMeshProUGUI targetText;    // Text element to display the current target word for the student
-        [SerializeField] private TargetButtonUI targetButtonUI; // Reference to the TargetButtonUI script to check if the target has been confirmed
+        private CueLevel pressedCueButton = CueLevel.None;
+        private string lastComputedHint = "";
+
+        [Header("Cue UI")]
+        [SerializeField] private GameObject cueButtonPanel;
+        [SerializeField] private Button hintButton;
+        [SerializeField] private Button semanticCueButton;
+        [SerializeField] private Button phonemicCueButton;
+        [SerializeField] private Button modelCueButton;
+        [SerializeField] private GameObject hintBox;
+        [SerializeField] private TextMeshProUGUI hintText;
+
+        [Header("Target UI")]
+        [SerializeField] private TextMeshProUGUI targetText;
+        [SerializeField] private Image targetImage;
+
+        [Header("Target Images Mapping")]
+        [SerializeField] private List<TargetImageEntry> targetImages = new List<TargetImageEntry>();
 
         private IEnumerator Start()
         {
-            // Wire up UI button callbacks
             if (semanticCueButton != null)
                 semanticCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Semantic));
+
             if (phonemicCueButton != null)
                 phonemicCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Phonemic));
+
             if (modelCueButton != null)
                 modelCueButton.onClick.AddListener(() => OnCueButtonPressed(CueLevel.Model));
 
-            // Ensure hint box starts hidden
             if (hintBox != null)
                 hintBox.SetActive(false);
 
@@ -109,10 +116,6 @@ namespace UI.Cues
             UpdateTargetText();
         }
 
-        /// <summary>
-        /// Loads and parses all script entries from a JSON string.
-        /// </summary>
-        /// <param name="jsonText">JSON text containing all script data</param>
         private void LoadAllScripts(string jsonText)
         {
             if (string.IsNullOrEmpty(jsonText))
@@ -144,7 +147,7 @@ namespace UI.Cues
                         Debug.LogError("Failed to load target_words.json from StreamingAssets: " + request.error + " Path: " + path);
                         yield break;
                     }
-
+                    Debug.LogError("printing path" + path);
                     LoadAllScripts(request.downloadHandler.text);
                     Debug.Log("Loaded scripts from StreamingAssets via UnityWebRequest");
                 }
@@ -172,7 +175,7 @@ namespace UI.Cues
         /// Sets the current script based on the given script number.
         /// </summary>
         /// <param name="scriptNumber">The script number to select</param>
-        private bool SetCurrentScript(int scriptNumber)
+        public bool SetCurrentScript(int scriptNumber)
         {
             if (allScripts == null || allScripts.scripts == null)
             {
@@ -185,7 +188,11 @@ namespace UI.Cues
                 if (entry.script_number == scriptNumber)
                 {
                     currentScript = entry;
-                    Debug.Log("Current script set: " + entry.title);
+                    scriptNum = scriptNumber;
+
+                    Debug.Log("Current script set: " + entry.title + " | target_word = " + entry.target_word);
+
+                    UpdateTargetUI();
                     return true;
                 }
             }
@@ -202,14 +209,63 @@ namespace UI.Cues
             }
         }
 
-        /// <summary>
-        /// Checks whether the patient response contains the target or alternate target word.
-        /// </summary>
-        /// <param name="patientResponse">The patient response text</param>
-        /// <returns>True if the target word or alternate target was detected; otherwise false</returns>
+        private void UpdateTargetUI()
+        {
+            if (currentScript == null)
+                return;
+
+            if (targetText != null)
+                targetText.text = "Target: " + currentScript.target_word;
+
+            UpdateTargetImage();
+        }
+
+        private void UpdateTargetImage()
+        {
+            if (targetImage == null)
+            {
+                Debug.LogWarning("CueController: targetImage is not assigned.");
+                return;
+            }
+
+            if (currentScript == null)
+                return;
+
+            string targetWordNormalized = NormalizeWord(currentScript.target_word);
+
+            foreach (var entry in targetImages)
+            {
+                if (entry == null || entry.image == null || string.IsNullOrWhiteSpace(entry.targetWord))
+                    continue;
+
+                if (NormalizeWord(entry.targetWord) == targetWordNormalized)
+                {
+                    targetImage.sprite = entry.image;
+                    targetImage.enabled = true;
+                    targetImage.preserveAspect = true;
+
+                    Debug.Log("Updated target image for: " + currentScript.target_word);
+                    return;
+                }
+            }
+
+            Debug.LogWarning("No image mapping found for target word: " + currentScript.target_word);
+            targetImage.sprite = null;
+            targetImage.enabled = false;
+        }
+
+        private string NormalizeWord(string word)
+        {
+            if (string.IsNullOrWhiteSpace(word))
+                return "";
+
+            return word.Trim().ToLower();
+        }
+
         private bool CheckTargetWord(string patientResponse)
         {
-            if (string.IsNullOrEmpty(patientResponse) || currentScript == null) return false;
+            if (string.IsNullOrEmpty(patientResponse) || currentScript == null)
+                return false;
 
             string responseLower = patientResponse.ToLower();
             string targetLower = currentScript.target_word.ToLower();
@@ -226,12 +282,6 @@ namespace UI.Cues
             return false;
         }
 
-        /// <summary>
-        /// Determines the appropriate cue level for a patient response.
-        /// Follows the hierarchy: Semantic -> Phonemic -> Model.
-        /// </summary>
-        /// <param name="patientResponse">The patient response text</param>
-        /// <returns>The CueLevel that should be applied for this response</returns>
         private CueLevel DetermineCueLevel(string patientResponse, bool saidTarget)
         {
             CueLevel nextCueLevel = currentCueLevel;
@@ -241,13 +291,10 @@ namespace UI.Cues
 
             string responseLower = patientResponse.ToLower();
 
-            //if (saidTarget)
-                //return CueLevel.None;
             if (currentCueLevel == CueLevel.Model)
             {
                 Debug.Log("Model cue given again. Do not check for other levels");
                 return currentCueLevel;
-
             }
 
             foreach (var desc in currentScript.semanticKeywords)
@@ -256,7 +303,7 @@ namespace UI.Cues
                 {
                     Debug.Log("Semantic keyword detected: " + desc + " Setting cue level to Semantic.");
                     nextCueLevel = CueLevel.Semantic;
-                    break; // If we detect any semantic keyword, we can break out of the loop and
+                    break;
                 }
             }
 
@@ -266,7 +313,7 @@ namespace UI.Cues
                 {
                     Debug.Log("Phonemic keyword detected: " + word + " Setting cue level to Phonemic.");
                     nextCueLevel = CueLevel.Phonemic;
-                    break; // If we detect any phonemic keyword, we can break out of the loop and set the cue level to Phonemic.
+                    break;
                 }
             }
 
@@ -274,7 +321,7 @@ namespace UI.Cues
             {
                 Debug.Log("Semantic cue given again. Current semantic cue count " + semanticCueCount);
                 if (semanticCueCount >= maxCueCount)
-                {   
+                {
                     Debug.Log("Max semantic cue count reached. Escalating to phonemic cue.");
                     nextCueLevel = CueLevel.Phonemic;
                 }
@@ -298,11 +345,6 @@ namespace UI.Cues
             return nextCueLevel;
         }
 
-        /// <summary>
-        /// Returns the student-facing hint corresponding to the provided cue level.
-        /// </summary>
-        /// <param name="cue">The CueLevel determined for the response</param>
-        /// <returns>String containing the hint for the student; empty if not available</returns>
         private string GetStudentHint(CueLevel cue)
         {
             if (currentScript == null || currentScript.studentHints == null)
@@ -321,16 +363,6 @@ namespace UI.Cues
             }
         }
 
-        private void UpdateTarget()
-        {
-            if (targetButtonUI.IsConfirmed())
-            {
-                scriptNum = UnityEngine.Random.Range(2, 11);
-                if (SetCurrentScript(scriptNum))
-                    UpdateTargetText();
-            }
-        }
-
         public CueLevel GetCurrentCueLevel()
         {
             return currentCueLevel;
@@ -344,29 +376,18 @@ namespace UI.Cues
             phonemicCueCount = 0;
             lastComputedHint = "";
             pressedCueButton = CueLevel.None;
-            // Optionally hide the hint box when resetting
+
             if (hintBox != null)
                 hintBox.SetActive(false);
-            UpdateTarget();
+
+            if (hintText != null)
+                hintText.text = "";
         }
 
-        /// <summary>
-        /// Processes the patient response, determines the cue level, and provides
-        /// the corresponding student hint if applicable.
-        /// </summary>
-        /// <param name="patientResponse">The patient response text</param>
         public void HandleResponse(string patientResponse)
         {
-            // TODO:
-            // - Update to take studentResponse as a parameter in order to toggle cueing on.
-            // - Only check patientResponse if student has asked a question related to the target word.
-            //      - How do we determine this?
-            // - Make buttons greyed out if the corresponding CueLevel has not yet been reached.
-            // - Make cue text look nicer.
-            // - Make recommended cue button highlighted to guide the student towards the next appropriate cue level.
-            // - Add a target word to the UI so the student knows what the target is and can better understand the hints.
-
-            if (!cueingActive) return;
+            if (!cueingActive)
+                return;
 
             if (currentScript == null)
             {
@@ -378,7 +399,6 @@ namespace UI.Cues
             lastCueLevel = currentCueLevel;
             currentCueLevel = DetermineCueLevel(patientResponse, saidTarget);
 
-            // compute and cache the hint but do NOT show it unless the student pressed the matching cue button
             string hint = GetStudentHint(currentCueLevel);
             lastComputedHint = hint ?? "";
 
@@ -388,23 +408,8 @@ namespace UI.Cues
             Debug.Log("Cached hint: " + lastComputedHint);
             Debug.Log("Semantic cue count: " + semanticCueCount);
             Debug.Log("Phonemic cue count: " + phonemicCueCount);
-
-            if (currentCueLevel != CueLevel.None)
-                Debug.Log("Student hint (cached): " + lastComputedHint);
-            else
-                Debug.Log("No hint needed");
-
-            // After updating currentCueLevel and caching the hint, update UI visibility
-            
         }
 
-        // ----------------------------
-        // UI HANDLERS
-        // ----------------------------
-
-        /// <summary>
-        /// Toggles the visibility of the cue button panel.
-        /// </summary>
         public void ToggleCuePanel()
         {
             Debug.Log("Toggling cue button panel");
@@ -412,9 +417,6 @@ namespace UI.Cues
                 cueButtonPanel.SetActive(!cueButtonPanel.activeSelf);
         }
 
-        /// <summary>
-        /// Toggles the visibility of the hint box.
-        /// </summary>
         public void ToggleHintBox()
         {
             Debug.Log("Toggling hint box");
@@ -422,12 +424,6 @@ namespace UI.Cues
                 hintBox.SetActive(!hintBox.activeSelf);
         }
 
-        /// <summary>
-        /// Function to be called when a Cue button is pressed. Caches which 
-        /// button was pressed and then calls ShowHintIfAllowed to determine 
-        /// whether to show the hint based on currentCueLevel and the pressed button.
-        /// </summary>
-        /// <param name="pressedCue"></param>
         public void OnCueButtonPressed(CueLevel pressedCue)
         {
             pressedCueButton = pressedCue;
@@ -435,13 +431,8 @@ namespace UI.Cues
             ShowHintIfAllowed();
         }
 
-        /// <summary>
-        /// Shows the cached hint only when the student has pressed the cue button that matches currentCueLevel.
-        /// Hides the hint box otherwise.
-        /// </summary>
         private void ShowHintIfAllowed()
         {
-            // Preconditions
             if (hintBox == null || hintText == null)
                 return;
 
@@ -454,17 +445,13 @@ namespace UI.Cues
 
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
-                Debug.Log("Showing student hint for " + CueLevel.Model);
+                Debug.Log("Showing student hint for Model");
                 return;
             }
 
-            // Only show the hint when:
-            // - there is a cached hint for the current cue level,
-            // - the current cue level is not None,
-            // - and the student pressed the matching cue button.
-            if (currentCueLevel != CueLevel.None
-                && pressedCueButton == currentCueLevel
-                && !string.IsNullOrEmpty(lastComputedHint))
+            if (currentCueLevel != CueLevel.None &&
+                pressedCueButton == currentCueLevel &&
+                !string.IsNullOrEmpty(lastComputedHint))
             {
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
@@ -472,10 +459,13 @@ namespace UI.Cues
             }
             else
             {
-                // If not allowed to show, ensure hint box is hidden
                 hintBox.SetActive(false);
+
                 if (pressedCueButton != currentCueLevel)
-                    Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: " + pressedCueButton + " Current: " + currentCueLevel);
+                {
+                    Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: "
+                        + pressedCueButton + " Current: " + currentCueLevel);
+                }
             }
         }
     }

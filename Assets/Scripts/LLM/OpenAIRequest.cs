@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UI.Cues;
+using UI.Cues.WarningSystem;
 
 public class OpenAIRequest : MonoBehaviour
 {
@@ -28,12 +29,22 @@ public class OpenAIRequest : MonoBehaviour
     public string lostResponse = "umm... fast... uh... fast... ";
     public float maxSpeechSpeed = 200f;
 
-    public string CurrentUserId { get; private set; }
-    public int CurrentSimulationLevel { get; private set; } = 1;
-
+    // Components
+    private CharacterAnimationController animationController;
     private EmotionController emotionController;
     [SerializeField] private GameObject cueControllerObject;
     private CueController cueController;
+
+    [Header("Cue Warning System")]
+    [SerializeField] private CueSkipGuard cueSkipGuard;
+    [SerializeField] private TargetButtonUI targetButtonUI;
+
+    // Internal state
+    private float currentSpeechSpeed;
+    private string basePath;
+    public string CurrentUserId { get; private set; }
+    public int CurrentSimulationLevel { get; private set; } = 1;
+
     private readonly List<Dictionary<string, string>> chatMessages = new List<Dictionary<string, string>>();
     private string currentPatientResponse = "";
     private string pendingNurseMessage = "";
@@ -98,10 +109,7 @@ public class OpenAIRequest : MonoBehaviour
         TryResolveEmotionController();
 
         if (cueControllerObject == null)
-        {
             Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
-            return;
-        }
 
         cueController = cueControllerObject.GetComponent<CueController>();
 
@@ -110,6 +118,12 @@ public class OpenAIRequest : MonoBehaviour
 
         if (cueController == null)
             Debug.LogError("CueController component not found on the UI GameObject.");
+
+        if (cueSkipGuard == null)
+            Debug.LogWarning("OpenAIRequest: cueSkipGuard not assigned. Cue order warnings will not fire.");
+
+        if (targetButtonUI == null)
+            Debug.LogWarning("OpenAIRequest: targetButtonUI not assigned. Target word will be empty.");
 
         if (!string.IsNullOrEmpty(currentScenario))
             InitializeChat();
@@ -162,6 +176,16 @@ public class OpenAIRequest : MonoBehaviour
 
     public void ReceiveNurseTranscription(string transcribedText, float speechWpm)
     {
+        Debug.LogError($"[OpenAIRequest] ReceiveNurseTranscription text=\"{transcribedText}\" wpm={speechWpm:0.##}");
+
+        // Check cue order before sending to GPT
+        if (cueSkipGuard != null)
+        {
+            string targetWord = targetButtonUI != null ? targetButtonUI.CurrentTargetWord : "";
+            cueSkipGuard.CheckStudentUtterance(transcribedText, targetWord);
+            Debug.Log($"[OpenAIRequest] CueSkipGuard checked: text=\"{transcribedText}\" target=\"{targetWord}\"");
+        }
+
         NurseResponds(transcribedText, speechWpm);
     }
 
@@ -173,6 +197,8 @@ public class OpenAIRequest : MonoBehaviour
             return;
         }
 
+        Debug.LogError($"[OpenAIRequest] NurseResponds accepted message=\"{nurseMessage.Trim()}\" chatCountBefore={chatMessages.Count}");
+
         if (chatMessages.Count == 0 && !string.IsNullOrEmpty(currentScenario))
             InitializeChat();
 
@@ -183,8 +209,10 @@ public class OpenAIRequest : MonoBehaviour
         });
         PrintChatMessage(chatMessages);
         pendingNurseMessage = nurseMessage.Trim();
+        Debug.LogError($"[OpenAIRequest] pendingNurseMessage set. turnIndex(before increment)={turnIndex}");
 
         turnIndex++;
+        Debug.LogError($"[OpenAIRequest] turnIndex incremented to {turnIndex}");
 
         if (speechWpm > maxSpeechSpeed)
         {
