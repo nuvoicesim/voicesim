@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Threading.Tasks;
 using System.IO;
@@ -125,6 +125,11 @@ public class SpeechToTextController2 : MonoBehaviour
             transcriptText.text = speech.text;
         }
         Debug.Log("STT: Transcription result: '" + speech.text + "' (WPM: " + speech.wpm + ")");
+
+        if (cueSkipGuard != null)
+            cueSkipGuard.CheckStudentUtterance(speech.text, "");
+        else
+            Debug.LogWarning("STT: CueSkipGuard reference is missing!");
 
         // Cleanup file
         if (File.Exists(filePath))
@@ -263,90 +268,12 @@ public class SpeechToTextController2 : MonoBehaviour
             {
                 string responseContent = request.downloadHandler.text;
                 var transcriptionResponse = JsonConvert.DeserializeObject<TranscriptionResponse>(responseContent);
-        // Save the AudioClip as a WAV file using SavWav
-        string filePath = Path.Combine(Application.persistentDataPath, "recordedAudio.wav");
-        SavWav.Save("recordedAudio.wav", recordedClip);
-        Debug.Log($"STT: Saved audio to: {filePath}");
-
-        Debug.Log("STT: Sending audio to Whisper API...");
-
-        // Send the WAV file to OpenAI Whisper API
-        WhisperResult speech = await SendToWhisperAPI(filePath, "whisper-1", "en", 0.2f);
-
-        // Display only the transcription text
-        transcriptText.text = speech.text;
-        Debug.Log($"STT: Transcription result: '{speech.text}' (WPM: {speech.wpm})");
-
-        // Optionally delete the temporary file
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-            Debug.Log("STT: Deleted temporary audio file");
-        }
-
-        // Fiona update 11/13: integrate with patient NPC
-        if (cueSkipGuard != null)
-            cueSkipGuard?.CheckStudentUtterance(speech.text, "");
-        else
-            Debug.LogWarning("STT: CueSkipGuard reference is missing!");
-        await WaitForOpenAIRequestAndSend(speech.text, speech.wpm);
-    }
-
-    private async Task<WhisperResult> SendToWhisperAPI(string filePath, string model, string language, float temperature)
-    {
-        using (HttpClient client = new HttpClient())
-        {
-            try
-            {
-                // 验证API密钥
-                if (string.IsNullOrEmpty(openAiApiKey))
-                {
-                    Debug.LogError("STT: API key is null or empty");
-                    return new WhisperResult { text = "Error: No API key", wpm = 0f };
-                }
-
-                client.DefaultRequestHeaders.Clear();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + openAiApiKey);
-
-                Debug.Log("=== STT WHISPER API REQUEST ===");
-                Debug.Log($"API Key preview: {openAiApiKey.Substring(0, Math.Min(10, openAiApiKey.Length))}...");
-                Debug.Log($"File path: {filePath}");
-                Debug.Log($"File exists: {File.Exists(filePath)}");
-
-                using (var form = new MultipartFormDataContent())
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    var audioContent = new StreamContent(fileStream);
-                    audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/wav");
-                    form.Add(audioContent, "file", Path.GetFileName(filePath));
-                    form.Add(new StringContent(model), "model");
-
-                    if (!string.IsNullOrEmpty(language))
-                        form.Add(new StringContent(language), "language");
-
-                    form.Add(new StringContent("verbose_json"), "response_format");
-                    form.Add(new StringContent(temperature.ToString()), "temperature");
-
-                    HttpResponseMessage response = await client.PostAsync("https://api.openai.com/v1/audio/transcriptions", form);
-
-                    Debug.Log($"STT Response Status: {response.StatusCode}");
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Debug.Log("✓ STT Whisper API success");
-
-                        // Parse the JSON response and extract only the "text" field
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        Debug.Log($"STT Response length: {responseContent.Length}");
-
-                        var transcriptionResponse = JsonConvert.DeserializeObject<TranscriptionResponse>(responseContent);
 
                 if (transcriptionResponse == null)
                 {
                     return new WhisperResult { text = "Error in transcription", wpm = 0f };
                 }
 
-                // Calculate WPM from segments
                 float wpm = 0f;
                 if (transcriptionResponse.segments != null && transcriptionResponse.segments.Count > 0)
                 {
