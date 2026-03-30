@@ -251,15 +251,15 @@ namespace UI.Cues.WarningSystem
         private string BuildWarning(CueLevel expected, CueLevel used)
         {
             if (expected == CueLevel.Semantic && used == CueLevel.Phonemic)
-                return "Please try a Semantic cue first before moving to a Phonemic cue.";
+                return "Warning: Please try a Semantic cue first before moving to a Phonemic cue.";
 
             if (expected == CueLevel.Semantic && used == CueLevel.Model)
-                return "Please try Semantic → Phonemic cues before providing the Model cue.";
+                return "Warning: Please try Semantic → Phonemic cues before providing the Model cue.";
 
             if (expected == CueLevel.Phonemic && used == CueLevel.Model)
-                return "Please try a Phonemic cue before providing the Model cue.";
+                return "Warning: Please try a Phonemic cue before providing the Model cue.";
 
-            return "Please use cues in order: Semantic → Phonemic → Model.";
+            return "Warning: Please use cues in order: Semantic → Phonemic → Model.";
         }
 
         private ClassificationResult ClassifyDetailed(string text, string targetWord)

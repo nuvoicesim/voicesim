@@ -79,6 +79,7 @@ namespace UI.Cues
         [SerializeField] private Button semanticCueButton;
         [SerializeField] private Button phonemicCueButton;
         [SerializeField] private Button modelCueButton;
+        [SerializeField] private Button confirmTargetButton;
         [SerializeField] private GameObject hintBox;
         [SerializeField] private TextMeshProUGUI hintText;
 
@@ -88,6 +89,9 @@ namespace UI.Cues
 
         [Header("Target Images Mapping")]
         [SerializeField] private List<TargetImageEntry> targetImages = new List<TargetImageEntry>();
+
+        [Header("Warning Banner")]
+        [SerializeField] private WarningBanner warningBanner;
 
         private IEnumerator Start()
         {
@@ -107,6 +111,9 @@ namespace UI.Cues
             {
                 Debug.LogError("No targetText object found");
             }
+
+            if (confirmTargetButton != null)
+                confirmTargetButton.onClick.AddListener(() => OnConfirmTargetButtonPressed());
 
             yield return LoadScriptsFromStreamingAssets();
 
@@ -431,25 +438,34 @@ namespace UI.Cues
             ShowHintIfAllowed();
         }
 
+        public void OnConfirmTargetButtonPressed()
+        {
+            Debug.Log("Confirm target button pressed, resetting cueing");
+            ResetCueing();
+        }
+
         private void ShowHintIfAllowed()
         {
             if (hintBox == null || hintText == null)
                 return;
 
-            if (pressedCueButton == CueLevel.Model && currentCueLevel != CueLevel.Model)
+            if (pressedCueButton != currentCueLevel)
             {
-                Debug.Log("Model cue button pressed but current cue level is not Model.");
+                Debug.Log("Pressed cue button does not match current cue level. Pressed: "
+                    + pressedCueButton + ", Current: " + currentCueLevel + ". Showing warning banner and hint.");
 
-                string hint = GetStudentHint(CueLevel.Model);
+                string hint = GetStudentHint(pressedCueButton);
                 lastComputedHint = hint ?? "";
 
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
-                Debug.Log("Showing student hint for Model");
+
+                warningBanner.Show("Warning: You have pressed a hint for a higher cue level than expected. Expected: " + currentCueLevel + ", Pressed: " + pressedCueButton);
+                Debug.Log("Showing warning banner and hint for " + pressedCueButton);
                 return;
             }
 
-            if (currentCueLevel != CueLevel.None &&
+            else if (currentCueLevel != CueLevel.None &&
                 pressedCueButton == currentCueLevel &&
                 !string.IsNullOrEmpty(lastComputedHint))
             {
@@ -457,15 +473,10 @@ namespace UI.Cues
                 hintBox.SetActive(true);
                 Debug.Log("Showing student hint for " + currentCueLevel);
             }
+
             else
             {
                 hintBox.SetActive(false);
-
-                if (pressedCueButton != currentCueLevel)
-                {
-                    Debug.Log("Hint hidden because pressed cue does not match current cue level. Pressed: "
-                        + pressedCueButton + " Current: " + currentCueLevel);
-                }
             }
         }
     }
