@@ -23,8 +23,7 @@ public class ScoreManager : MonoBehaviour
 
     private string currentScenario = "";
     private List<ConversationTurn> conversationTurns = new List<ConversationTurn>();
-    [Header("LLM Scoring Backend")]
-    [SerializeField] private string fallbackScoringUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev/llm-scoring";
+    private const string ScoringPath = "/llm-scoring";
     [SerializeField] private int scoringTimeoutSeconds = 60;
 
     void Awake()
@@ -143,10 +142,10 @@ public class ScoreManager : MonoBehaviour
             progressBarUI.UpdateProgress(0.3f, "Preparing clinical assessment...");
         yield return new WaitForSeconds(0.3f);
 
-        string scoringUrl = fallbackScoringUrl;
-        if (OpenAIRequest.Instance != null)
+        if (!ApiConfigProvider.TryBuildBackendUrl(ScoringPath, out string scoringUrl))
         {
-            scoringUrl = OpenAIRequest.Instance.GetScoringEndpointUrl();
+            DisplayErrorReport(string.Empty, "API environment config is missing or incomplete.");
+            yield break;
         }
 
         string userId = "anonymous-user";

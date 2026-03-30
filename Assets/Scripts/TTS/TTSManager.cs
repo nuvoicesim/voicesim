@@ -18,12 +18,6 @@ public class TTSManager : MonoBehaviour
     public AudioSource audioSource;
 
     [Header("TTS Configuration")]
-    [Tooltip("AWS backend base URL for TTS")]
-    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
-
-    [Tooltip("Path for the TTS endpoint")]
-    [SerializeField] private string ttsPath = "/tts";
-
     [SerializeField, Range(1, 3)] private int maxRetries = 2;
     [SerializeField] private int requestTimeoutSeconds = 45;
 
@@ -79,6 +73,7 @@ public class TTSManager : MonoBehaviour
     public EmotionController emotionController;
     private bool hasLoggedMissingMotionTarget;
     private int previousDirectMotionCode = -1;
+    private const string TtsPath = "/tts";
     private static readonly string[] OriginalMotionTriggers =
     {
         "Neutral", "Confused", "Nod 1", "Nod 2", "Nod 3",
@@ -259,7 +254,12 @@ public class TTSManager : MonoBehaviour
 
     private IEnumerator ConvertTextToSpeechRoutine(string inputText, int? motionCode)
     {
-        string endpoint = $"{backendBaseUrl.TrimEnd('/')}{ttsPath}";
+        if (!ApiConfigProvider.TryBuildBackendUrl(TtsPath, out string endpoint))
+        {
+            Debug.LogError("TTS Manager: API environment config is missing or incomplete.");
+            yield break;
+        }
+
         int attempts = Mathf.Max(1, maxRetries);
         if (string.IsNullOrWhiteSpace(sessionId))
             sessionId = $"tts-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";

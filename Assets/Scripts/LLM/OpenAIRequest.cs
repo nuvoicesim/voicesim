@@ -19,8 +19,6 @@ public class OpenAIRequest : MonoBehaviour
     public string apiKey = "";
 
     [Header("LLM Backend")]
-    [SerializeField] private string backendBaseUrl = "https://f0kk74qeyf.execute-api.us-west-2.amazonaws.com/dev";
-    [SerializeField] private string dialoguePath = "/llm-dialogue";
     [SerializeField, Range(1, 3)] private int maxRetries = 2;
     [SerializeField] private int requestTimeoutSeconds = 45;
 
@@ -40,6 +38,8 @@ public class OpenAIRequest : MonoBehaviour
     [SerializeField] private TargetButtonUI targetButtonUI;
 
     // Internal state
+    private const string DialoguePath = "/llm-dialogue";
+    private const string ScoringPath = "/llm-scoring";
     private float currentSpeechSpeed;
     private string basePath;
     public string CurrentUserId { get; private set; }
@@ -229,7 +229,13 @@ public class OpenAIRequest : MonoBehaviour
     private IEnumerator PostDialogueRequest()
     {
         string requestBody = BuildDialogueRequestBody();
-        string requestUrl = $"{backendBaseUrl.TrimEnd('/')}{dialoguePath}";
+        if (!ApiConfigProvider.TryBuildBackendUrl(DialoguePath, out string requestUrl))
+        {
+            Debug.LogError("[OpenAIRequest] API environment config is missing or incomplete.");
+            HandlePatientResponse("I... I am not sure...", 0, 0);
+            yield break;
+        }
+
         int attempts = Mathf.Max(1, maxRetries);
 
         for (int attempt = 1; attempt <= attempts; attempt++)
@@ -427,7 +433,10 @@ public class OpenAIRequest : MonoBehaviour
 
     public string GetScoringEndpointUrl()
     {
-        return $"{backendBaseUrl.TrimEnd('/')}/llm-scoring";
+        if (ApiConfigProvider.TryBuildBackendUrl(ScoringPath, out string scoringUrl))
+            return scoringUrl;
+
+        return null;
     }
 
     public void SaveConversationToAWS()
