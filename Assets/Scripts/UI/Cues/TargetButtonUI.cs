@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using UI.Cues;
 using UI.Cues.WarningSystem;
@@ -26,7 +27,8 @@ public class TargetButtonUI : MonoBehaviour
     };
 
     private int currentTargetIndex = 1;
-    private const int MaxTargetIndex = 10;
+    private int MaxTargetIndex => TargetWords.Length - 1;
+    private Button targetButton;
 
     /// <summary>
     /// Returns the current target word in lowercase, e.g. "coffee".
@@ -34,18 +36,29 @@ public class TargetButtonUI : MonoBehaviour
     public string CurrentTargetWord =>
         currentTargetIndex < TargetWords.Length ? TargetWords[currentTargetIndex] : "";
 
+    void Awake()
+    {
+        targetButton = GetComponent<Button>();
+    }
+
     void Start()
     {
         UpdateButtonLabel();
+        UpdateButtonInteractivity();
     }
 
     public void OnTargetClicked()
     {
+        if (currentTargetIndex >= MaxTargetIndex)
+        {
+            Debug.Log($"Already at final target: Target {currentTargetIndex} ({CurrentTargetWord})");
+            return;
+        }
+
         currentTargetIndex++;
-        if (currentTargetIndex > MaxTargetIndex)
-            currentTargetIndex = 1;
 
         UpdateButtonLabel();
+        UpdateButtonInteractivity();
 
         if (cueController != null)
         {
@@ -73,6 +86,17 @@ public class TargetButtonUI : MonoBehaviour
     private void UpdateButtonLabel()
     {
         if (buttonText != null)
-            buttonText.text = "Target " + currentTargetIndex;
+        {
+            if (currentTargetIndex >= MaxTargetIndex)
+                buttonText.text = $"Final Target ({currentTargetIndex}/{MaxTargetIndex})";
+            else
+                buttonText.text = $"Next Target ({currentTargetIndex}/{MaxTargetIndex})";
+        }
+    }
+
+    private void UpdateButtonInteractivity()
+    {
+        if (targetButton != null)
+            targetButton.interactable = currentTargetIndex < MaxTargetIndex;
     }
 }
