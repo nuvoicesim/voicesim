@@ -9,9 +9,7 @@ using System;
 public class AWSAPIConnector : MonoBehaviour
 {
     public static AWSAPIConnector Instance;
-
-    [Header("AWS API Configuration")]
-    public string awsApiUrl = "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod/chat-history";
+    private const string ChatHistoryPath = "/chat-history";
 
     [Header("Test Configuration")]
     [Tooltip("Hard-coded user ID for testing")]
@@ -39,7 +37,8 @@ public class AWSAPIConnector : MonoBehaviour
     void Start()
     {
         Debug.Log("=== AWS API CONNECTOR INITIALIZED ===");
-        Debug.Log($"API Endpoint: {awsApiUrl}");
+        if (ApiConfigProvider.TryBuildBackendUrl(ChatHistoryPath, out string apiUrl))
+            Debug.Log($"API Endpoint: {apiUrl}");
         Debug.Log($"Test User ID: {testUserId}");
         Debug.Log($"Test Simulation Level: {testSimulationLevel}");
     }
@@ -160,7 +159,13 @@ public class AWSAPIConnector : MonoBehaviour
             Debug.Log($"Payload: {jsonData}");
         }
 
-        yield return StartCoroutine(SendPostRequest(awsApiUrl, jsonData, "Chat History"));
+        if (!ApiConfigProvider.TryBuildBackendUrl(ChatHistoryPath, out string chatHistoryUrl))
+        {
+            Debug.LogError("[AWSAPIConnector] API environment config is missing or incomplete.");
+            yield break;
+        }
+
+        yield return StartCoroutine(SendPostRequest(chatHistoryUrl, jsonData, "Chat History"));
     }
 
     private IEnumerator SendCombinedDataCoroutine(ChatHistoryPayload payload)
@@ -175,7 +180,13 @@ public class AWSAPIConnector : MonoBehaviour
             Debug.Log($"Payload: {jsonData}");
         }
 
-        yield return StartCoroutine(SendPostRequest(awsApiUrl, jsonData, "Combined Chat History + Evaluation"));
+        if (!ApiConfigProvider.TryBuildBackendUrl(ChatHistoryPath, out string chatHistoryUrl))
+        {
+            Debug.LogError("[AWSAPIConnector] API environment config is missing or incomplete.");
+            yield break;
+        }
+
+        yield return StartCoroutine(SendPostRequest(chatHistoryUrl, jsonData, "Combined Chat History + Evaluation"));
     }
 
     // 通用POST请求方法

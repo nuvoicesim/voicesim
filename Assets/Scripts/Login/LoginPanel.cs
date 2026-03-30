@@ -19,9 +19,6 @@ public class LoginPanel : MonoBehaviour
     [SerializeField] private GameObject panelRoot;        // Optional: leave empty to use this GameObject
 
     [Header("Network Settings")]
-    [SerializeField]
-    private string loginUrl =
-        "https://vkqdv4t0rh.execute-api.us-east-1.amazonaws.com/prod/auth/login";
     [Tooltip("Total seconds before the request times out.")]
     [SerializeField, Range(5, 120)] private int requestTimeoutSeconds = 20;
 
@@ -34,6 +31,7 @@ public class LoginPanel : MonoBehaviour
     // --- Internal state ---
     private Coroutine _inflight;
     private const string LastUsernamePrefsKey = "LoginPanel_LastUsername";
+    private const string LoginPath = "/auth/login";
     private GameObject Root => panelRoot == null ? gameObject : panelRoot;
 
     // --- DTOs matching your API schema ---
@@ -143,6 +141,13 @@ public class LoginPanel : MonoBehaviour
 
     private IEnumerator LoginRoutine(string username, string password)
     {
+        if (!ApiConfigProvider.TryBuildBackendUrl(LoginPath, out string loginUrl))
+        {
+            _inflight = null;
+            Fail("API environment config is missing or incomplete.");
+            yield break;
+        }
+
         ToggleInteractable(false);
         ShowSpinner(true);
         SetStatus("Signing in…");
