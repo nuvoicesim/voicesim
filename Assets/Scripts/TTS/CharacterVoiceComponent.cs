@@ -81,7 +81,6 @@ public class CharacterVoiceComponent : MonoBehaviour
         if (voiceProfile == null || ttsManager == null) return;
         
         // Apply voice settings to TTSManager
-        ttsManager.voiceId = voiceProfile.voiceId;
         ttsManager.modelId = voiceProfile.modelId;
         ttsManager.stability = voiceProfile.stability;
         ttsManager.similarityBoost = voiceProfile.similarityBoost;

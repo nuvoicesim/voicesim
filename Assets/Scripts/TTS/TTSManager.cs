@@ -21,9 +21,6 @@ public class TTSManager : MonoBehaviour
     [SerializeField, Range(1, 3)] private int maxRetries = 2;
     [SerializeField] private int requestTimeoutSeconds = 45;
 
-    [Tooltip("Voice ID for ElevenLabs")]
-    public string voiceId = "Bz0vsNJm8uY1hbd4c4AE";
-
     [Tooltip("Model ID for ElevenLabs")]
     public string modelId = "eleven_multilingual_v2";
 
@@ -58,8 +55,7 @@ public class TTSManager : MonoBehaviour
 
     // Runtime request context
     public string CurrentUserId { get; private set; }
-    public int CurrentSimulationLevel { get; private set; } = 1;
-    public string CurrentScenario { get; private set; } = "task1";
+    public string CurrentScenario { get; private set; } = "assignment-runtime";
 
     private string sessionId = "";
     private int turnIndex = 0;
@@ -116,13 +112,16 @@ public class TTSManager : MonoBehaviour
 
     void Start()
     {
+        RuntimeSessionContext.Changed += HandleRuntimeContextChanged;
+        ApplyRuntimeContextFromHost();
+
         // Get references to required components
         TryResolveMotionTargets();
 
         // Find the Audio2FaceManager if we're using it
         if (useAudio2Face)
         {
-            audio2FaceManager = FindObjectOfType<Audio2FaceManager>();
+            audio2FaceManager = FindFirstObjectByType<Audio2FaceManager>();
             if (audio2FaceManager == null)
             {
                 Debug.LogWarning("Audio2FaceManager not found in the scene. Audio2Face integration disabled.");
@@ -138,13 +137,13 @@ public class TTSManager : MonoBehaviour
         if (!useBloodEffectController) return;
 
         // Find the blood effect in the UI
-        bloodEffectController = FindObjectOfType<BloodEffectController>();
+        bloodEffectController = FindFirstObjectByType<BloodEffectController>();
         if (bloodEffectController == null)
         {
             Debug.LogError("BloodEffectController not found in the scene. Make sure it exists in the UI!");
         }
 
-        bloodTextController = FindObjectOfType<BloodTextController>();
+        bloodTextController = FindFirstObjectByType<BloodTextController>();
         if (bloodTextController == null)
         {
             Debug.LogError("BloodTextController not found in the scene. Make sure it exists in the UI!");
@@ -154,6 +153,11 @@ public class TTSManager : MonoBehaviour
         {
             Debug.LogError("EmotionController not found in the scene. Make sure it exists!");
         }
+    }
+
+    private void OnDestroy()
+    {
+        RuntimeSessionContext.Changed -= HandleRuntimeContextChanged;
     }
 
     private bool TryResolveMotionTargets()
@@ -178,7 +182,7 @@ public class TTSManager : MonoBehaviour
         }
         if (animationController == null)
         {
-            animationController = FindObjectOfType<CharacterAnimationController>();
+            animationController = FindFirstObjectByType<CharacterAnimationController>();
         }
 
         if (motionAnimator == null)
@@ -199,7 +203,7 @@ public class TTSManager : MonoBehaviour
         }
         if (motionAnimator == null)
         {
-            motionAnimator = FindObjectOfType<Animator>();
+            motionAnimator = FindFirstObjectByType<Animator>();
         }
 
         if (animationController == null && motionAnimator == null)
@@ -219,18 +223,12 @@ public class TTSManager : MonoBehaviour
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
         CurrentUserId = userId;
-        CurrentSimulationLevel = Mathf.Clamp(simulationLevel, 1, 3);
-        CurrentScenario = BuildScenarioFromSimulationLevel(CurrentSimulationLevel);
+        CurrentScenario = RuntimeSessionContext.HasContext ? RuntimeSessionContext.ContextLabel : CurrentScenario;
+        if (string.IsNullOrWhiteSpace(CurrentScenario))
+            CurrentScenario = "assignment-runtime";
         sessionId = $"{CurrentUserId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
         turnIndex = 0;
-
-        switch (CurrentSimulationLevel)
-        {
-            case 1: voiceId = "QXFI3J7JB0fOlMwKDUxE"; break;
-            case 2: voiceId = "KjIBD4QnlzAqKHmoYfdZ"; break;
-            case 3: voiceId = "nlPFgtYJ0K18Hij3YdiX"; break;
-        }
-        Debug.Log($"[TTSManager] context userID={CurrentUserId}, simulationLevel={CurrentSimulationLevel}, scenario={CurrentScenario}, voiceId={voiceId}");
+        Debug.Log($"[TTSManager] Legacy local context applied. userID={CurrentUserId}, contextLabel={CurrentScenario}");
     }
 
     // Public method to be called to convert text to speech
@@ -254,6 +252,12 @@ public class TTSManager : MonoBehaviour
 
     private IEnumerator ConvertTextToSpeechRoutine(string inputText, int? motionCode)
     {
+        if (!RuntimeSessionContext.HasRuntimeToken)
+        {
+            Debug.LogError("TTS Manager: Missing runtime token. The host app must inject runtime context before calling /tts.");
+            yield break;
+        }
+
         if (!ApiConfigProvider.TryBuildBackendUrl(TtsPath, out string endpoint))
         {
             Debug.LogError("TTS Manager: API environment config is missing or incomplete.");
@@ -261,13 +265,11 @@ public class TTSManager : MonoBehaviour
         }
 
         int attempts = Mathf.Max(1, maxRetries);
-        if (string.IsNullOrWhiteSpace(sessionId))
-            sessionId = $"tts-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
         turnIndex++;
 
         for (int attempt = 1; attempt <= attempts; attempt++)
         {
-            string requestId = $"{sessionId}-tts-{turnIndex}-try-{attempt}";
+            string requestId = $"{BuildRequestIdPrefix()}-tts-{turnIndex}-try-{attempt}";
             string jsonContent = JsonConvert.SerializeObject(BuildTTSRequestPayload(inputText));
 
             using (var request = new UnityWebRequest(endpoint, "POST"))
@@ -279,6 +281,9 @@ public class TTSManager : MonoBehaviour
                 request.SetRequestHeader("Content-Type", "application/json");
                 request.SetRequestHeader("Accept", "application/json");
                 request.SetRequestHeader("X-Request-ID", requestId);
+
+                if (!RuntimeSessionContext.ApplyAuthorization(request, "TTSManager"))
+                    yield break;
 
                 Debug.Log("=== AWS TTS REQUEST ===");
                 Debug.Log("POST endpoint: " + endpoint);
@@ -356,22 +361,7 @@ public class TTSManager : MonoBehaviour
     {
         return new TTSRequestPayload
         {
-            userID = string.IsNullOrWhiteSpace(CurrentUserId) ? "anonymous-user" : CurrentUserId,
-            simulationLevel = Mathf.Clamp(CurrentSimulationLevel, 1, 3),
-            scenario = string.IsNullOrWhiteSpace(CurrentScenario)
-                ? BuildScenarioFromSimulationLevel(Mathf.Clamp(CurrentSimulationLevel, 1, 3))
-                : CurrentScenario,
             text = inputText,
-            voiceProfile = new TTSVoiceProfile
-            {
-                profileId = $"sim-{Mathf.Clamp(CurrentSimulationLevel, 1, 3)}",
-                voiceId = voiceId,
-                modelId = modelId,
-                stability = stability,
-                similarityBoost = similarityBoost,
-                styleExaggeration = styleExaggeration,
-                speed = speed
-            },
             options = new TTSOptions
             {
                 format = "pcm_16000",
@@ -379,23 +369,10 @@ public class TTSManager : MonoBehaviour
             },
             metadata = new TTSMetadata
             {
-                sessionId = string.IsNullOrWhiteSpace(sessionId)
-                    ? $"tts-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}"
-                    : sessionId,
                 turnIndex = turnIndex,
-                client = "unity"
+                client = "unity-webgl"
             }
         };
-    }
-
-    private static string BuildScenarioFromSimulationLevel(int simulationLevel)
-    {
-        switch (Mathf.Clamp(simulationLevel, 1, 3))
-        {
-            case 2: return "task2";
-            case 3: return "task3";
-            default: return "task1";
-        }
     }
 
     private static List<WordTiming> BuildWordTimings(Alignment alignment)
@@ -553,25 +530,9 @@ public class TTSManager : MonoBehaviour
     [Serializable]
     public class TTSRequestPayload
     {
-        public string userID { get; set; }
-        public int simulationLevel { get; set; }
-        public string scenario { get; set; }
         public string text { get; set; }
-        public TTSVoiceProfile voiceProfile { get; set; }
         public TTSOptions options { get; set; }
         public TTSMetadata metadata { get; set; }
-    }
-
-    [Serializable]
-    public class TTSVoiceProfile
-    {
-        public string profileId { get; set; }
-        public string voiceId { get; set; }
-        public string modelId { get; set; }
-        public float stability { get; set; }
-        public float similarityBoost { get; set; }
-        public float styleExaggeration { get; set; }
-        public float speed { get; set; }
     }
 
     [Serializable]
@@ -584,7 +545,6 @@ public class TTSManager : MonoBehaviour
     [Serializable]
     public class TTSMetadata
     {
-        public string sessionId { get; set; }
         public int turnIndex { get; set; }
         public string client { get; set; }
     }
@@ -755,5 +715,39 @@ public class TTSManager : MonoBehaviour
     public void UpdateAnimation(int code)
     {
         UpdateMotion(code);
+    }
+
+    private void HandleRuntimeContextChanged()
+    {
+        ApplyRuntimeContextFromHost();
+    }
+
+    private void ApplyRuntimeContextFromHost()
+    {
+        if (!RuntimeSessionContext.HasContext)
+            return;
+
+        string previousSessionId = sessionId;
+        CurrentUserId = string.IsNullOrWhiteSpace(RuntimeSessionContext.UserId) ? CurrentUserId : RuntimeSessionContext.UserId;
+        CurrentScenario = RuntimeSessionContext.ContextLabel;
+        if (string.IsNullOrWhiteSpace(CurrentScenario))
+            CurrentScenario = "assignment-runtime";
+
+        if (!string.IsNullOrWhiteSpace(RuntimeSessionContext.SessionId))
+            sessionId = RuntimeSessionContext.SessionId;
+
+        bool isNewSession = !string.IsNullOrWhiteSpace(sessionId) && !string.Equals(previousSessionId, sessionId, StringComparison.Ordinal);
+        if (isNewSession || string.IsNullOrWhiteSpace(previousSessionId))
+            turnIndex = 0;
+
+        Debug.Log($"[TTSManager] Runtime context applied. sessionId={sessionId}, assignmentId={RuntimeSessionContext.AssignmentId}, sceneId={RuntimeSessionContext.SceneId}, contextLabel={CurrentScenario}");
+    }
+
+    private string BuildRequestIdPrefix()
+    {
+        if (!string.IsNullOrWhiteSpace(sessionId))
+            return sessionId;
+
+        return string.IsNullOrWhiteSpace(CurrentUserId) ? "unity-webgl" : CurrentUserId;
     }
 }

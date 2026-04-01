@@ -43,7 +43,6 @@ public class OpenAIRequest : MonoBehaviour
     private float currentSpeechSpeed;
     private string basePath;
     public string CurrentUserId { get; private set; }
-    public int CurrentSimulationLevel { get; private set; } = 1;
 
     private readonly List<Dictionary<string, string>> chatMessages = new List<Dictionary<string, string>>();
     private string currentPatientResponse = "";
@@ -60,28 +59,17 @@ public class OpenAIRequest : MonoBehaviour
     }
 
     [Serializable]
-    private class DialogueMetadata
-    {
-        public string sessionId;
-        public int turnIndex;
-        public string client;
-    }
-
-    [Serializable]
-    private class DialogueOptions
-    {
-        public float temperature;
-        public int maxOutputTokens;
-    }
-
-    [Serializable]
     private class DialogueRequestPayload
     {
-        public string userID;
-        public int simulationLevel;
         public List<Dictionary<string, string>> messages;
         public DialogueMetadata metadata;
-        public DialogueOptions options;
+    }
+
+    [Serializable]
+    private class DialogueMetadata
+    {
+        public int turnIndex;
+        public string client;
     }
 
     [Serializable]
@@ -111,7 +99,7 @@ public class OpenAIRequest : MonoBehaviour
         if (cueControllerObject == null)
             Debug.LogWarning("OpenAIRequest: cueControllerObject is not assigned. Skipping cue UI setup.");
 
-        cueController = cueControllerObject.GetComponent<CueController>();
+        cueController = cueControllerObject != null ? cueControllerObject.GetComponent<CueController>() : null;
 
         if (emotionController == null)
             Debug.LogError("OpenAIRequest: EmotionController not found on this object, children, or parent.");
@@ -125,10 +113,18 @@ public class OpenAIRequest : MonoBehaviour
         if (targetButtonUI == null)
             Debug.LogWarning("OpenAIRequest: targetButtonUI not assigned. Target word will be empty.");
 
+        RuntimeSessionContext.Changed += HandleRuntimeContextChanged;
+        ApplyRuntimeContextFromHost();
+
         if (!string.IsNullOrEmpty(currentScenario))
             InitializeChat();
         else
-            Debug.LogWarning("[OpenAIRequest] currentScenario is empty at Start; will initialize after login via ApplyLoginContext.");
+            Debug.LogWarning("[OpenAIRequest] Waiting for runtime session context from host app.");
+    }
+
+    private void OnDestroy()
+    {
+        RuntimeSessionContext.Changed -= HandleRuntimeContextChanged;
     }
 
     private bool TryResolveEmotionController()
@@ -148,23 +144,17 @@ public class OpenAIRequest : MonoBehaviour
     public void ApplyLoginContext(string userId, int simulationLevel)
     {
         CurrentUserId = userId;
-        CurrentSimulationLevel = Mathf.Clamp(simulationLevel, 1, 3);
         sessionId = $"{CurrentUserId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        currentScenario = RuntimeSessionContext.HasContext ? RuntimeSessionContext.ContextLabel : currentScenario;
+        if (string.IsNullOrWhiteSpace(currentScenario))
+            currentScenario = "assignment-runtime";
         turnIndex = 0;
-
-        switch (CurrentSimulationLevel)
-        {
-            case 1: currentScenario = "task1"; break;
-            case 2: currentScenario = "task2"; break;
-            case 3: currentScenario = "task3"; break;
-            default: currentScenario = "task1"; break;
-        }
-
         InitializeChat();
+
         if (ScoreManager.Instance != null)
             ScoreManager.Instance.Initialize(currentScenario);
 
-        Debug.Log($"[OpenAIRequest] Login context applied. userID={CurrentUserId}, simulationLevel={CurrentSimulationLevel}, scenario={currentScenario}");
+        Debug.Log($"[OpenAIRequest] Legacy local context applied. userID={CurrentUserId}, contextLabel={currentScenario}");
     }
 
     private void InitializeChat()
@@ -194,6 +184,13 @@ public class OpenAIRequest : MonoBehaviour
         if (string.IsNullOrWhiteSpace(nurseMessage))
         {
             Debug.LogWarning("[OpenAIRequest] Empty nurse message ignored.");
+            return;
+        }
+
+        if (!RuntimeSessionContext.HasRuntimeToken)
+        {
+            Debug.LogError("[OpenAIRequest] Cannot send dialogue request without a runtime token.");
+            HandlePatientResponse("I... I am not sure...", 0, 0);
             return;
         }
 
@@ -247,7 +244,13 @@ public class OpenAIRequest : MonoBehaviour
                 request.timeout = requestTimeoutSeconds;
                 request.SetRequestHeader("Content-Type", "application/json");
                 request.SetRequestHeader("Accept", "application/json");
-                request.SetRequestHeader("X-Request-ID", $"{sessionId}-turn-{turnIndex}-try-{attempt}");
+                request.SetRequestHeader("X-Request-ID", $"{BuildRequestIdPrefix()}-turn-{turnIndex}-try-{attempt}");
+
+                if (!RuntimeSessionContext.ApplyAuthorization(request, "OpenAIRequest"))
+                {
+                    HandlePatientResponse("I... I am not sure...", 0, 0);
+                    yield break;
+                }
 
                 yield return request.SendWebRequest();
 
@@ -319,19 +322,11 @@ public class OpenAIRequest : MonoBehaviour
 
         var payload = new DialogueRequestPayload
         {
-            userID = string.IsNullOrWhiteSpace(CurrentUserId) ? "anonymous-user" : CurrentUserId,
-            simulationLevel = Mathf.Clamp(CurrentSimulationLevel, 1, 3),
             messages = filteredMessages,
             metadata = new DialogueMetadata
             {
-                sessionId = sessionId,
                 turnIndex = turnIndex,
-                client = "unity"
-            },
-            options = new DialogueOptions
-            {
-                temperature = 0.2f,
-                maxOutputTokens = 220
+                client = "unity-webgl"
             }
         };
 
@@ -441,7 +436,7 @@ public class OpenAIRequest : MonoBehaviour
 
     public void SaveConversationToAWS()
     {
-        Debug.Log("🔄 Conversation will be saved with evaluation report");
+        Debug.Log("[OpenAIRequest] Session turns and evaluation are persisted by the current backend flow. No separate chat-history call is required.");
     }
 
     [ContextMenu("Debug Chat Messages")]
@@ -458,14 +453,51 @@ public class OpenAIRequest : MonoBehaviour
     [ContextMenu("Test Save Current Conversation")]
     public void TestSaveCurrentConversation()
     {
-        if (AWSAPIConnector.Instance != null && chatMessages.Count > 0)
+        Debug.LogWarning("[OpenAIRequest] Legacy chat-history save helper is deprecated for the current embedded WebGL contract.");
+    }
+
+    private void HandleRuntimeContextChanged()
+    {
+        ApplyRuntimeContextFromHost();
+    }
+
+    private void ApplyRuntimeContextFromHost()
+    {
+        if (!RuntimeSessionContext.HasContext)
+            return;
+
+        string previousScenario = currentScenario;
+        string previousSessionId = sessionId;
+        string nextUserId = string.IsNullOrWhiteSpace(RuntimeSessionContext.UserId) ? CurrentUserId : RuntimeSessionContext.UserId;
+        string nextScenario = RuntimeSessionContext.ContextLabel;
+        string nextSessionId = RuntimeSessionContext.SessionId;
+        bool isNewSession = !string.IsNullOrWhiteSpace(nextSessionId) && !string.Equals(previousSessionId, nextSessionId, StringComparison.Ordinal);
+        bool needsInitialization = isNewSession || chatMessages.Count == 0 || string.IsNullOrWhiteSpace(previousScenario);
+
+        CurrentUserId = nextUserId;
+        currentScenario = string.IsNullOrWhiteSpace(nextScenario)
+            ? "assignment-runtime"
+            : nextScenario;
+
+        if (!string.IsNullOrWhiteSpace(nextSessionId))
+            sessionId = nextSessionId;
+
+        if (needsInitialization)
         {
-            Debug.Log("Testing immediate chat history save...");
-            AWSAPIConnector.Instance.SaveChatHistory(chatMessages);
+            turnIndex = 0;
+            InitializeChat();
+            if (ScoreManager.Instance != null)
+                ScoreManager.Instance.Initialize(currentScenario);
         }
-        else
-        {
-            Debug.LogWarning("Cannot test save: missing components or no chat messages");
-        }
+
+        Debug.Log($"[OpenAIRequest] Runtime context applied. sessionId={sessionId}, assignmentId={RuntimeSessionContext.AssignmentId}, sceneId={RuntimeSessionContext.SceneId}, contextLabel={currentScenario}");
+    }
+
+    private string BuildRequestIdPrefix()
+    {
+        if (!string.IsNullOrWhiteSpace(sessionId))
+            return sessionId;
+
+        return string.IsNullOrWhiteSpace(CurrentUserId) ? "unity-webgl" : CurrentUserId;
     }
 }

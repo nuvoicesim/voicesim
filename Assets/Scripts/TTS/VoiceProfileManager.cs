@@ -158,7 +158,6 @@ public class VoiceProfileManager : MonoBehaviour
         // Apply settings to TTSManager
         if (ttsManager != null)
         {
-            ttsManager.voiceId = profile.voiceId;
             ttsManager.modelId = profile.modelId;
             ttsManager.stability = profile.stability;
             ttsManager.similarityBoost = profile.similarityBoost;
