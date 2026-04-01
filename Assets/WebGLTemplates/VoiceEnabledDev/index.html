@@ -437,6 +437,8 @@
       let isRecognitionActive = false;
       let finalTranscript = '';
       let interimTranscript = '';
+      let userSpeechStartAtIso = '';
+      let userSpeechEndAtIso = '';
       let isRKeyPressed = false;
       let lastInterimLogAt = 0;
       const interimLogThrottleMs = 800;
@@ -459,6 +461,18 @@
           isRecognitionActive = true;
           voiceLog('info', 'Recording started. Hold R to keep recording, release R to send.');
           notifyUnityStatus('Recording started');
+        };
+
+        recognition.onspeechstart = () => {
+          if (!userSpeechStartAtIso) {
+            userSpeechStartAtIso = new Date().toISOString();
+            voiceLog('debug', 'Speech detected at', userSpeechStartAtIso);
+          }
+        };
+
+        recognition.onspeechend = () => {
+          userSpeechEndAtIso = new Date().toISOString();
+          voiceLog('debug', 'Speech ended at', userSpeechEndAtIso);
         };
 
         recognition.onresult = (event) => {
@@ -485,7 +499,7 @@
           isRecognitionActive = false;
           const text = finalTranscript.trim();
           if (text) {
-            sendToUnity(text);
+            sendToUnity(text, userSpeechStartAtIso || null, userSpeechEndAtIso || null);
           } else {
             voiceLog('debug', 'Recording ended with no transcript.');
           }
@@ -518,6 +532,8 @@
 
         finalTranscript = '';
         interimTranscript = '';
+        userSpeechStartAtIso = '';
+        userSpeechEndAtIso = '';
 
         try {
           recognition.start();
@@ -550,7 +566,7 @@
         }
       }
 
-      function sendToUnity(text) {
+      function sendToUnity(text, userSpeechStartAt, userSpeechEndAt) {
         if (!unityInstanceGlobal) {
           voiceLog('error', 'Unity instance is not available.');
           return;
@@ -567,11 +583,16 @@
           'WebGLTextBridge',
           'Humano_Aphasia'
         ];
+        const payload = JSON.stringify({
+          text,
+          userSpeechStartAt: userSpeechStartAt || undefined,
+          userSpeechEndAt: userSpeechEndAt || undefined
+        });
 
         if (knownBridgeName) {
           try {
-            unityInstanceGlobal.SendMessage(knownBridgeName, 'InjectText', text);
-            voiceLog('info', 'Sent transcript via', knownBridgeName + ':', text);
+            unityInstanceGlobal.SendMessage(knownBridgeName, 'InjectText', payload);
+            voiceLog('info', 'Sent transcript via', knownBridgeName + ':', text, userSpeechStartAt || '', userSpeechEndAt || '');
             return;
           } catch (error) {
             voiceLog('warn', 'Known bridge failed, rediscovering:', knownBridgeName, error.message);
@@ -582,9 +603,9 @@
         let sent = false;
         for (const name of possibleNames) {
           try {
-            unityInstanceGlobal.SendMessage(name, 'InjectText', text);
+            unityInstanceGlobal.SendMessage(name, 'InjectText', payload);
             knownBridgeName = name;
-            voiceLog('info', 'Sent transcript via', name + ':', text);
+            voiceLog('info', 'Sent transcript via', name + ':', text, userSpeechStartAt || '', userSpeechEndAt || '');
             sent = true;
             break;
           } catch (error) {

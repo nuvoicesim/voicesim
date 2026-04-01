@@ -240,6 +240,11 @@ public class TTSManager : MonoBehaviour
     // Optional motionCode supports structured dialogue outputs where code is separate from text.
     public void ConvertTextToSpeech(string text, int? motionCode)
     {
+        ConvertTextToSpeech(text, motionCode, null);
+    }
+
+    public void ConvertTextToSpeech(string text, int? motionCode, int? resolvedTurnIndex)
+    {
         if (string.IsNullOrEmpty(text))
         {
             Debug.Log("TTS Manager: No text provided for TTS");
@@ -247,10 +252,10 @@ public class TTSManager : MonoBehaviour
         }
 
         Debug.Log($"TTS Manager: Processing text: '{text}'");
-        StartCoroutine(ConvertTextToSpeechRoutine(text, motionCode));
+        StartCoroutine(ConvertTextToSpeechRoutine(text, motionCode, resolvedTurnIndex));
     }
 
-    private IEnumerator ConvertTextToSpeechRoutine(string inputText, int? motionCode)
+    private IEnumerator ConvertTextToSpeechRoutine(string inputText, int? motionCode, int? resolvedTurnIndex)
     {
         if (!RuntimeSessionContext.HasRuntimeToken)
         {
@@ -265,12 +270,12 @@ public class TTSManager : MonoBehaviour
         }
 
         int attempts = Mathf.Max(1, maxRetries);
-        turnIndex++;
+        int requestTurnIndex = ReserveTurnIndex(resolvedTurnIndex);
 
         for (int attempt = 1; attempt <= attempts; attempt++)
         {
-            string requestId = $"{BuildRequestIdPrefix()}-tts-{turnIndex}-try-{attempt}";
-            string jsonContent = JsonConvert.SerializeObject(BuildTTSRequestPayload(inputText));
+            string requestId = $"{BuildRequestIdPrefix()}-tts-{requestTurnIndex}-try-{attempt}";
+            string jsonContent = JsonConvert.SerializeObject(BuildTTSRequestPayload(inputText, requestTurnIndex));
 
             using (var request = new UnityWebRequest(endpoint, "POST"))
             {
@@ -334,7 +339,7 @@ public class TTSManager : MonoBehaviour
                     }
 
                     Debug.Log($"[TTSManager] AWS TTS success: {audioBytes.Length} bytes, requestId={parsed.RequestId}");
-                    ProcessAudioBytes(audioBytes, wordTimings, inputText, motionCode);
+                    ProcessAudioBytes(audioBytes, wordTimings, inputText, motionCode, requestTurnIndex);
                     yield break;
                 }
 
@@ -357,7 +362,7 @@ public class TTSManager : MonoBehaviour
         Debug.LogError("TTS Manager: Failed to get audio data from AWS /tts");
     }
 
-    private object BuildTTSRequestPayload(string inputText)
+    private object BuildTTSRequestPayload(string inputText, int requestTurnIndex)
     {
         return new TTSRequestPayload
         {
@@ -369,7 +374,7 @@ public class TTSManager : MonoBehaviour
             },
             metadata = new TTSMetadata
             {
-                turnIndex = turnIndex,
+                turnIndex = requestTurnIndex,
                 client = "unity-webgl"
             }
         };
@@ -459,7 +464,7 @@ public class TTSManager : MonoBehaviour
 
 
     // Method to process and play the audio bytes received
-    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent, int? motionCode)
+    private void ProcessAudioBytes(byte[] audioData, List<WordTiming> wordTimings, string messageContent, int? motionCode, int requestTurnIndex)
     {
         AudioClip audioClip = CreateAudioClipFromPcm16(audioData, 16000, 1, "tts_audio");
         if (audioClip == null)
@@ -468,7 +473,7 @@ public class TTSManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(PlayAudioClip(audioClip, wordTimings, messageContent, motionCode));
+        StartCoroutine(PlayAudioClip(audioClip, wordTimings, messageContent, motionCode, requestTurnIndex));
     }
 
     private AudioClip CreateAudioClipFromPcm16(byte[] pcmData, int sampleRate, int channels, string clipName)
@@ -494,35 +499,63 @@ public class TTSManager : MonoBehaviour
     }
 
     // Coroutine to play audio clip directly from memory (WebGL-safe).
-    private IEnumerator PlayAudioClip(AudioClip audioClip, List<WordTiming> wordTimings, string messageContent, int? motionCode)
+    private IEnumerator PlayAudioClip(AudioClip audioClip, List<WordTiming> wordTimings, string messageContent, int? motionCode, int requestTurnIndex)
     {
+        if (audioSource == null)
+        {
+            Debug.LogError("TTS Manager: AudioSource is not assigned.");
+            yield break;
+        }
+
         audioSource.clip = audioClip;
         audioSource.Play();
+        bool playbackStarted = false;
+        float playbackStartDeadline = Time.realtimeSinceStartup + 1.0f;
 
-        // If the file is successfully loaded, play emotion animation
-        if (emotionController == null)
+        while (!playbackStarted)
         {
-            Debug.LogError("EmotionController not found in the scene. Make sure it exists!");
-        }
-        else
-        {
-            emotionController.SyncAnimationsWithWordTimings(wordTimings);
-            //emotionController.PlayEmotion();
+            if (audioSource.isPlaying)
+            {
+                playbackStarted = true;
+
+                if (OpenAIRequest.Instance != null)
+                    OpenAIRequest.Instance.ReportPatientSpeechStart(requestTurnIndex);
+
+                if (emotionController == null)
+                {
+                    Debug.LogError("EmotionController not found in the scene. Make sure it exists!");
+                }
+                else
+                {
+                    emotionController.SyncAnimationsWithWordTimings(wordTimings);
+                }
+
+                if (motionCode.HasValue)
+                {
+                    UpdateMotion(motionCode.Value);
+                }
+                else
+                {
+                    UpdateMotionFromLegacySuffix(messageContent);
+                }
+
+                break;
+            }
+
+            if (Time.realtimeSinceStartup >= playbackStartDeadline)
+            {
+                Debug.LogWarning($"[TTSManager] Audio playback never started for turnIndex={requestTurnIndex}. Leaving patient speech timing unset.");
+                yield break;
+            }
+
+            yield return null;
         }
 
-        // Update motion based on explicit code first, then legacy suffix if present.
-        if (motionCode.HasValue)
-        {
-            UpdateMotion(motionCode.Value);
-        }
-        else
-        {
-            UpdateMotionFromLegacySuffix(messageContent);
-        }
+        while (audioSource != null && audioSource.isPlaying)
+            yield return null;
 
-        float waitTime = audioClip.length + 0.5f;
-        Debug.Log($"Audio playing, will wait {waitTime} seconds for completion");
-        yield return new WaitForSeconds(waitTime);
+        if (OpenAIRequest.Instance != null)
+            OpenAIRequest.Instance.ReportPatientSpeechEnd(requestTurnIndex);
 
         Debug.Log("Audio playback completed");
     }
@@ -750,4 +783,17 @@ public class TTSManager : MonoBehaviour
 
         return string.IsNullOrWhiteSpace(CurrentUserId) ? "unity-webgl" : CurrentUserId;
     }
+
+    private int ReserveTurnIndex(int? resolvedTurnIndex)
+    {
+        if (resolvedTurnIndex.HasValue && resolvedTurnIndex.Value > 0)
+        {
+            turnIndex = resolvedTurnIndex.Value;
+            return turnIndex;
+        }
+
+        turnIndex++;
+        return turnIndex;
+    }
+
 }

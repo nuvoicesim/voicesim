@@ -1,4 +1,5 @@
 using UnityEngine;
+using Newtonsoft.Json;
 
 public class WebGLTextBridge : MonoBehaviour
 {
@@ -6,6 +7,14 @@ public class WebGLTextBridge : MonoBehaviour
 
     [Header("Speech Settings")]
     [SerializeField] private float defaultSpeechWpm = 0f;
+
+    [System.Serializable]
+    private class WebGLSpeechPayload
+    {
+        public string text;
+        public string userSpeechStartAt;
+        public string userSpeechEndAt;
+    }
 
     private void Awake()
     {
@@ -23,7 +32,14 @@ public class WebGLTextBridge : MonoBehaviour
     // Called by JavaScript in WebGL template after browser speech recognition.
     public void InjectText(string text)
     {
-        if (string.IsNullOrWhiteSpace(text))
+        WebGLSpeechPayload payload = TryParsePayload(text);
+        string resolvedText = payload != null && !string.IsNullOrWhiteSpace(payload.text)
+            ? payload.text
+            : text;
+        string userSpeechStartAt = payload?.userSpeechStartAt;
+        string userSpeechEndAt = payload?.userSpeechEndAt;
+
+        if (string.IsNullOrWhiteSpace(resolvedText))
         {
             Debug.LogWarning("[WebGLTextBridge] Empty text from browser STT.");
             return;
@@ -31,8 +47,9 @@ public class WebGLTextBridge : MonoBehaviour
 
         if (OpenAIRequest.Instance != null)
         {
-            Debug.Log($"[WebGLTextBridge] Forwarding transcript to OpenAIRequest: {text}");
-            OpenAIRequest.Instance.ReceiveNurseTranscription(text, defaultSpeechWpm);
+            resolvedText = resolvedText.Trim();
+            Debug.Log($"[WebGLTextBridge] Forwarding transcript to OpenAIRequest: {resolvedText}");
+            OpenAIRequest.Instance.ReceiveNurseTranscription(resolvedText, defaultSpeechWpm, userSpeechStartAt, userSpeechEndAt);
             return;
         }
 
@@ -43,5 +60,20 @@ public class WebGLTextBridge : MonoBehaviour
     public void UpdateVoiceStatus(string status)
     {
         Debug.Log("[WebGLTextBridge] Voice status: " + status);
+    }
+
+    private static WebGLSpeechPayload TryParsePayload(string rawValue)
+    {
+        if (string.IsNullOrWhiteSpace(rawValue) || rawValue[0] != '{')
+            return null;
+
+        try
+        {
+            return JsonConvert.DeserializeObject<WebGLSpeechPayload>(rawValue);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

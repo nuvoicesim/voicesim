@@ -40,6 +40,7 @@ public class OpenAIRequest : MonoBehaviour
     // Internal state
     private const string DialoguePath = "/llm-dialogue";
     private const string ScoringPath = "/llm-scoring";
+    private const string SessionTurnPathFormat = "/sessions/{0}/turns/{1}";
     private float currentSpeechSpeed;
     private string basePath;
     public string CurrentUserId { get; private set; }
@@ -47,6 +48,9 @@ public class OpenAIRequest : MonoBehaviour
     private readonly List<Dictionary<string, string>> chatMessages = new List<Dictionary<string, string>>();
     private string currentPatientResponse = "";
     private string pendingNurseMessage = "";
+    private string activeUserSpeechStartAt = "";
+    private string activeUserSpeechEndAt = "";
+    private bool hasReportedUserSpeechEndForCurrentTurn;
     private string sessionId = "";
     private int turnIndex = 0;
 
@@ -70,6 +74,7 @@ public class OpenAIRequest : MonoBehaviour
     {
         public int turnIndex;
         public string client;
+        public string userSpeechStartAt;
     }
 
     [Serializable]
@@ -78,6 +83,15 @@ public class OpenAIRequest : MonoBehaviour
         public string error;
         public string requestId;
         public bool retryable;
+    }
+
+    [Serializable]
+    private class TurnTimingUpdatePayload
+    {
+        public string userSpeechStartAt;
+        public string userSpeechEndAt;
+        public string patientSpeechStartAt;
+        public string patientSpeechEndAt;
     }
 
     void Awake()
@@ -161,10 +175,13 @@ public class OpenAIRequest : MonoBehaviour
     {
         chatMessages.Clear();
         currentPatientResponse = "";
+        activeUserSpeechStartAt = "";
+        activeUserSpeechEndAt = "";
+        hasReportedUserSpeechEndForCurrentTurn = false;
         Debug.Log("[OpenAIRequest] Chat initialized without system message. Backend owns system prompt.");
     }
 
-    public void ReceiveNurseTranscription(string transcribedText, float speechWpm)
+    public void ReceiveNurseTranscription(string transcribedText, float speechWpm, string userSpeechStartAt = null, string userSpeechEndAt = null)
     {
         Debug.LogError($"[OpenAIRequest] ReceiveNurseTranscription text=\"{transcribedText}\" wpm={speechWpm:0.##}");
 
@@ -176,10 +193,10 @@ public class OpenAIRequest : MonoBehaviour
             Debug.Log($"[OpenAIRequest] CueSkipGuard checked: text=\"{transcribedText}\" target=\"{targetWord}\"");
         }
 
-        NurseResponds(transcribedText, speechWpm);
+        NurseResponds(transcribedText, speechWpm, userSpeechStartAt, userSpeechEndAt);
     }
 
-    private void NurseResponds(string nurseMessage, float speechWpm)
+    private void NurseResponds(string nurseMessage, float speechWpm, string userSpeechStartAt, string userSpeechEndAt)
     {
         if (string.IsNullOrWhiteSpace(nurseMessage))
         {
@@ -206,6 +223,9 @@ public class OpenAIRequest : MonoBehaviour
         });
         PrintChatMessage(chatMessages);
         pendingNurseMessage = nurseMessage.Trim();
+        activeUserSpeechStartAt = NormalizeOptionalTimestamp(userSpeechStartAt);
+        activeUserSpeechEndAt = NormalizeOptionalTimestamp(userSpeechEndAt);
+        hasReportedUserSpeechEndForCurrentTurn = false;
         Debug.LogError($"[OpenAIRequest] pendingNurseMessage set. turnIndex(before increment)={turnIndex}");
 
         turnIndex++;
@@ -259,10 +279,12 @@ public class OpenAIRequest : MonoBehaviour
                 {
                     if (TryExtractDialogueResponse(request.downloadHandler.text, out string ttsText, out int emotionCode, out int motionCode))
                     {
+                        TryReportPendingUserSpeechEnd();
                         HandlePatientResponse(ttsText, emotionCode, motionCode);
                     }
                     else
                     {
+                        TryReportPendingUserSpeechEnd();
                         Debug.LogError("[OpenAIRequest] Could not parse dialogue response. Using neutral fallback.");
                         HandlePatientResponse("I... I am not sure...", 0, 0);
                     }
@@ -326,11 +348,17 @@ public class OpenAIRequest : MonoBehaviour
             metadata = new DialogueMetadata
             {
                 turnIndex = turnIndex,
-                client = "unity-webgl"
+                client = "unity-webgl",
+                userSpeechStartAt = activeUserSpeechStartAt
             }
         };
 
-        return JsonConvert.SerializeObject(payload);
+        return JsonConvert.SerializeObject(
+            payload,
+            new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
     }
 
     private bool TryExtractDialogueResponse(string responseBody, out string responseText, out int emotionCode, out int motionCode)
@@ -342,6 +370,8 @@ public class OpenAIRequest : MonoBehaviour
         try
         {
             var jsonResponse = JObject.Parse(responseBody);
+            TryApplyResolvedTurnIndex(jsonResponse["metadata"]?["turnIndex"]);
+
             string messageContent = jsonResponse["choices"]?[0]?["message"]?["content"]?.ToString();
             if (string.IsNullOrWhiteSpace(messageContent))
             {
@@ -387,7 +417,10 @@ public class OpenAIRequest : MonoBehaviour
         PrintChatMessage(chatMessages);
 
         if (TTSManager.Instance != null)
-            TTSManager.Instance.ConvertTextToSpeech(responseText, motionCode);
+            TTSManager.Instance.ConvertTextToSpeech(
+                responseText,
+                motionCode,
+                turnIndex);
         else
             Debug.LogError("TTSManager instance not found.");
 
@@ -499,5 +532,144 @@ public class OpenAIRequest : MonoBehaviour
             return sessionId;
 
         return string.IsNullOrWhiteSpace(CurrentUserId) ? "unity-webgl" : CurrentUserId;
+    }
+
+    private void TryApplyResolvedTurnIndex(JToken turnIndexToken)
+    {
+        if (turnIndexToken == null)
+            return;
+
+        int resolvedTurnIndex;
+        if (!int.TryParse(turnIndexToken.ToString(), out resolvedTurnIndex) || resolvedTurnIndex <= 0)
+            return;
+
+        if (resolvedTurnIndex != turnIndex)
+        {
+            Debug.Log($"[OpenAIRequest] Backend resolved turnIndex={resolvedTurnIndex} (client had {turnIndex}). Reusing backend value.");
+        }
+
+        turnIndex = resolvedTurnIndex;
+    }
+
+    private static string NormalizeOptionalTimestamp(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return value.Trim();
+    }
+
+    public void ReportPatientSpeechStart(int resolvedTurnIndex)
+    {
+        StartCoroutine(ReportTurnTimingUpdate(
+            resolvedTurnIndex,
+            patientSpeechStartAt: GetUtcIsoTimestamp()));
+    }
+
+    public void ReportPatientSpeechEnd(int resolvedTurnIndex)
+    {
+        StartCoroutine(ReportTurnTimingUpdate(
+            resolvedTurnIndex,
+            patientSpeechEndAt: GetUtcIsoTimestamp()));
+    }
+
+    private void TryReportPendingUserSpeechEnd()
+    {
+        if (hasReportedUserSpeechEndForCurrentTurn || string.IsNullOrWhiteSpace(activeUserSpeechEndAt))
+            return;
+
+        hasReportedUserSpeechEndForCurrentTurn = true;
+        StartCoroutine(ReportTurnTimingUpdate(
+            turnIndex,
+            userSpeechEndAt: activeUserSpeechEndAt));
+    }
+
+    private IEnumerator ReportTurnTimingUpdate(
+        int resolvedTurnIndex,
+        string userSpeechStartAt = null,
+        string userSpeechEndAt = null,
+        string patientSpeechStartAt = null,
+        string patientSpeechEndAt = null)
+    {
+        if (resolvedTurnIndex <= 0)
+            yield break;
+
+        var payload = new TurnTimingUpdatePayload
+        {
+            userSpeechStartAt = NormalizeOptionalTimestamp(userSpeechStartAt),
+            userSpeechEndAt = NormalizeOptionalTimestamp(userSpeechEndAt),
+            patientSpeechStartAt = NormalizeOptionalTimestamp(patientSpeechStartAt),
+            patientSpeechEndAt = NormalizeOptionalTimestamp(patientSpeechEndAt)
+        };
+
+        if (string.IsNullOrWhiteSpace(payload.userSpeechStartAt) &&
+            string.IsNullOrWhiteSpace(payload.userSpeechEndAt) &&
+            string.IsNullOrWhiteSpace(payload.patientSpeechStartAt) &&
+            string.IsNullOrWhiteSpace(payload.patientSpeechEndAt))
+        {
+            yield break;
+        }
+
+        string activeSessionId = !string.IsNullOrWhiteSpace(RuntimeSessionContext.SessionId)
+            ? RuntimeSessionContext.SessionId
+            : sessionId;
+
+        if (string.IsNullOrWhiteSpace(activeSessionId))
+        {
+            Debug.LogWarning("[OpenAIRequest] Skipping turn timing update because sessionId is missing.");
+            yield break;
+        }
+
+        string sessionPath = string.Format(
+            SessionTurnPathFormat,
+            Uri.EscapeDataString(activeSessionId),
+            resolvedTurnIndex);
+
+        if (!ApiConfigProvider.TryBuildBackendUrl(sessionPath, out string endpoint))
+        {
+            Debug.LogError("[OpenAIRequest] Could not build turn timing endpoint.");
+            yield break;
+        }
+
+        string jsonContent = JsonConvert.SerializeObject(
+            payload,
+            new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+        using (var request = new UnityWebRequest(endpoint, "PUT"))
+        {
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonContent);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.timeout = requestTimeoutSeconds;
+            request.SetRequestHeader("Content-Type", "application/json");
+            request.SetRequestHeader("Accept", "application/json");
+
+            if (!RuntimeSessionContext.ApplyAuthorization(request, "OpenAIRequest"))
+                yield break;
+
+            yield return request.SendWebRequest();
+
+            bool success = request.result == UnityWebRequest.Result.Success &&
+                           request.responseCode >= 200 &&
+                           request.responseCode < 300;
+
+            if (!success)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                string responseBody = request.downloadHandler?.text ?? string.Empty;
+                Debug.LogWarning(
+                    $"[OpenAIRequest] Turn timing update failed for sessionId={activeSessionId}, turnIndex={resolvedTurnIndex}. " +
+                    $"status={(int)request.responseCode}, transport={request.error}, body={responseBody}");
+#endif
+            }
+        }
+    }
+
+    private static string GetUtcIsoTimestamp()
+    {
+        return DateTimeOffset.UtcNow.UtcDateTime.ToString("o");
     }
 }

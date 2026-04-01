@@ -140,11 +140,11 @@ public class SpeechToTextController2 : MonoBehaviour
         }
 
         // Send to OpenAIRequest consumer
-        await WaitForOpenAIRequestAndSend(speech.text, speech.wpm);
+        await WaitForOpenAIRequestAndSend(speech.text, speech.wpm, null, null);
     }
 
     // Wait for OpenAIRequest instance and send transcription
-    private async Task WaitForOpenAIRequestAndSend(string transcriptionText, float wpm)
+    private async Task WaitForOpenAIRequestAndSend(string transcriptionText, float wpm, string userSpeechStartAt, string userSpeechEndAt)
     {
         float waitTime = 0f;
         float maxWaitTime = 5f;
@@ -158,7 +158,7 @@ public class SpeechToTextController2 : MonoBehaviour
         if (OpenAIRequest.Instance != null)
         {
             Debug.Log("STT: Found OpenAIRequest instance, sending transcription...");
-            OpenAIRequest.Instance.ReceiveNurseTranscription(transcriptionText, wpm);
+            OpenAIRequest.Instance.ReceiveNurseTranscription(transcriptionText, wpm, userSpeechStartAt, userSpeechEndAt);
             return;
         }
 
@@ -169,7 +169,7 @@ public class SpeechToTextController2 : MonoBehaviour
         if (openAIRequest != null)
         {
             Debug.Log("STT: Found OpenAIRequest via FindObjectOfType, sending transcription...");
-            openAIRequest.ReceiveNurseTranscription(transcriptionText, wpm);
+            openAIRequest.ReceiveNurseTranscription(transcriptionText, wpm, userSpeechStartAt, userSpeechEndAt);
         }
         else
         {
