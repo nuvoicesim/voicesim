@@ -154,7 +154,6 @@ namespace UI.Cues
                         Debug.LogError("Failed to load target_words.json from StreamingAssets: " + request.error + " Path: " + path);
                         yield break;
                     }
-                    Debug.LogError("printing path" + path);
                     LoadAllScripts(request.downloadHandler.text);
                     Debug.Log("Loaded scripts from StreamingAssets via UnityWebRequest");
                 }
