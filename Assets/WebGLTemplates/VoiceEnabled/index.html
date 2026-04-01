@@ -27,7 +27,11 @@
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var unityInstanceGlobal = null;
+      var hasPostedUnityReady = false;
       var knownBridgeName = null;
+      var pendingRuntimeContext = null;
+      var runtimeContextDispatchAttempts = 0;
+      const runtimeContextStorageKey = 'voicesim.runtimeContext';
 
       const LOG_LEVELS = { debug: 10, info: 20, warn: 30, error: 40 };
 
@@ -56,6 +60,225 @@
         const fn = (level === 'error') ? console.error : (level === 'warn' ? console.warn : console.log);
         fn('[VoiceSim]', ...args);
       }
+
+      function tryParseJson(value) {
+        if (!value) {
+          return null;
+        }
+
+        if (typeof value === 'object') {
+          return value;
+        }
+
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          voiceLog('warn', 'Failed to parse runtime context JSON:', error.message);
+          return null;
+        }
+      }
+
+      function normalizeRuntimeContext(raw) {
+        if (!raw || typeof raw !== 'object') {
+          return null;
+        }
+
+        const context = {
+          tokenType: typeof raw.tokenType === 'string' ? raw.tokenType.trim() : '',
+          runtimeToken: typeof raw.runtimeToken === 'string' ? raw.runtimeToken.trim() : '',
+          expiresAt: typeof raw.expiresAt === 'string' ? raw.expiresAt.trim() : '',
+          refreshAfter: typeof raw.refreshAfter === 'string' ? raw.refreshAfter.trim() : '',
+          sessionId: typeof raw.sessionId === 'string' ? raw.sessionId.trim() : '',
+          assignmentId: typeof raw.assignmentId === 'string' ? raw.assignmentId.trim() : '',
+          sceneId: typeof raw.sceneId === 'string' ? raw.sceneId.trim() : '',
+          unityBuildFolder: typeof raw.unityBuildFolder === 'string' ? raw.unityBuildFolder.trim() : '',
+          userId: typeof raw.userId === 'string' ? raw.userId.trim() : '',
+          userRole: typeof raw.userRole === 'string' ? raw.userRole.trim() : '',
+          userEmail: typeof raw.userEmail === 'string' ? raw.userEmail.trim() : ''
+        };
+
+        const hasAnyValue = Object.values(context).some((value) => value !== '' && value !== undefined);
+        return hasAnyValue ? context : null;
+      }
+
+      function buildRuntimeContextFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const raw = {
+          tokenType: params.get('tokenType'),
+          runtimeToken: params.get('runtimeToken'),
+          expiresAt: params.get('expiresAt'),
+          refreshAfter: params.get('refreshAfter'),
+          sessionId: params.get('sessionId'),
+          assignmentId: params.get('assignmentId'),
+          sceneId: params.get('sceneId'),
+          unityBuildFolder: params.get('unityBuildFolder'),
+          userId: params.get('userId'),
+          userRole: params.get('userRole'),
+          userEmail: params.get('userEmail')
+        };
+
+        return normalizeRuntimeContext(raw);
+      }
+
+      function isEmbeddedInIframe() {
+        return Boolean(window.parent && window.parent !== window);
+      }
+
+      function resolveInitialRuntimeContext() {
+        const fromWindow = normalizeRuntimeContext(tryParseJson(window.voiceSimRuntimeContext));
+        const fromStorage = isEmbeddedInIframe()
+          ? null
+          : normalizeRuntimeContext(tryParseJson(window.localStorage.getItem(runtimeContextStorageKey)));
+        const fromQuery = buildRuntimeContextFromQuery();
+
+        return normalizeRuntimeContext({
+          ...(fromStorage || {}),
+          ...(fromWindow || {}),
+          ...(fromQuery || {})
+        });
+      }
+
+      function exposeRuntimeContext(context) {
+        window.__VOICE_SIM_RUNTIME__ = context || null;
+
+        try {
+          window.dispatchEvent(new CustomEvent('voice-sim-runtime-updated', {
+            detail: window.__VOICE_SIM_RUNTIME__
+          }));
+        } catch (error) {
+          voiceLog('debug', 'Could not dispatch runtime update event:', error.message);
+        }
+      }
+
+      function hasRuntimeToken() {
+        return Boolean(pendingRuntimeContext && pendingRuntimeContext.runtimeToken);
+      }
+
+      function persistRuntimeContext(context) {
+        if (!context) {
+          window.localStorage.removeItem(runtimeContextStorageKey);
+          return;
+        }
+
+        window.localStorage.setItem(runtimeContextStorageKey, JSON.stringify(context));
+      }
+
+      function dispatchRuntimeContextToUnity() {
+        if (!unityInstanceGlobal || !pendingRuntimeContext) {
+          return;
+        }
+
+        try {
+          unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ApplyRuntimeContext', JSON.stringify(pendingRuntimeContext));
+          runtimeContextDispatchAttempts = 0;
+          voiceLog('info', 'Applied runtime context to Unity:', pendingRuntimeContext);
+        } catch (error) {
+          runtimeContextDispatchAttempts += 1;
+          voiceLog('warn', 'Runtime context dispatch failed:', error.message);
+
+          if (runtimeContextDispatchAttempts < 10) {
+            window.setTimeout(dispatchRuntimeContextToUnity, 500);
+          }
+        }
+      }
+
+      function applyRuntimeContext(context, options = {}) {
+        const normalized = normalizeRuntimeContext(context);
+        pendingRuntimeContext = normalized;
+        runtimeContextDispatchAttempts = 0;
+        exposeRuntimeContext(normalized);
+
+        if (options.persist !== false) {
+          persistRuntimeContext(normalized);
+        }
+
+        if (!normalized) {
+          if (unityInstanceGlobal) {
+            try {
+              unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ClearRuntimeContext', '');
+            } catch (error) {
+              voiceLog('debug', 'Could not clear runtime context in Unity:', error.message);
+            }
+          }
+          return;
+        }
+
+        dispatchRuntimeContextToUnity();
+      }
+
+      function clearRuntimeContext() {
+        pendingRuntimeContext = null;
+        exposeRuntimeContext(null);
+        persistRuntimeContext(null);
+
+        if (!unityInstanceGlobal) {
+          return;
+        }
+
+        try {
+          unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ClearRuntimeContext', '');
+        } catch (error) {
+          voiceLog('debug', 'Could not clear runtime context in Unity:', error.message);
+        }
+      }
+
+      function registerTestingHelpers() {
+        window.voiceSimTesting = {
+          getRuntimeContext() {
+            return pendingRuntimeContext;
+          },
+          setRuntimeContext(context, persist = true) {
+            applyRuntimeContext(context, { persist });
+          },
+          clearRuntimeContext() {
+            clearRuntimeContext();
+          },
+          sendTranscript(text) {
+            sendToUnity(text);
+          }
+        };
+      }
+
+      function notifyParentUnityReady() {
+        if (hasPostedUnityReady) {
+          return;
+        }
+
+        if (!window.parent || window.parent === window) {
+          return;
+        }
+
+        try {
+          window.parent.postMessage({ type: 'unity-ready' }, '*');
+          hasPostedUnityReady = true;
+          voiceLog('info', 'Posted unity-ready to parent window.');
+        } catch (error) {
+          voiceLog('warn', 'Failed to post unity-ready to parent:', error.message);
+        }
+      }
+
+      function handleParentRuntimeMessage(event) {
+        if (window.parent && window.parent !== window && event.source !== window.parent) {
+          return;
+        }
+
+        const data = tryParseJson(event.data) || event.data;
+        if (!data || data.type !== 'unity-init') {
+          return;
+        }
+
+        const payload = data.payload;
+        if (!payload || typeof payload !== 'object') {
+          voiceLog('warn', 'Ignored unity-init payload because it was missing or invalid.');
+          return;
+        }
+
+        applyRuntimeContext(payload);
+        notifyUnityStatus(hasRuntimeToken() ? 'Session initialized' : 'Runtime context received without token');
+        voiceLog('info', 'Applied unity-init runtime context from parent message.');
+      }
+
+      window.addEventListener('message', handleParentRuntimeMessage);
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
@@ -117,12 +340,16 @@
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           unityInstanceGlobal = unityInstance;
+          window.unityInstance = unityInstance;
           document.querySelector("#unity-loading-bar").style.display = "none";
           document.querySelector("#unity-fullscreen-button").onclick = () => {
             unityInstance.SetFullscreen(1);
           };
 
+          registerTestingHelpers();
+          applyRuntimeContext(resolveInitialRuntimeContext(), { persist: false });
           initializeVoiceRecognition();
+          notifyParentUnityReady();
         }).catch((message) => {
           voiceLog('error', 'Unity load failed:', message);
           alert(message);
@@ -206,6 +433,12 @@
           voiceLog('error', 'Recognition is not initialized.');
           return;
         }
+        if (!hasRuntimeToken()) {
+          voiceLog('warn', 'Runtime token is not ready. Waiting for unity-init from host app.');
+          notifyUnityStatus('Waiting for session initialization');
+          notifyParentUnityReady();
+          return;
+        }
         if (isRecognitionActive) {
           voiceLog('warn', 'Recognition is already active.');
           return;
@@ -248,6 +481,12 @@
       function sendToUnity(text) {
         if (!unityInstanceGlobal) {
           voiceLog('error', 'Unity instance is not available.');
+          return;
+        }
+        if (!hasRuntimeToken()) {
+          voiceLog('warn', 'Transcript ignored because runtime token is not available yet.');
+          notifyUnityStatus('Waiting for session initialization');
+          notifyParentUnityReady();
           return;
         }
 

@@ -45,4 +45,17 @@ public class WebGLGlobalBridge : MonoBehaviour
             WebGLTextBridge.Instance.UpdateVoiceStatus(status);
         }
     }
+
+    // Called from JavaScript - injects host-owned runtime session context.
+    public void ApplyRuntimeContext(string json)
+    {
+        Debug.Log("[WebGLGlobalBridge] ApplyRuntimeContext called.");
+        RuntimeSessionContext.ApplyJson(json);
+    }
+
+    public void ClearRuntimeContext()
+    {
+        Debug.Log("[WebGLGlobalBridge] ClearRuntimeContext called.");
+        RuntimeSessionContext.Clear();
+    }
 }
