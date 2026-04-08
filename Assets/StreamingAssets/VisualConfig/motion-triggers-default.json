@@ -1,0 +1,14 @@
+{
+  "triggers": [
+    { "code": 0, "name": "Neutral", "animatorTrigger": "Neutral" },
+    { "code": 1, "name": "Confused", "animatorTrigger": "Confused" },
+    { "code": 2, "name": "Nod1", "animatorTrigger": "Nod 1" },
+    { "code": 3, "name": "Nod2", "animatorTrigger": "Nod 2" },
+    { "code": 4, "name": "Nod3", "animatorTrigger": "Nod 3" },
+    { "code": 5, "name": "Nod4", "animatorTrigger": "Nod 4" },
+    { "code": 6, "name": "HeadShake1", "animatorTrigger": "Head Shake 1" },
+    { "code": 7, "name": "HeadShake2", "animatorTrigger": "Head Shake 2" },
+    { "code": 8, "name": "TapTable", "animatorTrigger": "Tap Table" },
+    { "code": 9, "name": "Struggling", "animatorTrigger": "Struggling" }
+  ]
+}

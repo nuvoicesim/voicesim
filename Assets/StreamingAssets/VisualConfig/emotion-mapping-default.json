@@ -1,0 +1,207 @@
+{
+  "emotions": [
+    {
+      "code": 0,
+      "name": "Neutral",
+      "baseState": "Neutral",
+      "baseIntensity": 1.0,
+      "peakReaction": "None",
+      "peakIntensity": 0.0,
+      "browTension": 0.0,
+      "softSmile": 0.0,
+      "eyeTension": 0.0,
+      "blinkPatternShift": 0.0
+    },
+    {
+      "code": 1,
+      "name": "Discomfort",
+      "baseState": "Frustrated",
+      "baseIntensity": 0.85,
+      "peakReaction": "None",
+      "peakIntensity": 0.0,
+      "browTension": 0.48,
+      "softSmile": 0.0,
+      "eyeTension": 0.432,
+      "blinkPatternShift": 0.12
+    },
+    {
+      "code": 2,
+      "name": "Happy",
+      "baseState": "MildHappy",
+      "baseIntensity": 1.0,
+      "peakReaction": "StrongHappy",
+      "peakIntensity": 0.65,
+      "browTension": 0.0,
+      "softSmile": 0.66,
+      "eyeTension": 0.0,
+      "blinkPatternShift": 0.0
+    },
+    {
+      "code": 3,
+      "name": "Pain",
+      "baseState": "Frustrated",
+      "baseIntensity": 1.0,
+      "peakReaction": "Confused",
+      "peakIntensity": 0.82,
+      "browTension": 0.72,
+      "softSmile": 0.0,
+      "eyeTension": 0.72,
+      "blinkPatternShift": 0.2
+    },
+    {
+      "code": 4,
+      "name": "Sad",
+      "baseState": "Frustrated",
+      "baseIntensity": 1.0,
+      "peakReaction": "CryingOverwhelmed",
+      "peakIntensity": 0.684,
+      "browTension": 0.6,
+      "softSmile": 0.0,
+      "eyeTension": 0.72,
+      "blinkPatternShift": 0.18
+    },
+    {
+      "code": 5,
+      "name": "Anger",
+      "baseState": "Frustrated",
+      "baseIntensity": 1.0,
+      "peakReaction": "Confused",
+      "peakIntensity": 0.4875,
+      "browTension": 0.69,
+      "softSmile": 0.0,
+      "eyeTension": 0.57,
+      "blinkPatternShift": 0.12
+    },
+    {
+      "code": 6,
+      "name": "Frustrated",
+      "baseState": "Frustrated",
+      "baseIntensity": 1.0,
+      "peakReaction": "Confused",
+      "peakIntensity": 0.615,
+      "browTension": 0.72,
+      "softSmile": 0.0,
+      "eyeTension": 0.63,
+      "blinkPatternShift": 0.2
+    },
+    {
+      "code": 7,
+      "name": "Thinking",
+      "baseState": "Neutral",
+      "baseIntensity": 1.0,
+      "peakReaction": "Confused",
+      "peakIntensity": 0.4125,
+      "browTension": 0.24,
+      "softSmile": 0.0,
+      "eyeTension": 0.3,
+      "blinkPatternShift": 0.28
+    },
+    {
+      "code": 8,
+      "name": "Apologetic",
+      "baseState": "MildHappy",
+      "baseIntensity": 0.85,
+      "peakReaction": "Relief",
+      "peakIntensity": 0.72,
+      "browTension": 0.0,
+      "softSmile": 0.44,
+      "eyeTension": 0.21,
+      "blinkPatternShift": 0.0
+    },
+    {
+      "code": 9,
+      "name": "Cry",
+      "baseState": "Frustrated",
+      "baseIntensity": 1.0,
+      "peakReaction": "CryingOverwhelmed",
+      "peakIntensity": 0.95,
+      "browTension": 0.72,
+      "softSmile": 0.0,
+      "eyeTension": 0.72,
+      "blinkPatternShift": 0.25
+    }
+  ],
+  "motionModifiers": [
+    {
+      "code": 0,
+      "name": "Neutral"
+    },
+    {
+      "code": 1,
+      "name": "Confused",
+      "minBlinkShift": 0.35,
+      "peakOverride": "Confused",
+      "peakOverrideIntensity": 0.75,
+      "excludeEmotions": [2, 8, 9]
+    },
+    {
+      "code": 2,
+      "name": "Nod1",
+      "addSoftSmile": 0.12,
+      "peakOverride": "StrongHappy",
+      "peakOverrideIntensity": 0.65,
+      "excludeEmotions": [0, 1, 3, 4, 5, 6, 7, 9]
+    },
+    {
+      "code": 3,
+      "name": "Nod2",
+      "addSoftSmile": 0.12,
+      "peakOverride": "StrongHappy",
+      "peakOverrideIntensity": 0.65,
+      "excludeEmotions": [0, 1, 3, 4, 5, 6, 7, 9]
+    },
+    {
+      "code": 4,
+      "name": "Nod3",
+      "addSoftSmile": 0.12,
+      "peakOverride": "StrongHappy",
+      "peakOverrideIntensity": 0.65,
+      "excludeEmotions": [0, 1, 3, 4, 5, 6, 7, 9]
+    },
+    {
+      "code": 5,
+      "name": "Nod4",
+      "addSoftSmile": 0.12,
+      "peakOverride": "StrongHappy",
+      "peakOverrideIntensity": 0.65,
+      "excludeEmotions": [0, 1, 3, 4, 5, 6, 7, 9]
+    },
+    {
+      "code": 6,
+      "name": "HeadShake1",
+      "addBrowTension": 0.15,
+      "addEyeTension": 0.1,
+      "minBlinkShift": 0.22,
+      "peakOverride": "Confused",
+      "peakOverrideIntensity": 0.6375,
+      "onlyIfNoPeak": true
+    },
+    {
+      "code": 7,
+      "name": "HeadShake2",
+      "addBrowTension": 0.15,
+      "addEyeTension": 0.1,
+      "minBlinkShift": 0.22,
+      "peakOverride": "Confused",
+      "peakOverrideIntensity": 0.6375,
+      "onlyIfNoPeak": true
+    },
+    {
+      "code": 8,
+      "name": "TapTable",
+      "addBrowTension": 0.12,
+      "addEyeTension": 0.12,
+      "minBlinkShift": 0.2
+    },
+    {
+      "code": 9,
+      "name": "Struggling",
+      "addBrowTension": 0.18,
+      "addEyeTension": 0.2,
+      "minBlinkShift": 0.32,
+      "peakOverride": "Confused",
+      "peakOverrideIntensity": 0.7125,
+      "excludeEmotions": [9]
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "baseStates": [
+    {
+      "name": "Neutral",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browInnerUp", "weight": 2.0, "speechReduction": 0.0 },
+        { "name": "eyeWideLeft", "weight": 3.0, "speechReduction": 0.0 },
+        { "name": "eyeWideRight", "weight": 3.0, "speechReduction": 0.0 },
+        { "name": "mouthClose", "weight": 2.0, "speechReduction": 0.8 }
+      ]
+    },
+    {
+      "name": "MildHappy",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browOuterUpLeft", "weight": 9.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpRight", "weight": 9.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 8.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 8.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "mouthSmileLeft", "weight": 28.0, "speechReduction": 0.65 },
+        { "name": "mouthSmileRight", "weight": 28.0, "speechReduction": 0.65 }
+      ]
+    },
+    {
+      "name": "Frustrated",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browDownLeft", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "browDownRight", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "browInnerUp", "weight": 12.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 24.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 24.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "noseSneerLeft", "weight": 18.0, "speechReduction": 0.0 },
+        { "name": "noseSneerRight", "weight": 18.0, "speechReduction": 0.0 },
+        { "name": "mouthFrownLeft", "weight": 22.0, "speechReduction": 0.55 },
+        { "name": "mouthFrownRight", "weight": 22.0, "speechReduction": 0.55 },
+        { "name": "jawForward", "weight": 5.0, "speechReduction": 0.5 }
+      ]
+    }
+  ],
+  "peakReactions": [
+    {
+      "name": "StrongHappy",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browOuterUpLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpRight", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 22.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 22.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 34.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 34.0, "speechReduction": 0.0 },
+        { "name": "mouthDimpleLeft", "weight": 20.0, "speechReduction": 0.55 },
+        { "name": "mouthDimpleRight", "weight": 20.0, "speechReduction": 0.55 },
+        { "name": "mouthSmileLeft", "weight": 58.0, "speechReduction": 0.6 },
+        { "name": "mouthSmileRight", "weight": 58.0, "speechReduction": 0.6 }
+      ]
+    },
+    {
+      "name": "CryingOverwhelmed",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browInnerUp", "weight": 58.0, "speechReduction": 0.0 },
+        { "name": "browDownLeft", "weight": 24.0, "speechReduction": 0.0 },
+        { "name": "browDownRight", "weight": 24.0, "speechReduction": 0.0 },
+        { "name": "eyeWideLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeWideRight", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 20.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 20.0, "speechReduction": 0.0 },
+        { "name": "mouthShrugUpper", "weight": 8.0, "speechReduction": 0.65 },
+        { "name": "mouthFrownLeft", "weight": 34.0, "speechReduction": 0.4 },
+        { "name": "mouthFrownRight", "weight": 34.0, "speechReduction": 0.4 },
+        { "name": "jawOpen", "weight": 15.0, "speechReduction": 0.75 }
+      ]
+    },
+    {
+      "name": "Relief",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browInnerUp", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpLeft", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpRight", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 10.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 10.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 16.0, "speechReduction": 0.0 },
+        { "name": "mouthSmileLeft", "weight": 32.0, "speechReduction": 0.65 },
+        { "name": "mouthSmileRight", "weight": 32.0, "speechReduction": 0.65 },
+        { "name": "jawOpen", "weight": 14.0, "speechReduction": 0.8 }
+      ]
+    },
+    {
+      "name": "Confused",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browInnerUp", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "browDownLeft", "weight": 18.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpRight", "weight": 26.0, "speechReduction": 0.0 },
+        { "name": "eyeLookInLeft", "weight": 12.0, "speechReduction": 0.0 },
+        { "name": "eyeLookOutRight", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeWideRight", "weight": 18.0, "speechReduction": 0.0 },
+        { "name": "noseSneerLeft", "weight": 8.0, "speechReduction": 0.0 },
+        { "name": "jawLeft", "weight": 6.0, "speechReduction": 0.65 },
+        { "name": "mouthPucker", "weight": 11.0, "speechReduction": 0.72 },
+        { "name": "mouthFrownLeft", "weight": 13.0, "speechReduction": 0.5 }
+      ]
+    }
+  ],
+  "overlays": [
+    {
+      "name": "BrowTension",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "browDownLeft", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "browDownRight", "weight": 32.0, "speechReduction": 0.0 },
+        { "name": "browInnerUp", "weight": 22.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpLeft", "weight": 25.0, "speechReduction": 0.0 },
+        { "name": "browOuterUpRight", "weight": 17.0, "speechReduction": 0.0 }
+      ]
+    },
+    {
+      "name": "SoftSmile",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "eyeSquintLeft", "weight": 6.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 6.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "mouthSmileLeft", "weight": 24.0, "speechReduction": 0.7 },
+        { "name": "mouthSmileRight", "weight": 24.0, "speechReduction": 0.7 }
+      ]
+    },
+    {
+      "name": "EyeTension",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "eyeLookInLeft", "weight": 8.0, "speechReduction": 0.0 },
+        { "name": "eyeLookInRight", "weight": 8.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintLeft", "weight": 30.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 30.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "cheekSquintRight", "weight": 14.0, "speechReduction": 0.0 }
+      ]
+    },
+    {
+      "name": "BlinkPatternShift",
+      "intensity": 1.0,
+      "blendShapes": [
+        { "name": "eyeSquintLeft", "weight": 12.0, "speechReduction": 0.0 },
+        { "name": "eyeSquintRight", "weight": 12.0, "speechReduction": 0.0 },
+        { "name": "eyeBlinkLeft", "weight": 14.0, "speechReduction": 0.0 },
+        { "name": "eyeBlinkRight", "weight": 14.0, "speechReduction": 0.0 }
+      ]
+    }
+  ]
+}

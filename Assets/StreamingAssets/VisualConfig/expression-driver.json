@@ -1,0 +1,20 @@
+{
+  "variation": {
+    "enabled": true,
+    "range": 0.08
+  },
+  "escalation": {
+    "enabled": true,
+    "rate": 0.05,
+    "maxMultiplier": 1.4
+  },
+  "transition": {
+    "peakBoostOnChange": 0.15
+  },
+  "fatigue": {
+    "enabled": true,
+    "startTurn": 8,
+    "eyeTensionPerTurn": 0.01,
+    "blinkShiftPerTurn": 0.005
+  }
+}

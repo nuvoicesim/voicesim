@@ -5,6 +5,7 @@
       "title": "Morning Routine",
       "target_word": "Coffee",
       "alternate_target": "",
+      "image": "coffee.png",
       "semanticKeywords": [ "beverage", "hot", "drink", "iced", "cold", "drank", "bitter" ],
       "phonemicKeywords": [ "cof", "caw", "cfe", "kuh" ],
       "studentHints": {
@@ -18,6 +19,7 @@
       "title": "Family Members",
       "target_word": "Daughter",
       "alternate_target": "",
+      "image": "daughter.png",
       "semanticKeywords": [ "female child", "my child", "family member" ],
       "phonemicKeywords": [ "dau", "daw", "dag" ],
       "studentHints": {
@@ -31,6 +33,7 @@
       "title": "Daily Activities",
       "target_word": "Shower",
       "alternate_target": "",
+      "image": "shower.png",
       "semanticKeywords": [ "wash body", "bath", "cleaning up", "hygiene" ],
       "phonemicKeywords": [ "sho", "shau", "shw" ],
       "studentHints": {
@@ -44,6 +47,7 @@
       "title": "Meals",
       "target_word": "Sandwich",
       "alternate_target": "",
+      "image": "sandwich.png",
       "semanticKeywords": [ "meat", "lunch food", "bread" ],
       "phonemicKeywords": [ "san", "saw", "sand" ],
       "studentHints": {
@@ -57,6 +61,7 @@
       "title": "Transportation",
       "target_word": "Car",
       "alternate_target": "",
+      "image": "car.png",
       "semanticKeywords": [ "vehicle", "drive", "automobile", "ride" ],
       "phonemicKeywords": [ "ca", "car", "kar" ],
       "studentHints": {
@@ -70,6 +75,7 @@
       "title": "Clothing",
       "target_word": "Shirt",
       "alternate_target": "",
+      "image": "shirt.png",
       "semanticKeywords": [ "clothing", "clothes", "top" ],
       "phonemicKeywords": [ "shi", "sh", "sht" ],
       "studentHints": {
@@ -83,6 +89,7 @@
       "title": "Weather",
       "target_word": "Sunny",
       "alternate_target": "",
+      "image": "sunny.png",
       "semanticKeywords": [ "bright day", "no clouds", "sun is out" ],
       "phonemicKeywords": [ "sun", "sunn", "suny" ],
       "studentHints": {
@@ -96,6 +103,7 @@
       "title": "Household Items",
       "target_word": "Television",
       "alternate_target": "TV",
+      "image": "television.png",
       "semanticKeywords": [ "watch shows", "screen", "entertainment device" ],
       "phonemicKeywords": [ "tel", "tele", "tv" ],
       "studentHints": {
@@ -109,6 +117,7 @@
       "title": "Health/Medical",
       "target_word": "Pill",
       "alternate_target": "Pills",
+      "image": "pill.png",
       "semanticKeywords": [ "medicine", "tablet", "medication" ],
       "phonemicKeywords": [ "pil", "pill", "p" ],
       "studentHints": {
@@ -122,6 +131,7 @@
       "title": "Emotions/Feelings",
       "target_word": "Tired",
       "alternate_target": "",
+      "image": "tired.png",
       "semanticKeywords": [ "sleepy", "fatigued", "need rest" ],
       "phonemicKeywords": [ "tir", "tie", "tird" ],
       "studentHints": {
