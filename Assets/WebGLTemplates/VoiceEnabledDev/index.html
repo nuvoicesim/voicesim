@@ -1,0 +1,1179 @@
+<!-- Generated from Assets/WebGLTemplates/VoiceEnabled/index.html by SyncVoiceEnabledDevTemplate.cs. -->
+<!-- Edit the prod template or this sync script instead of editing this file directly. -->
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | V.O.I.C.E Dev</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+
+    <aside id='dev-launcher' data-collapsed='true'>
+      <div class='launcher-card'>
+        <div class='launcher-header'>
+          <div class='launcher-heading'>
+            <div>
+              <p class='eyebrow'>Unity Dev Launcher</p>
+              <h1>Bootstrap A Local Session</h1>
+            </div>
+            <button
+              id='launcher-toggle'
+              class='launcher-toggle'
+              type='button'
+              aria-controls='launcher-panel'
+              aria-expanded='false'
+            >
+              Show
+            </button>
+          </div>
+        </div>
+
+        <div id='launcher-panel' hidden>
+          <p class='launcher-copy'>
+            Use this template for local WebGL iteration. It calls the backend dev bootstrap route,
+            gets a real active session plus a short-lived runtime token, and injects that payload into Unity.
+          </p>
+          <p class='launcher-note'>
+            Point this at the sandbox or staging API, keep it aligned with
+            <code>ApiEnvironmentConfig.asset</code>, and refresh before <code>refreshAfter</code>.
+          </p>
+
+          <div class='launcher-grid'>
+            <label class='field span-2'>
+              <span>Bootstrap API URL</span>
+              <input id='api-base-url' type='url' placeholder='https://.../prod' />
+            </label>
+
+            <label class='field'>
+              <span>Assignment ID</span>
+              <input id='assignment-id' type='text' placeholder='asgn_123' />
+            </label>
+
+            <label class='field'>
+              <span>Student User ID</span>
+              <input id='student-user-id' type='text' placeholder='7811e3a0-a061-70d2-c7d6-315cd36795c4' />
+            </label>
+
+            <label class='field span-2'>
+              <span>Dev Bootstrap Key</span>
+              <textarea
+                id='dev-bootstrap-key'
+                rows='4'
+                placeholder='Paste the shared X-Dev-Bootstrap-Key used for local Unity testing.'
+              ></textarea>
+            </label>
+          </div>
+
+          <div class='launcher-actions'>
+            <button id='launch-button' class='primary' type='button'>Bootstrap Session</button>
+            <button id='refresh-button' type='button'>Refresh Runtime Token</button>
+            <button id='end-button' class='danger' type='button'>Complete Session</button>
+            <button id='clear-button' type='button'>Clear Context</button>
+          </div>
+
+          <div id='launcher-status' class='launcher-status'>Waiting for launch.</div>
+          <div id='session-summary' class='session-summary'>No active session.</div>
+        </div>
+      </div>
+    </aside>
+
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">V.O.I.C.E Dev</div>
+      </div>
+    </div>
+
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var unityInstanceGlobal = null;
+      var hasPostedUnityReady = false;
+      var knownBridgeName = null;
+      var pendingRuntimeContext = null;
+      var runtimeContextDispatchAttempts = 0;
+      const runtimeContextStorageKey = 'voicesim.runtimeContext';
+
+      const LOG_LEVELS = { debug: 10, info: 20, warn: 30, error: 40 };
+
+      function resolveVoiceSimLogLevel() {
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = (params.get('voicesimLog') || '').toLowerCase();
+        if (LOG_LEVELS[fromQuery]) {
+          localStorage.setItem('voicesim.logLevel', fromQuery);
+          return fromQuery;
+        }
+
+        const fromStorage = (localStorage.getItem('voicesim.logLevel') || '').toLowerCase();
+        if (LOG_LEVELS[fromStorage]) {
+          return fromStorage;
+        }
+
+        return 'warn';
+      }
+
+      const activeVoiceSimLogLevel = resolveVoiceSimLogLevel();
+
+      function voiceLog(level, ...args) {
+        if (!LOG_LEVELS[level] || LOG_LEVELS[level] < LOG_LEVELS[activeVoiceSimLogLevel]) {
+          return;
+        }
+        const fn = (level === 'error') ? console.error : (level === 'warn' ? console.warn : console.log);
+        fn('[VoiceSim]', ...args);
+      }
+
+      function tryParseJson(value) {
+        if (!value) {
+          return null;
+        }
+
+        if (typeof value === 'object') {
+          return value;
+        }
+
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          voiceLog('warn', 'Failed to parse runtime context JSON:', error.message);
+          return null;
+        }
+      }
+
+      function normalizeRuntimeContext(raw) {
+        if (!raw || typeof raw !== 'object') {
+          return null;
+        }
+
+        const context = {
+          tokenType: typeof raw.tokenType === 'string' ? raw.tokenType.trim() : '',
+          runtimeToken: typeof raw.runtimeToken === 'string' ? raw.runtimeToken.trim() : '',
+          expiresAt: typeof raw.expiresAt === 'string' ? raw.expiresAt.trim() : '',
+          refreshAfter: typeof raw.refreshAfter === 'string' ? raw.refreshAfter.trim() : '',
+          sessionId: typeof raw.sessionId === 'string' ? raw.sessionId.trim() : '',
+          assignmentId: typeof raw.assignmentId === 'string' ? raw.assignmentId.trim() : '',
+          sceneId: typeof raw.sceneId === 'string' ? raw.sceneId.trim() : '',
+          unityBuildFolder: typeof raw.unityBuildFolder === 'string' ? raw.unityBuildFolder.trim() : '',
+          userId: typeof raw.userId === 'string' ? raw.userId.trim() : '',
+          userRole: typeof raw.userRole === 'string' ? raw.userRole.trim() : '',
+          userEmail: typeof raw.userEmail === 'string' ? raw.userEmail.trim() : ''
+        };
+
+        const hasAnyValue = Object.values(context).some((value) => value !== '' && value !== undefined);
+        return hasAnyValue ? context : null;
+      }
+
+      function buildRuntimeContextFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const raw = {
+          tokenType: params.get('tokenType'),
+          runtimeToken: params.get('runtimeToken'),
+          expiresAt: params.get('expiresAt'),
+          refreshAfter: params.get('refreshAfter'),
+          sessionId: params.get('sessionId'),
+          assignmentId: params.get('assignmentId'),
+          sceneId: params.get('sceneId'),
+          unityBuildFolder: params.get('unityBuildFolder'),
+          userId: params.get('userId'),
+          userRole: params.get('userRole'),
+          userEmail: params.get('userEmail')
+        };
+
+        return normalizeRuntimeContext(raw);
+      }
+
+      function isEmbeddedInIframe() {
+        return Boolean(window.parent && window.parent !== window);
+      }
+
+      function resolveInitialRuntimeContext() {
+        const fromWindow = normalizeRuntimeContext(tryParseJson(window.voiceSimRuntimeContext));
+        const fromStorage = isEmbeddedInIframe()
+          ? null
+          : normalizeRuntimeContext(tryParseJson(window.localStorage.getItem(runtimeContextStorageKey)));
+        const fromQuery = buildRuntimeContextFromQuery();
+
+        return normalizeRuntimeContext({
+          ...(fromStorage || {}),
+          ...(fromWindow || {}),
+          ...(fromQuery || {})
+        });
+      }
+
+      function exposeRuntimeContext(context) {
+        window.__VOICE_SIM_RUNTIME__ = context || null;
+
+        try {
+          window.dispatchEvent(new CustomEvent('voice-sim-runtime-updated', {
+            detail: window.__VOICE_SIM_RUNTIME__
+          }));
+        } catch (error) {
+          voiceLog('debug', 'Could not dispatch runtime update event:', error.message);
+        }
+      }
+
+      function hasRuntimeToken() {
+        return Boolean(pendingRuntimeContext && pendingRuntimeContext.runtimeToken);
+      }
+
+      function persistRuntimeContext(context) {
+        if (!context) {
+          window.localStorage.removeItem(runtimeContextStorageKey);
+          return;
+        }
+
+        window.localStorage.setItem(runtimeContextStorageKey, JSON.stringify(context));
+      }
+
+      function dispatchRuntimeContextToUnity() {
+        if (!unityInstanceGlobal || !pendingRuntimeContext) {
+          return;
+        }
+
+        try {
+          unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ApplyRuntimeContext', JSON.stringify(pendingRuntimeContext));
+          runtimeContextDispatchAttempts = 0;
+          voiceLog('info', 'Applied runtime context to Unity:', pendingRuntimeContext);
+        } catch (error) {
+          runtimeContextDispatchAttempts += 1;
+          voiceLog('warn', 'Runtime context dispatch failed:', error.message);
+
+          if (runtimeContextDispatchAttempts < 10) {
+            window.setTimeout(dispatchRuntimeContextToUnity, 500);
+          }
+        }
+      }
+
+      function applyRuntimeContext(context, options = {}) {
+        const normalized = normalizeRuntimeContext(context);
+        pendingRuntimeContext = normalized;
+        runtimeContextDispatchAttempts = 0;
+        exposeRuntimeContext(normalized);
+
+        if (options.persist !== false) {
+          persistRuntimeContext(normalized);
+        }
+
+        if (!normalized) {
+          if (unityInstanceGlobal) {
+            try {
+              unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ClearRuntimeContext', '');
+            } catch (error) {
+              voiceLog('debug', 'Could not clear runtime context in Unity:', error.message);
+            }
+          }
+          return;
+        }
+
+        dispatchRuntimeContextToUnity();
+      }
+
+      function clearRuntimeContext() {
+        pendingRuntimeContext = null;
+        exposeRuntimeContext(null);
+        persistRuntimeContext(null);
+
+        if (!unityInstanceGlobal) {
+          return;
+        }
+
+        try {
+          unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'ClearRuntimeContext', '');
+        } catch (error) {
+          voiceLog('debug', 'Could not clear runtime context in Unity:', error.message);
+        }
+      }
+
+      function registerTestingHelpers() {
+        window.voiceSimTesting = {
+          getRuntimeContext() {
+            return pendingRuntimeContext;
+          },
+          setRuntimeContext(context, persist = true) {
+            applyRuntimeContext(context, { persist });
+          },
+          clearRuntimeContext() {
+            clearRuntimeContext();
+          },
+          sendTranscript(text) {
+            sendToUnity(text);
+          }
+        };
+      }
+
+      function notifyParentUnityReady() {
+        if (hasPostedUnityReady) {
+          return;
+        }
+
+        if (!window.parent || window.parent === window) {
+          return;
+        }
+
+        try {
+          window.parent.postMessage({ type: 'unity-ready' }, '*');
+          hasPostedUnityReady = true;
+          voiceLog('info', 'Posted unity-ready to parent window.');
+        } catch (error) {
+          voiceLog('warn', 'Failed to post unity-ready to parent:', error.message);
+        }
+      }
+
+      function handleParentRuntimeMessage(event) {
+        if (window.parent && window.parent !== window && event.source !== window.parent) {
+          return;
+        }
+
+        const data = tryParseJson(event.data) || event.data;
+        if (!data || data.type !== 'unity-init') {
+          return;
+        }
+
+        const payload = data.payload;
+        if (!payload || typeof payload !== 'object') {
+          voiceLog('warn', 'Ignored unity-init payload because it was missing or invalid.');
+          return;
+        }
+
+        applyRuntimeContext(payload);
+        notifyUnityStatus(hasRuntimeToken() ? 'Session initialized' : 'Runtime context received without token');
+        voiceLog('info', 'Applied unity-init runtime context from parent message.');
+      }
+
+      window.addEventListener('message', handleParentRuntimeMessage);
+
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      var config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        autoSyncPersistentDataPath: true,
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+      } else {
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          unityInstanceGlobal = unityInstance;
+          window.unityInstance = unityInstance;
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          document.querySelector("#unity-fullscreen-button").onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+
+          registerTestingHelpers();
+          applyRuntimeContext(resolveInitialRuntimeContext(), { persist: false });
+          initializeVoiceRecognition();
+          notifyParentUnityReady();
+        }).catch((message) => {
+          voiceLog('error', 'Unity load failed:', message);
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+
+      // ============================================
+      // Console-only Web Speech API implementation
+      // Hold R to start recording, release R to stop and send transcript.
+      // ============================================
+      let recognition = null;
+      let isRecognitionActive = false;
+      let finalTranscript = '';
+      let interimTranscript = '';
+      let userSpeechStartAtIso = '';
+      let userSpeechEndAtIso = '';
+      let isRKeyPressed = false;
+      let lastInterimLogAt = 0;
+      const interimLogThrottleMs = 800;
+
+      function initializeVoiceRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+          voiceLog('error', 'Web Speech API not supported. Use Chrome/Edge/Safari.');
+          return;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          isRecognitionActive = true;
+          voiceLog('info', 'Recording started. Hold R to keep recording, release R to send.');
+          notifyUnityStatus('Recording started');
+        };
+
+        recognition.onspeechstart = () => {
+          if (!userSpeechStartAtIso) {
+            userSpeechStartAtIso = new Date().toISOString();
+            voiceLog('debug', 'Speech detected at', userSpeechStartAtIso);
+          }
+        };
+
+        recognition.onspeechend = () => {
+          userSpeechEndAtIso = new Date().toISOString();
+          voiceLog('debug', 'Speech ended at', userSpeechEndAtIso);
+        };
+
+        recognition.onresult = (event) => {
+          interimTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+              voiceLog('info', 'Final segment:', transcript);
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+
+          const now = Date.now();
+          if (interimTranscript && now - lastInterimLogAt >= interimLogThrottleMs) {
+            voiceLog('debug', 'Interim:', interimTranscript);
+            lastInterimLogAt = now;
+          }
+        };
+
+        recognition.onend = () => {
+          isRecognitionActive = false;
+          const text = finalTranscript.trim();
+          if (text) {
+            sendToUnity(text, userSpeechStartAtIso || null, userSpeechEndAtIso || null);
+          } else {
+            voiceLog('debug', 'Recording ended with no transcript.');
+          }
+        };
+
+        recognition.onerror = (event) => {
+          isRecognitionActive = false;
+          voiceLog('error', 'Speech recognition error:', event.error);
+          notifyUnityStatus('Error: ' + event.error);
+        };
+
+        voiceLog('info', 'Voice recognition initialized. Use keyboard: hold R to record, release R to send.');
+      }
+
+      function startRecording() {
+        if (!recognition) {
+          voiceLog('error', 'Recognition is not initialized.');
+          return;
+        }
+        if (!hasRuntimeToken()) {
+          voiceLog('warn', 'Runtime token is not ready. Waiting for unity-init from host app.');
+          notifyUnityStatus('Waiting for session initialization');
+          notifyParentUnityReady();
+          return;
+        }
+        if (isRecognitionActive) {
+          voiceLog('warn', 'Recognition is already active.');
+          return;
+        }
+
+        finalTranscript = '';
+        interimTranscript = '';
+        userSpeechStartAtIso = '';
+        userSpeechEndAtIso = '';
+
+        try {
+          recognition.start();
+        } catch (error) {
+          voiceLog('error', 'Failed to start recording:', error);
+        }
+      }
+
+      function stopRecording() {
+        if (!recognition || !isRecognitionActive) {
+          return;
+        }
+
+        try {
+          recognition.stop();
+          voiceLog('info', 'Stopping recording...');
+        } catch (error) {
+          voiceLog('error', 'Failed to stop recording:', error);
+        }
+      }
+
+      function notifyUnityStatus(status) {
+        if (!unityInstanceGlobal) {
+          return;
+        }
+        try {
+          unityInstanceGlobal.SendMessage('WebGLGlobalBridge', 'UpdateVoiceStatus', status);
+        } catch (error) {
+          voiceLog('debug', 'Could not send status to Unity:', error.message);
+        }
+      }
+
+      function sendToUnity(text, userSpeechStartAt, userSpeechEndAt) {
+        if (!unityInstanceGlobal) {
+          voiceLog('error', 'Unity instance is not available.');
+          return;
+        }
+        if (!hasRuntimeToken()) {
+          voiceLog('warn', 'Transcript ignored because runtime token is not available yet.');
+          notifyUnityStatus('Waiting for session initialization');
+          notifyParentUnityReady();
+          return;
+        }
+
+        const possibleNames = [
+          'WebGLGlobalBridge',
+          'WebGLTextBridge',
+          'Humano_Aphasia'
+        ];
+        const payload = JSON.stringify({
+          text,
+          userSpeechStartAt: userSpeechStartAt || undefined,
+          userSpeechEndAt: userSpeechEndAt || undefined
+        });
+
+        if (knownBridgeName) {
+          try {
+            unityInstanceGlobal.SendMessage(knownBridgeName, 'InjectText', payload);
+            voiceLog('info', 'Sent transcript via', knownBridgeName + ':', text, userSpeechStartAt || '', userSpeechEndAt || '');
+            return;
+          } catch (error) {
+            voiceLog('warn', 'Known bridge failed, rediscovering:', knownBridgeName, error.message);
+            knownBridgeName = null;
+          }
+        }
+
+        let sent = false;
+        for (const name of possibleNames) {
+          try {
+            unityInstanceGlobal.SendMessage(name, 'InjectText', payload);
+            knownBridgeName = name;
+            voiceLog('info', 'Sent transcript via', name + ':', text, userSpeechStartAt || '', userSpeechEndAt || '');
+            sent = true;
+            break;
+          } catch (error) {
+            voiceLog('debug', 'SendMessage failed for', name + ':', error.message);
+          }
+        }
+
+        if (!sent) {
+          voiceLog('error', 'Failed to send transcript to Unity.');
+        }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.key === 'r' || e.key === 'R') && !isRKeyPressed) {
+          isRKeyPressed = true;
+          startRecording();
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        if (e.key === 'r' || e.key === 'R') {
+          isRKeyPressed = false;
+          stopRecording();
+        }
+      });
+    </script>
+
+    <script>
+      (function() {
+        var tokenRefreshTimerId = 0;
+        var activeBootstrapState = null;
+        var launcherInitialized = false;
+        var launcherSettingsStorageKey = 'voicesim.devLauncher';
+        var DEFAULT_BOOTSTRAP_API_URL = 'https://bhyalmu7i1.execute-api.us-east-1.amazonaws.com/prod';
+
+        var launcherElements = {
+          root: document.querySelector('#dev-launcher'),
+          panel: document.querySelector('#launcher-panel'),
+          toggleButton: document.querySelector('#launcher-toggle'),
+          apiBaseUrl: document.querySelector('#api-base-url'),
+          assignmentId: document.querySelector('#assignment-id'),
+          studentUserId: document.querySelector('#student-user-id'),
+          devBootstrapKey: document.querySelector('#dev-bootstrap-key'),
+          launchButton: document.querySelector('#launch-button'),
+          refreshButton: document.querySelector('#refresh-button'),
+          endButton: document.querySelector('#end-button'),
+          clearButton: document.querySelector('#clear-button'),
+          status: document.querySelector('#launcher-status'),
+          sessionSummary: document.querySelector('#session-summary')
+        };
+
+        if (!launcherElements.root) {
+          return;
+        }
+
+        window.voiceLog = function(level) {
+          if (!window.LOG_LEVELS || !window.LOG_LEVELS[level] || window.LOG_LEVELS[level] < window.activeVoiceSimLogLevel) {
+            return;
+          }
+
+          var args = Array.prototype.slice.call(arguments, 1);
+          var fn = level === 'error' ? console.error : (level === 'warn' ? console.warn : console.log);
+          fn.apply(console, ['[VoiceSimDev]'].concat(args));
+        };
+
+        function defaultLauncherSettings() {
+          return {
+            apiBaseUrl: DEFAULT_BOOTSTRAP_API_URL,
+            assignmentId: '',
+            studentUserId: '',
+            isCollapsed: false,
+            devBootstrapKey: ''
+          };
+        }
+
+        function loadLauncherSettings() {
+          var parsed = window.tryParseJson(window.localStorage.getItem(launcherSettingsStorageKey));
+          return Object.assign({}, defaultLauncherSettings(), parsed || {});
+        }
+
+        function resolveInitialLauncherCollapsed(settings) {
+          var rawSettings = window.tryParseJson(window.localStorage.getItem(launcherSettingsStorageKey));
+          if (rawSettings && Object.prototype.hasOwnProperty.call(rawSettings, 'isCollapsed')) {
+            return Boolean(settings.isCollapsed);
+          }
+
+          return window.innerWidth <= 1200;
+        }
+
+        function saveLauncherSettings(partialSettings) {
+          var next = Object.assign({}, loadLauncherSettings(), partialSettings || {});
+          window.localStorage.setItem(launcherSettingsStorageKey, JSON.stringify(next));
+          return next;
+        }
+
+        function readLauncherSettingsFromForm() {
+          return {
+            apiBaseUrl: launcherElements.apiBaseUrl.value.trim() || DEFAULT_BOOTSTRAP_API_URL,
+            assignmentId: launcherElements.assignmentId.value.trim(),
+            studentUserId: launcherElements.studentUserId.value.trim(),
+            devBootstrapKey: launcherElements.devBootstrapKey.value.trim()
+          };
+        }
+
+        function applyLauncherSettingsToForm(settings) {
+          launcherElements.apiBaseUrl.value = settings.apiBaseUrl || DEFAULT_BOOTSTRAP_API_URL;
+          launcherElements.assignmentId.value = settings.assignmentId || '';
+          launcherElements.studentUserId.value = settings.studentUserId || '';
+          launcherElements.devBootstrapKey.value = settings.devBootstrapKey || '';
+        }
+
+        function setLauncherStatus(message, tone) {
+          launcherElements.status.textContent = message;
+          launcherElements.status.dataset.tone = tone || 'neutral';
+        }
+
+        function setLauncherCollapsed(isCollapsed) {
+          launcherElements.root.dataset.collapsed = isCollapsed ? 'true' : 'false';
+          launcherElements.panel.hidden = isCollapsed;
+          launcherElements.toggleButton.textContent = isCollapsed ? 'Show' : 'Hide';
+          launcherElements.toggleButton.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+        }
+
+        function renderSessionSummary() {
+          var runtimeContext = window.pendingRuntimeContext;
+          if (!runtimeContext) {
+            launcherElements.sessionSummary.textContent = 'No active session.';
+            return;
+          }
+
+          var parts = [
+            runtimeContext.assignmentId ? 'assignment: ' + runtimeContext.assignmentId : null,
+            (runtimeContext.userId || (activeBootstrapState && activeBootstrapState.studentUserId))
+              ? 'student: ' + (runtimeContext.userId || activeBootstrapState.studentUserId)
+              : null,
+            runtimeContext.sessionId ? 'session: ' + runtimeContext.sessionId : null,
+            runtimeContext.sceneId ? 'scene: ' + runtimeContext.sceneId : null,
+            runtimeContext.expiresAt ? 'expires: ' + runtimeContext.expiresAt : null,
+            runtimeContext.refreshAfter ? 'refresh: ' + runtimeContext.refreshAfter : null
+          ].filter(Boolean);
+
+          launcherElements.sessionSummary.textContent = parts.length > 0 ? parts.join(' | ') : 'Runtime context injected.';
+        }
+
+        function setLauncherBusy(isBusy) {
+          launcherElements.launchButton.disabled = isBusy;
+          launcherElements.refreshButton.disabled = isBusy;
+          launcherElements.endButton.disabled = isBusy;
+          launcherElements.clearButton.disabled = isBusy;
+        }
+
+        function resetActiveBootstrapState() {
+          if (tokenRefreshTimerId) {
+            window.clearTimeout(tokenRefreshTimerId);
+            tokenRefreshTimerId = 0;
+          }
+
+          activeBootstrapState = null;
+        }
+
+        function buildApiUrl(baseUrl, path) {
+          return baseUrl.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+
+        function parseJsonResponse(response) {
+          return response.text().then(function(text) {
+            if (!text) {
+              return null;
+            }
+
+            try {
+              return JSON.parse(text);
+            } catch (error) {
+              throw new Error('Expected JSON response but received: ' + text.slice(0, 200));
+            }
+          });
+        }
+
+        function httpJson(url, options) {
+          return fetch(url, options).then(function(response) {
+            return parseJsonResponse(response).then(function(body) {
+              if (!response.ok) {
+                var errorMessage = body && body.error ? body.error : (response.status + ' ' + response.statusText);
+                throw new Error(errorMessage);
+              }
+
+              return body;
+            });
+          });
+        }
+
+        function buildDevBootstrapHeaders(devBootstrapKey) {
+          if (!devBootstrapKey) {
+            throw new Error('Dev bootstrap key is required.');
+          }
+
+          return {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Dev-Bootstrap-Key': devBootstrapKey
+          };
+        }
+
+        function buildRuntimeHeaders(runtimeToken) {
+          if (!runtimeToken) {
+            throw new Error('Runtime token is required.');
+          }
+
+          return {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + runtimeToken
+          };
+        }
+
+        function bootstrapDevSession(settings) {
+          return httpJson(
+            buildApiUrl(settings.apiBaseUrl, '/sessions/dev-bootstrap'),
+            {
+              method: 'POST',
+              headers: buildDevBootstrapHeaders(settings.devBootstrapKey),
+              body: JSON.stringify({
+                assignmentId: settings.assignmentId,
+                studentUserId: settings.studentUserId,
+                client: 'unity-webgl'
+              })
+            }
+          );
+        }
+
+        function completeSessionRequest(apiBaseUrl, sessionId, runtimeHeaders) {
+          return httpJson(
+            buildApiUrl(apiBaseUrl, '/sessions/' + encodeURIComponent(sessionId) + '/complete'),
+            {
+              method: 'PUT',
+              headers: runtimeHeaders,
+              body: JSON.stringify({})
+            }
+          );
+        }
+
+        function buildRuntimeContextFromBootstrap(bootstrapEnvelope) {
+          var session = bootstrapEnvelope.session || {};
+          return {
+            runtimeToken: bootstrapEnvelope.runtimeToken || '',
+            sessionId: session.sessionId || '',
+            assignmentId: session.assignmentId || '',
+            sceneId: session.sceneId || '',
+            unityBuildFolder: session.unityBuildFolder || '',
+            userId: session.studentUserId || '',
+            expiresAt: bootstrapEnvelope.expiresAt || '',
+            refreshAfter: bootstrapEnvelope.refreshAfter || ''
+          };
+        }
+
+        function scheduleTokenRefresh(context, bootstrapState) {
+          if (tokenRefreshTimerId) {
+            window.clearTimeout(tokenRefreshTimerId);
+            tokenRefreshTimerId = 0;
+          }
+
+          if (!context || !bootstrapState) {
+            return;
+          }
+
+          var refreshAfterMs = context.refreshAfter ? Date.parse(context.refreshAfter) : NaN;
+          var expiresAtMs = context.expiresAt ? Date.parse(context.expiresAt) : NaN;
+          var nextRunAt = Number.isFinite(refreshAfterMs) ? refreshAfterMs : NaN;
+
+          if (!Number.isFinite(nextRunAt) && Number.isFinite(expiresAtMs)) {
+            nextRunAt = expiresAtMs - 60 * 1000;
+          }
+
+          if (!Number.isFinite(nextRunAt)) {
+            setLauncherStatus('Session launched. No refresh schedule returned by the backend.', 'success');
+            return;
+          }
+
+          var delayMs = Math.max(1000, nextRunAt - Date.now());
+          tokenRefreshTimerId = window.setTimeout(function() {
+            refreshRuntimeToken(true).catch(function(error) {
+              setLauncherStatus('Automatic token refresh failed: ' + error.message, 'error');
+            });
+          }, delayMs);
+        }
+
+        function launchSession() {
+          var settings = readLauncherSettingsFromForm();
+
+          if (!settings.assignmentId) {
+            setLauncherStatus('Assignment ID is required.', 'error');
+            return Promise.resolve();
+          }
+
+          saveLauncherSettings({
+            apiBaseUrl: settings.apiBaseUrl,
+            assignmentId: settings.assignmentId,
+            studentUserId: settings.studentUserId,
+            devBootstrapKey: settings.devBootstrapKey
+          });
+
+          setLauncherBusy(true);
+          setLauncherStatus('Calling /sessions/dev-bootstrap...', 'busy');
+
+          return Promise.resolve().then(function() {
+            if (!settings.studentUserId) {
+              throw new Error('Student User ID is required.');
+            }
+            if (!settings.devBootstrapKey) {
+              throw new Error('Dev bootstrap key is required.');
+            }
+
+            return bootstrapDevSession(settings).then(function(bootstrapEnvelope) {
+              if (!bootstrapEnvelope || !bootstrapEnvelope.runtimeToken) {
+                throw new Error('Dev bootstrap response did not include runtimeToken.');
+              }
+              if (!bootstrapEnvelope.session || !bootstrapEnvelope.session.sessionId) {
+                throw new Error('Dev bootstrap response did not include session.sessionId.');
+              }
+
+              var runtimeContext = buildRuntimeContextFromBootstrap(bootstrapEnvelope);
+              activeBootstrapState = {
+                apiBaseUrl: settings.apiBaseUrl,
+                sessionId: runtimeContext.sessionId,
+                assignmentId: runtimeContext.assignmentId,
+                studentUserId: settings.studentUserId,
+                devBootstrapKey: settings.devBootstrapKey
+              };
+
+              window.applyRuntimeContext(runtimeContext, { persist: true });
+              renderSessionSummary();
+              scheduleTokenRefresh(runtimeContext, activeBootstrapState);
+              setLauncherStatus((bootstrapEnvelope.message || 'Session bootstrapped.') + ' Runtime context injected into Unity.', 'success');
+            });
+          }).catch(function(error) {
+            window.voiceLog('error', error);
+            setLauncherStatus('Launch failed: ' + error.message, 'error');
+          }).finally(function() {
+            setLauncherBusy(false);
+          });
+        }
+
+        function refreshRuntimeToken(isAutomatic) {
+          var runtimeContext = window.pendingRuntimeContext;
+          var settings = loadLauncherSettings();
+
+          if (!runtimeContext || !runtimeContext.sessionId) {
+            return Promise.reject(new Error('No active session available to refresh.'));
+          }
+
+          var bootstrapState = activeBootstrapState || {
+            apiBaseUrl: settings.apiBaseUrl || DEFAULT_BOOTSTRAP_API_URL,
+            sessionId: runtimeContext.sessionId,
+            assignmentId: runtimeContext.assignmentId,
+            studentUserId: settings.studentUserId,
+            devBootstrapKey: settings.devBootstrapKey
+          };
+
+          if (!bootstrapState.assignmentId || !bootstrapState.studentUserId || !bootstrapState.devBootstrapKey) {
+            return Promise.reject(new Error('Dev bootstrap settings are unavailable. Bootstrap a new session.'));
+          }
+
+          if (!isAutomatic) {
+            setLauncherBusy(true);
+            setLauncherStatus('Refreshing runtime token via /sessions/dev-bootstrap...', 'busy');
+          }
+
+          return bootstrapDevSession({
+            apiBaseUrl: bootstrapState.apiBaseUrl,
+            assignmentId: bootstrapState.assignmentId,
+            studentUserId: bootstrapState.studentUserId,
+            devBootstrapKey: bootstrapState.devBootstrapKey
+          }).then(function(bootstrapEnvelope) {
+            if (!bootstrapEnvelope || !bootstrapEnvelope.runtimeToken) {
+              throw new Error('Dev bootstrap response did not include runtimeToken.');
+            }
+
+            var nextContext = window.normalizeRuntimeContext(Object.assign(
+              {},
+              runtimeContext,
+              buildRuntimeContextFromBootstrap(bootstrapEnvelope)
+            ));
+
+            activeBootstrapState = Object.assign({}, bootstrapState, {
+              sessionId: nextContext.sessionId || bootstrapState.sessionId,
+              assignmentId: nextContext.assignmentId || bootstrapState.assignmentId
+            });
+
+            window.applyRuntimeContext(nextContext, { persist: true });
+            renderSessionSummary();
+            scheduleTokenRefresh(nextContext, activeBootstrapState);
+            setLauncherStatus(isAutomatic ? 'Runtime token refreshed automatically.' : 'Runtime token refreshed.', 'success');
+          }).finally(function() {
+            if (!isAutomatic) {
+              setLauncherBusy(false);
+            }
+          });
+        }
+
+        function endSession() {
+          var runtimeContext = window.pendingRuntimeContext;
+          var settings = loadLauncherSettings();
+
+          if (!runtimeContext || !runtimeContext.sessionId) {
+            setLauncherStatus('No active session available to end.', 'error');
+            return Promise.resolve();
+          }
+
+          var bootstrapState = activeBootstrapState || {
+            apiBaseUrl: settings.apiBaseUrl || DEFAULT_BOOTSTRAP_API_URL,
+            sessionId: runtimeContext.sessionId,
+            assignmentId: runtimeContext.assignmentId,
+            studentUserId: settings.studentUserId,
+            devBootstrapKey: settings.devBootstrapKey
+          };
+
+          if (!runtimeContext.runtimeToken) {
+            setLauncherStatus('Runtime token is unavailable. Launch a new session.', 'error');
+            return Promise.resolve();
+          }
+
+          setLauncherBusy(true);
+          setLauncherStatus('Ending session...', 'busy');
+
+          return completeSessionRequest(
+            bootstrapState.apiBaseUrl,
+            runtimeContext.sessionId,
+            buildRuntimeHeaders(runtimeContext.runtimeToken)
+          ).then(function(sessionEnvelope) {
+            resetActiveBootstrapState();
+            window.clearRuntimeContext();
+            renderSessionSummary();
+
+            var completedSession = sessionEnvelope && sessionEnvelope.session ? sessionEnvelope.session : null;
+            var endedAt = completedSession && completedSession.endedAt ? completedSession.endedAt : '';
+
+            setLauncherStatus(
+              endedAt
+                ? 'Session completed at ' + endedAt + '. Runtime context cleared.'
+                : 'Session completed and runtime context cleared.',
+              'success'
+            );
+          }).catch(function(error) {
+            window.voiceLog('error', error);
+            setLauncherStatus('End session failed: ' + error.message, 'error');
+          }).finally(function() {
+            setLauncherBusy(false);
+          });
+        }
+
+        function onLauncherFieldChange() {
+          var settings = readLauncherSettingsFromForm();
+          saveLauncherSettings({
+            apiBaseUrl: settings.apiBaseUrl,
+            assignmentId: settings.assignmentId,
+            studentUserId: settings.studentUserId,
+            devBootstrapKey: settings.devBootstrapKey
+          });
+        }
+
+        function toggleLauncherPanel() {
+          var isCollapsed = launcherElements.root.dataset.collapsed === 'true';
+          var nextCollapsed = !isCollapsed;
+          setLauncherCollapsed(nextCollapsed);
+          saveLauncherSettings({ isCollapsed: nextCollapsed });
+        }
+
+        function initializeLauncher() {
+          if (launcherInitialized) {
+            renderSessionSummary();
+            return;
+          }
+
+          launcherInitialized = true;
+
+          var settings = loadLauncherSettings();
+          applyLauncherSettingsToForm(settings);
+          setLauncherCollapsed(resolveInitialLauncherCollapsed(settings));
+
+          [
+            launcherElements.apiBaseUrl,
+            launcherElements.assignmentId,
+            launcherElements.studentUserId,
+            launcherElements.devBootstrapKey
+          ].forEach(function(element) {
+            element.addEventListener('input', onLauncherFieldChange);
+          });
+
+          launcherElements.launchButton.addEventListener('click', function() {
+            launchSession();
+          });
+          launcherElements.toggleButton.addEventListener('click', function() {
+            toggleLauncherPanel();
+          });
+          launcherElements.refreshButton.addEventListener('click', function() {
+            refreshRuntimeToken(false).catch(function(error) {
+              setLauncherStatus('Manual refresh failed: ' + error.message, 'error');
+              setLauncherBusy(false);
+            });
+          });
+          launcherElements.endButton.addEventListener('click', function() {
+            endSession();
+          });
+          launcherElements.clearButton.addEventListener('click', function() {
+            resetActiveBootstrapState();
+            window.clearRuntimeContext();
+            renderSessionSummary();
+            setLauncherStatus('Runtime context cleared.', 'neutral');
+          });
+
+          var initialRuntimeContext = window.pendingRuntimeContext;
+          if (!initialRuntimeContext && typeof window.resolveInitialRuntimeContext === 'function') {
+            initialRuntimeContext = window.resolveInitialRuntimeContext();
+          }
+
+          renderSessionSummary();
+
+          if (initialRuntimeContext && initialRuntimeContext.sessionId) {
+            if (settings.assignmentId && settings.studentUserId && settings.devBootstrapKey) {
+              activeBootstrapState = {
+                apiBaseUrl: settings.apiBaseUrl || DEFAULT_BOOTSTRAP_API_URL,
+                sessionId: initialRuntimeContext.sessionId,
+                assignmentId: initialRuntimeContext.assignmentId || settings.assignmentId,
+                studentUserId: settings.studentUserId,
+                devBootstrapKey: settings.devBootstrapKey
+              };
+            }
+
+            scheduleTokenRefresh(initialRuntimeContext, activeBootstrapState);
+            setLauncherStatus('Restored previous runtime context from local storage.', 'neutral');
+            return;
+          }
+
+          setLauncherStatus('Waiting for launch.', 'neutral');
+        }
+
+        var baseApplyRuntimeContext = window.applyRuntimeContext;
+        window.applyRuntimeContext = function(context, options) {
+          var result = baseApplyRuntimeContext(context, options);
+          renderSessionSummary();
+          return result;
+        };
+
+        var baseClearRuntimeContext = window.clearRuntimeContext;
+        window.clearRuntimeContext = function() {
+          resetActiveBootstrapState();
+          var result = baseClearRuntimeContext();
+          renderSessionSummary();
+          return result;
+        };
+
+        var baseRegisterTestingHelpers = window.registerTestingHelpers;
+        window.registerTestingHelpers = function() {
+          baseRegisterTestingHelpers();
+          initializeLauncher();
+
+          window.voiceSimTesting = window.voiceSimTesting || {};
+          window.voiceSimTesting.clearRuntimeContext = function() {
+            window.clearRuntimeContext();
+          };
+          window.voiceSimTesting.launchSession = launchSession;
+          window.voiceSimTesting.refreshRuntimeToken = function() {
+            return refreshRuntimeToken(false);
+          };
+          window.voiceSimTesting.endSession = endSession;
+        };
+      })();
+    </script>
+
+  </body>
+</html>

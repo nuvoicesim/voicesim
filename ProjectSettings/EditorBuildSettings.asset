@@ -8,9 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GameScenarios/BrocasAphasiaScenario.unity
     guid: 3064c4367a1d7874ea1e32384f458606
-  - enabled: 0
-    path: Assets/Scenes/POC/POC_MainSimulation.unity
-    guid: b98ccd4011669490983b46ded6666e0a
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 092f2de8c92414530ad38ed7d9e5dd49, type: 2}
   m_UseUCBPForAssetBundles: 0

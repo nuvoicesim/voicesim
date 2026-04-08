@@ -1,0 +1,355 @@
+/* Generated from Assets/WebGLTemplates/VoiceEnabled/TemplateData/style.css by SyncVoiceEnabledDevTemplate.cs. */
+/* Edit the prod template or this sync script instead of editing this file directly. */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #111;
+}
+
+#unity-container {
+  position: absolute;
+}
+
+#unity-container.unity-desktop {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#unity-container.unity-mobile {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+#unity-canvas {
+  background: #231f20;
+}
+
+.unity-mobile #unity-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+#unity-loading-bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+
+#unity-logo {
+  width: 154px;
+  height: 130px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px;
+}
+
+#unity-progress-bar-empty {
+  width: 141px;
+  height: 18px;
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #777;
+}
+
+#unity-progress-bar-full {
+  width: 0%;
+  height: 100%;
+  background: #4caf50;
+}
+
+#unity-footer {
+  position: relative;
+}
+
+.unity-mobile #unity-footer {
+  display: none;
+}
+
+#unity-fullscreen-button {
+  cursor: pointer;
+}
+
+#unity-warning {
+  position: absolute;
+  left: 50%;
+  top: 5%;
+  transform: translateX(-50%);
+  display: none;
+  z-index: 1;
+}
+
+html,
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(39, 95, 171, 0.2), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(205, 84, 58, 0.14), transparent 30%),
+    linear-gradient(135deg, #08121d 0%, #111d2b 45%, #0a1017 100%);
+  color: #e9eef5;
+  font-family: 'Avenir Next', 'Segoe UI', sans-serif;
+}
+
+body {
+  position: relative;
+}
+
+#dev-launcher {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 30;
+  width: min(380px, calc(100vw - 36px));
+  max-height: calc(100vh - 36px);
+}
+
+.launcher-card {
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(11, 18, 27, 0.88);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.launcher-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.launcher-header h1 {
+  margin: 4px 0 8px;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7cb3ff;
+}
+
+.launcher-copy,
+.launcher-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(233, 238, 245, 0.78);
+}
+
+.launcher-note code {
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.launcher-toggle {
+  appearance: none;
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 8px 12px;
+  border: 1px solid rgba(124, 179, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(124, 179, 255, 0.14);
+  color: #d8e7ff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.launcher-toggle:hover {
+  background: rgba(124, 179, 255, 0.2);
+}
+
+.launcher-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124, 179, 255, 0.18);
+}
+
+#launcher-panel[hidden] {
+  display: none;
+}
+
+#dev-launcher[data-collapsed='true'] .launcher-card {
+  padding-bottom: 18px;
+}
+
+#dev-launcher[data-collapsed='true'] .launcher-header h1 {
+  margin-bottom: 0;
+}
+
+.launcher-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+}
+
+.field.span-2 {
+  grid-column: 1 / -1;
+}
+
+.field span {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(233, 238, 245, 0.78);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f5f8fb;
+  font: inherit;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: rgba(124, 179, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(124, 179, 255, 0.18);
+}
+
+.launcher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.launcher-actions button {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef4fb;
+  font: inherit;
+  cursor: pointer;
+}
+
+.launcher-actions button.primary {
+  background: linear-gradient(135deg, #4d8ff5, #2d67cf);
+  border-color: rgba(124, 179, 255, 0.55);
+}
+
+.launcher-actions button.danger {
+  border-color: rgba(222, 104, 104, 0.42);
+  background: rgba(157, 49, 49, 0.22);
+  color: #ffdede;
+}
+
+.launcher-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.launcher-status,
+.session-summary {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.launcher-status {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(233, 238, 245, 0.92);
+}
+
+.launcher-status[data-tone='busy'] {
+  background: rgba(89, 139, 238, 0.14);
+  color: #aecdff;
+}
+
+.launcher-status[data-tone='success'] {
+  background: rgba(75, 170, 119, 0.16);
+  color: #c6f1d4;
+}
+
+.launcher-status[data-tone='error'] {
+  background: rgba(204, 84, 84, 0.16);
+  color: #ffd6d6;
+}
+
+.session-summary {
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(233, 238, 245, 0.72);
+}
+
+#unity-canvas {
+  border-radius: 18px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+}
+
+.unity-mobile #unity-canvas {
+  border-radius: 0;
+}
+
+#unity-progress-bar-empty {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+#unity-warning {
+  z-index: 20;
+}
+
+@media (max-width: 960px) {
+  #dev-launcher {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-height: calc(100vh - 20px);
+  }
+
+  .launcher-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.span-2 {
+    grid-column: auto;
+  }
+
+  .launcher-heading {
+    align-items: stretch;
+  }
+
+  .launcher-toggle {
+    min-width: 0;
+  }
+
+  #unity-container.unity-desktop {
+    top: auto;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+  }
+}

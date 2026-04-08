@@ -46,6 +46,7 @@ public class ScoreManager : MonoBehaviour
     public void Initialize(string scenario)
     {
         currentScenario = scenario;
+        conversationTurns.Clear();
         Debug.Log($"[ScoreManager] Initialized for scenario={currentScenario}. Backend owns scoring prompt.");
     }
 
@@ -148,26 +149,19 @@ public class ScoreManager : MonoBehaviour
             yield break;
         }
 
-        string userId = "anonymous-user";
-        int simulationLevel = 1;
-        if (OpenAIRequest.Instance != null)
-        {
-            if (!string.IsNullOrWhiteSpace(OpenAIRequest.Instance.CurrentUserId))
-                userId = OpenAIRequest.Instance.CurrentUserId;
-            simulationLevel = Mathf.Clamp(OpenAIRequest.Instance.CurrentSimulationLevel, 1, 3);
-        }
-
         var requestBody = new ScoringRequestPayload
         {
-            userID = userId,
-            simulationLevel = simulationLevel,
             conversationTurns = conversationTurns
-                .ConvertAll(turn => new ScoringTurn { patient = turn.Patient ?? "", nurse = turn.Nurse ?? "" }),
+                .ConvertAll(turn => new ScoringTurn
+                {
+                    patient = turn.Patient ?? "",
+                    nurse = turn.Nurse ?? "",
+                    slpStudent = turn.Nurse ?? ""
+                }),
             metadata = new ScoringMetadata
             {
-                sessionId = $"{userId}-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
                 turnIndex = conversationTurns.Count,
-                client = "unity"
+                client = "unity-webgl"
             }
         };
 
@@ -185,6 +179,13 @@ public class ScoreManager : MonoBehaviour
         request.SetRequestHeader("Accept", "application/json");
         request.timeout = scoringTimeoutSeconds;
 
+        if (!RuntimeSessionContext.ApplyAuthorization(request, "ScoreManager"))
+        {
+            if (progressBarUI != null)
+                progressBarUI.HideProgressBar();
+            yield break;
+        }
+
         Debug.Log($"[ScoreManager] Submitting conversation to scoring endpoint: {scoringUrl}");
 
         var operation = request.SendWebRequest();
@@ -201,9 +202,10 @@ public class ScoreManager : MonoBehaviour
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("OpenAI Request Error: " + request.error);
-            if (progressBarUI != null)
-                progressBarUI.HideProgressBar();
+            string responseBody = request.downloadHandler != null ? request.downloadHandler.text : string.Empty;
+            Debug.LogError($"OpenAI Request Error: {request.error} (HTTP {request.responseCode})");
+            Debug.LogError($"[ScoreManager] Scoring response body: {responseBody}");
+            DisplayErrorReport(responseBody, $"HTTP {request.responseCode}: {request.error}");
             yield break;
         }
 
@@ -286,16 +288,6 @@ public class ScoreManager : MonoBehaviour
         {
             Debug.LogError("未找到MedicalReportFormatter组件！");
             DisplayOriginalFormat(evaluation);
-        }
-
-        if (AWSAPIConnector.Instance != null)
-        {
-            Debug.Log("Saving evaluation to AWS database...");
-            AWSAPIConnector.Instance.SaveEvaluationFromScoreManager(evaluation);
-        }
-        else
-        {
-            Debug.LogWarning("AWSAPIConnector instance not found - evaluation not saved to database");
         }
 
         StartCoroutine(RefreshScrollViewLayout());
@@ -404,12 +396,12 @@ public class ScoringTurn
 {
     public string patient;
     public string nurse;
+    public string slpStudent;
 }
 
 [Serializable]
 public class ScoringMetadata
 {
-    public string sessionId;
     public int turnIndex;
     public string client;
 }
@@ -417,8 +409,6 @@ public class ScoringMetadata
 [Serializable]
 public class ScoringRequestPayload
 {
-    public string userID;
-    public int simulationLevel;
     public List<ScoringTurn> conversationTurns;
     public ScoringMetadata metadata;
 }
