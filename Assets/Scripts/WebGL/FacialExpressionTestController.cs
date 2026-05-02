@@ -123,6 +123,12 @@ public class FacialExpressionTestController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float speechReductionFull = 0.45f;
     [SerializeField, Min(0f)] float speechSmoothingSpeed = 8f;
 
+    [Header("Speech Jaw Supplement (Optional)")]
+    [SerializeField] bool enableSpeechJawOpenSupplement = false;
+    [SerializeField] string speechJawOpenBlendShapeName = "jawOpen";
+    [SerializeField, Range(0f, 100f)] float speechJawOpenWeight = 10f;
+    [SerializeField, Min(0f)] float speechJawOpenSmoothingSpeed = 8f;
+
     [Header("Blend")]
     [SerializeField, Min(1f)] float expressionBlendSpeed = 220f;
 
@@ -140,10 +146,13 @@ public class FacialExpressionTestController : MonoBehaviour
     float[] _targetWeights;
     float[] _appliedWeights;
     float _speechAmount = 0f;
+    float _speechJawOpenCurrent = 0f;
     int _eyeBlinkLeftIndex = -1;
     int _eyeBlinkRightIndex = -1;
+    int _speechJawOpenIndex = -1;
     bool _cacheBuilt = false;
     bool _hasLoggedMissingRenderer = false;
+    bool _hasLoggedMissingSpeechJawOpenBlendShape = false;
 
     void Awake()
     {
@@ -346,6 +355,7 @@ public class FacialExpressionTestController : MonoBehaviour
         _controlledIndices.Clear();
         _eyeBlinkLeftIndex = -1;
         _eyeBlinkRightIndex = -1;
+        _speechJawOpenIndex = -1;
         _cacheBuilt = false;
 
         if (!faceRenderer || !faceRenderer.sharedMesh)
@@ -376,6 +386,7 @@ public class FacialExpressionTestController : MonoBehaviour
         ResolveBaseStatePresets(mesh, controlledSet);
         ResolvePeakReactionPresets(mesh, controlledSet);
         ResolveOverlayPresets(mesh, controlledSet);
+        ResolveSpeechJawOpenSupplement(mesh, controlledSet);
 
         TryGetBlendShapeIndex(mesh, "eyeBlinkLeft", out _eyeBlinkLeftIndex);
         TryGetBlendShapeIndex(mesh, "eyeBlinkRight", out _eyeBlinkRightIndex);
@@ -387,6 +398,52 @@ public class FacialExpressionTestController : MonoBehaviour
         }
 
         _cacheBuilt = true;
+    }
+
+    void ResolveSpeechJawOpenSupplement(Mesh mesh, HashSet<int> controlledSet)
+    {
+        _speechJawOpenIndex = -1;
+        if (!enableSpeechJawOpenSupplement)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(speechJawOpenBlendShapeName))
+        {
+            LogMissingSpeechJawOpenBlendShape("speechJawOpenBlendShapeName is empty");
+            return;
+        }
+
+        int index;
+        if (!TryGetBlendShapeIndex(mesh, speechJawOpenBlendShapeName, out index))
+        {
+            LogMissingSpeechJawOpenBlendShape(string.Format("blend shape '{0}' was not found", speechJawOpenBlendShapeName));
+            return;
+        }
+
+        string actualName = mesh.GetBlendShapeName(index);
+        if (IsLipSyncBlendShape(actualName))
+        {
+            LogMissingSpeechJawOpenBlendShape(string.Format("blend shape '{0}' resolves to lip-sync shape '{1}' and is ignored", speechJawOpenBlendShapeName, actualName));
+            return;
+        }
+
+        _speechJawOpenIndex = index;
+        controlledSet.Add(index);
+    }
+
+    void LogMissingSpeechJawOpenBlendShape(string reason)
+    {
+        if (_hasLoggedMissingSpeechJawOpenBlendShape)
+        {
+            return;
+        }
+
+        _hasLoggedMissingSpeechJawOpenBlendShape = true;
+        Debug.LogWarning(string.Format(
+            "[FacialExpressionTestController] Speech jaw supplement disabled on '{0}': {1}.",
+            name,
+            reason), this);
     }
 
     void ResolveBaseStatePresets(Mesh mesh, HashSet<int> controlledSet)
@@ -550,6 +607,7 @@ public class FacialExpressionTestController : MonoBehaviour
         ApplyOverlayPreset(Overlay.EyeTension, eyeTensionWeight);
         float effectiveBlinkPatternShiftWeight = Mathf.Max(blinkPatternShiftWeight, idleBlinkPatternShiftWeight);
         ApplyBlinkPatternShift(effectiveBlinkPatternShiftWeight);
+        ApplySpeechJawOpenSupplement();
 
         float blendStep = expressionBlendSpeed * Time.deltaTime;
         for (int i = 0; i < _controlledIndices.Count; ++i)
@@ -559,6 +617,30 @@ public class FacialExpressionTestController : MonoBehaviour
             float next = Mathf.MoveTowards(_appliedWeights[index], target, blendStep);
             _appliedWeights[index] = next;
             faceRenderer.SetBlendShapeWeight(index, next);
+        }
+    }
+
+    void ApplySpeechJawOpenSupplement()
+    {
+        float target = 0f;
+        if (enableSpeechJawOpenSupplement && _speechJawOpenIndex >= 0)
+        {
+            target = Mathf.Clamp(speechJawOpenWeight, 0f, 100f) * _speechAmount;
+        }
+
+        if (speechJawOpenSmoothingSpeed <= 0f)
+        {
+            _speechJawOpenCurrent = target;
+        }
+        else
+        {
+            float lerp = 1f - Mathf.Exp(-speechJawOpenSmoothingSpeed * Time.deltaTime);
+            _speechJawOpenCurrent = Mathf.Lerp(_speechJawOpenCurrent, target, lerp);
+        }
+
+        if (_speechJawOpenIndex >= 0 && _speechJawOpenCurrent > 0f)
+        {
+            _targetWeights[_speechJawOpenIndex] += _speechJawOpenCurrent;
         }
     }
 

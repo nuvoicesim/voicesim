@@ -1,0 +1,901 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5840069659657971269
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.041
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.99914247
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.0000000057916614
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.041405816
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -9.3132246e-10
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 4.746
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      propertyPath: m_Name
+      value: patient_2_model
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7918357289444049983}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4562407809376896915}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1370283124057483456}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8911972900448877723}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1285412733453230144}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 73445340638300154}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5437261093811342694}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 720289452575126818}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4567796559292907059}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6668925248582050730}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4829023946581723011}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1573346482229067111}
+  m_SourcePrefab: {fileID: 100100000, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+--- !u!137 &5030953626406169912 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7719853920342504579, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+  m_PrefabInstance: {fileID: 5840069659657971269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6759183651704806164 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+  m_PrefabInstance: {fileID: 5840069659657971269}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7918357289444049983
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: f3543cb73df8649f7b2ea45c0f1562cf, type: 3}
+  m_Controller: {fileID: 9100000, guid: 4b65e50bcbf52ff4d9b2ea8a33b8db90, type: 2}
+  m_CullingMode: 1
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!82 &4562407809376896915
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &1370283124057483456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 354cff4bd7e4344c898201f2bf926e51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clip: {fileID: 8300000, guid: 0b3e0eeef6685cd42828ecb2c1c3c58e, type: 3}
+  start: 0.0025906735
+  end: 1
+  crossFadeDuration: 0.05
+--- !u!114 &8911972900448877723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87560e04aa74c7a41acb9c87051c3b02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profile: {fileID: 11400000, guid: 4526ef1e82e1e4e4b87df72218808ce3, type: 2}
+  onLipSyncUpdate:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1285412733453230144}
+        m_TargetAssemblyTypeName: uLipSync.uLipSyncBlendShape, uLipSync.Runtime
+        m_MethodName: OnLipSyncUpdate
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  outputSoundGain: 1
+  audioSourceProxy: {fileID: 0}
+  autoAudioSyncOnWebGL: 1
+  audioSyncOffsetTime: 0
+--- !u!114 &1285412733453230144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2163de355e8fd8e4b83b631e07455323, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  updateMethod: 0
+  skinnedMeshRenderer: {fileID: 5030953626406169912}
+  blendShapes:
+  - phoneme: AA
+    index: 52
+    maxWeight: 1
+  - phoneme: AE
+    index: 53
+    maxWeight: 1
+  - phoneme: AH
+    index: 54
+    maxWeight: 1
+  - phoneme: AO
+    index: 55
+    maxWeight: 1
+  - phoneme: EH
+    index: 56
+    maxWeight: 1
+  - phoneme: ER
+    index: 57
+    maxWeight: 1
+  - phoneme: IH
+    index: 58
+    maxWeight: 1
+  - phoneme: IY
+    index: 59
+    maxWeight: 1
+  - phoneme: UH
+    index: 60
+    maxWeight: 1
+  - phoneme: UW
+    index: 61
+    maxWeight: 1
+  - phoneme: B
+    index: 62
+    maxWeight: 1
+  - phoneme: CH
+    index: 63
+    maxWeight: 1
+  - phoneme: D
+    index: 64
+    maxWeight: 1
+  - phoneme: DH
+    index: 65
+    maxWeight: 1
+  - phoneme: F
+    index: 66
+    maxWeight: 1
+  - phoneme: G
+    index: 67
+    maxWeight: 1
+  - phoneme: HH
+    index: 68
+    maxWeight: 1
+  - phoneme: JH
+    index: 69
+    maxWeight: 1
+  - phoneme: K
+    index: 70
+    maxWeight: 1
+  - phoneme: L
+    index: 71
+    maxWeight: 1
+  - phoneme: M
+    index: 72
+    maxWeight: 1
+  - phoneme: N
+    index: 73
+    maxWeight: 1
+  - phoneme: NG
+    index: 74
+    maxWeight: 1
+  - phoneme: P
+    index: 75
+    maxWeight: 1
+  - phoneme: R
+    index: 76
+    maxWeight: 1
+  - phoneme: S
+    index: 77
+    maxWeight: 1
+  - phoneme: SH
+    index: 78
+    maxWeight: 1
+  - phoneme: T
+    index: 79
+    maxWeight: 1
+  - phoneme: TH
+    index: 80
+    maxWeight: 1
+  - phoneme: V
+    index: 81
+    maxWeight: 1
+  - phoneme: W
+    index: 82
+    maxWeight: 1
+  - phoneme: Y
+    index: 83
+    maxWeight: 1
+  - phoneme: Z
+    index: 84
+    maxWeight: 1
+  - phoneme: ZH
+    index: 85
+    maxWeight: 1
+  maxBlendShapeValue: 100
+  minVolume: -2.5
+  maxVolume: -1.5
+  smoothness: 0.05
+  usePhonemeBlend: 0
+--- !u!114 &73445340638300154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d868d52bed1a2c42a34e7d3178d98df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5437261093811342694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce8ecf81683e248b482557efcab54ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 4562407809376896915}
+  maxRetries: 2
+  requestTimeoutSeconds: 45
+  modelId: eleven_multilingual_v2
+  stability: 0.8
+  similarityBoost: 0.8
+  styleExaggeration: 0.4
+  speed: 0.7
+  useAudio2Face: 0
+  deleteCachedFiles: 0
+  useBloodEffectController: 0
+  emotionController: {fileID: 6668925248582050730}
+--- !u!114 &720289452575126818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8f3d7951de144f7ab4ec98e25a72c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voiceProfile: {fileID: 11400000, guid: a581dcec2a2db89438d4aa5f8cc49e40, type: 2}
+  ttsManager: {fileID: 5437261093811342694}
+  facialAnimationController: {fileID: 0}
+--- !u!114 &4567796559292907059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d87a583482af435996cc006517c6753b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cueSkipGuard: {fileID: 0}
+  transcriptText: {fileID: 0}
+--- !u!114 &6668925248582050730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a150137ffaacba4c9ede0797f2e1000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 7918357289444049983}
+  setEmotionCode: 0
+  setMotionCode: 0
+  disableMotion: 0
+  currentEmotionCode: 0
+  currentMotionCode: 0
+  emotionNames:
+  - Neutral
+  - Discomfort
+  - Happy
+  - Pain
+  - Sad
+  - Anger
+  - Frustrated
+  - Thinking
+  - Apologetic
+  - Cry
+  motionNames:
+  - Neutral
+  - Confused
+  - Nod 1
+  - Nod 2
+  - Nod 3
+  - Nod 4
+  - Head Shake 1
+  - Head Shake 2
+  - Tap Table
+  - Struggling
+  facialExpressionBridge: {fileID: 1573346482229067111}
+--- !u!114 &4829023946581723011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ba2dca5b822430386434f3dad25f1af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  faceRenderer: {fileID: 5030953626406169912}
+  lipSync: {fileID: 8911972900448877723}
+  autoFindReferences: 1
+  activeBaseState: 0
+  baseStateWeight: 1
+  activePeakReaction: 0
+  peakReactionWeight: 0
+  fadePeakReaction: 0
+  peakFadeSpeed: 0.7
+  browTensionWeight: 0
+  softSmileWeight: 0
+  eyeTensionWeight: 0
+  blinkPatternShiftWeight: 0
+  idleBlinkPatternShiftWeight: 0.2
+  blinkPatternFrequency: 0.75
+  blinkPatternPulseWeight: 80
+  blinkPatternDutyCycle: 0.11
+  baselineBlinkPulseScale: 0.58
+  speechReductionStart: 0.23
+  speechReductionFull: 0.8
+  speechSmoothingSpeed: 8
+  enableSpeechJawOpenSupplement: 1
+  speechJawOpenBlendShapeName: jawOpen
+  speechJawOpenWeight: 14
+  speechJawOpenSmoothingSpeed: 8
+  expressionBlendSpeed: 200
+  baseStatePresets:
+  - state: 0
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browDownLeft
+        weight: 3
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 5
+        mouthReduceDuringSpeech: 0
+      - blendShape: browInnerUp
+        weight: 5
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 2
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 4
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 1
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 2
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideLeft
+        weight: 0
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 0
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthClose
+        weight: 0
+        mouthReduceDuringSpeech: 1
+      - blendShape: mouthFrownRight
+        weight: 5
+        mouthReduceDuringSpeech: 0.75
+      - blendShape: mouthLowerDownRight
+        weight: 4
+        mouthReduceDuringSpeech: 0.65
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browOuterUpLeft
+        weight: 9
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 9
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 28
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthSmileRight
+        weight: 28
+        mouthReduceDuringSpeech: 0.65
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browDownLeft
+        weight: 46
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 46
+        mouthReduceDuringSpeech: 0
+      - blendShape: browInnerUp
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 40
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 40
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerRight
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthFrownLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthFrownRight
+        weight: 24
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: jawForward
+        weight: 6
+        mouthReduceDuringSpeech: 0.65
+  peakReactionPresets:
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browOuterUpLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 34
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 34
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthDimpleLeft
+        weight: 20
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: mouthDimpleRight
+        weight: 20
+        mouthReduceDuringSpeech: 0.55
+      - blendShape: mouthSmileLeft
+        weight: 58
+        mouthReduceDuringSpeech: 0.6
+      - blendShape: mouthSmileRight
+        weight: 58
+        mouthReduceDuringSpeech: 0.6
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 58
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 24
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 32
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthShrugUpper
+        weight: 8
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthFrownLeft
+        weight: 34
+        mouthReduceDuringSpeech: 0.4
+      - blendShape: mouthFrownRight
+        weight: 34
+        mouthReduceDuringSpeech: 0.4
+      - blendShape: jawOpen
+        weight: 15
+        mouthReduceDuringSpeech: 0.75
+  - state: 3
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpLeft
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 16
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 7
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 7
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 34
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthSmileRight
+        weight: 34
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: jawOpen
+        weight: 12
+        mouthReduceDuringSpeech: 0.8
+  - state: 4
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browInnerUp
+        weight: 26
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownLeft
+        weight: 30
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookInLeft
+        weight: 18
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookOutRight
+        weight: 20
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 28
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeWideRight
+        weight: 8
+        mouthReduceDuringSpeech: 0
+      - blendShape: noseSneerLeft
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: jawLeft
+        weight: 9
+        mouthReduceDuringSpeech: 0.65
+      - blendShape: mouthPucker
+        weight: 10
+        mouthReduceDuringSpeech: 0.85
+      - blendShape: mouthFrownLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0.75
+  overlayPresets:
+  - state: 0
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: browDownLeft
+        weight: 70
+        mouthReduceDuringSpeech: 0
+      - blendShape: browDownRight
+        weight: 70
+        mouthReduceDuringSpeech: 0
+      - blendShape: browInnerUp
+        weight: 48
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpLeft
+        weight: 12
+        mouthReduceDuringSpeech: 0
+      - blendShape: browOuterUpRight
+        weight: 10
+        mouthReduceDuringSpeech: 0
+  - state: 1
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeSquintLeft
+        weight: 6
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 6
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 14
+        mouthReduceDuringSpeech: 0
+      - blendShape: mouthSmileLeft
+        weight: 24
+        mouthReduceDuringSpeech: 0.7
+      - blendShape: mouthSmileRight
+        weight: 24
+        mouthReduceDuringSpeech: 0.7
+  - state: 2
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeLookInLeft
+        weight: 15
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookInRight
+        weight: 15
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 58
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 58
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintLeft
+        weight: 26
+        mouthReduceDuringSpeech: 0
+      - blendShape: cheekSquintRight
+        weight: 26
+        mouthReduceDuringSpeech: 0
+  - state: 3
+    preset:
+      intensity: 1
+      blendShapes:
+      - blendShape: eyeSquintLeft
+        weight: 17
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintRight
+        weight: 17
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeBlinkLeft
+        weight: 22
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeBlinkRight
+        weight: 22
+        mouthReduceDuringSpeech: 0
+--- !u!114 &1573346482229067111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759183651704806164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe261c5345a94f849440e9064350811b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  facialController: {fileID: 4829023946581723011}
+  emotionController: {fileID: 6668925248582050730}
+  autoResolveReferences: 1
+  registerWithEmotionController: 1
+  happyOverlayIntensity: 0.65
+  stressOverlayIntensity: 1
+  confusedPeakIntensity: 0.98
+  happyPeakIntensity: 0.75
+  cryPeakIntensity: 1
+  reliefPeakIntensity: 0.66
+  resetOverlaysBeforeApply: 1
+  enableBridgeLogs: 1
