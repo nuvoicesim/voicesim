@@ -1,0 +1,211 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3078468546329590340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3525891206479283618}
+  - component: {fileID: 7159783252031659227}
+  - component: {fileID: 4455455053151474894}
+  m_Layer: 0
+  m_Name: Humano_Aphasia_Combined
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3525891206479283618
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3078468546329590340}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.011110711, y: 0.99612993, z: 0.052995026, w: 0.069233835}
+  m_LocalPosition: {x: 4.1, y: -0.05, z: 5.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6178997914527297059}
+  - {fileID: 5728829771069155132}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: -5.972, y: 171.96, z: 1.698}
+--- !u!114 &7159783252031659227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3078468546329590340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5e3eefea68847789642833bc724829, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WebGLTextBridge
+  defaultSpeechWpm: 0
+--- !u!114 &4455455053151474894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3078468546329590340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a66d412a206a6be4580f4a134fa450c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiUrl: https://api.openai.com/v1/chat/completions
+  apiKey: 
+  maxRetries: 2
+  requestTimeoutSeconds: 45
+  currentScenario: task1
+  lostResponse: 'um... fast... uh... too... fast...  '
+  maxSpeechSpeed: 170
+  cueControllerObject: {fileID: 0}
+  cueSkipGuard: {fileID: 0}
+  targetButtonUI: {fileID: 0}
+--- !u!1001 &1803204869143406226
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3525891206479283618}
+    m_Modifications:
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -406.7264
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 9.574956
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 24.210068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.99914247
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.0000000057916614
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.041405816
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -9.3132246e-10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 4.746
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6759183651704806164, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_Name
+      value: patient_2_model
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+--- !u!4 &5728829771069155132 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6234847844261314990, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+  m_PrefabInstance: {fileID: 1803204869143406226}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3562976432651168319
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3525891206479283618}
+    m_Modifications:
+    - target: {fileID: 5437261093811342694, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: emotionController
+      value: 
+      objectReference: {fileID: 7926040804846406037}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8068719081323617958, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_Name
+      value: patient_1_model
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+--- !u!4 &6178997914527297059 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7255872866112341020, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+  m_PrefabInstance: {fileID: 3562976432651168319}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7926040804846406037 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6668925248582050730, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+  m_PrefabInstance: {fileID: 3562976432651168319}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a150137ffaacba4c9ede0797f2e1000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
