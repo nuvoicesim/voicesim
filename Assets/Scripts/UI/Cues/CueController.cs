@@ -112,6 +112,9 @@ namespace UI.Cues
                 Debug.LogError("No targetText object found");
             }
 
+            if (hintButton != null)
+                hintButton.onClick.AddListener(ToggleCuePanel);
+
             if (confirmTargetButton != null)
                 confirmTargetButton.onClick.AddListener(() => OnConfirmTargetButtonPressed());
 
