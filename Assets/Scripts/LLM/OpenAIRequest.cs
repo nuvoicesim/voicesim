@@ -30,6 +30,7 @@ public class OpenAIRequest : MonoBehaviour
     // Components
     private CharacterAnimationController animationController;
     private EmotionController emotionController;
+    private TTSManager ttsManager;
     [SerializeField] private GameObject cueControllerObject;
     private CueController cueController;
 
@@ -108,6 +109,7 @@ public class OpenAIRequest : MonoBehaviour
 
     void Start()
     {
+        TryResolveTTSManager();
         TryResolveEmotionController();
 
         if (cueControllerObject == null)
@@ -117,6 +119,9 @@ public class OpenAIRequest : MonoBehaviour
 
         if (emotionController == null)
             Debug.LogError("OpenAIRequest: EmotionController not found on this object, children, or parent.");
+
+        if (ttsManager == null)
+            Debug.LogError("OpenAIRequest: TTSManager not found under this root or in scene.");
 
         if (cueController == null)
             Debug.LogError("CueController component not found on the UI GameObject.");
@@ -143,16 +148,52 @@ public class OpenAIRequest : MonoBehaviour
 
     private bool TryResolveEmotionController()
     {
-        if (emotionController != null)
+        if (emotionController != null && emotionController.isActiveAndEnabled)
             return true;
 
-        emotionController = GetComponent<EmotionController>();
-        if (emotionController == null)
-            emotionController = GetComponentInChildren<EmotionController>(true);
-        if (emotionController == null)
-            emotionController = GetComponentInParent<EmotionController>();
-
+        emotionController = SelectBestEmotionController(GetComponentsInChildren<EmotionController>(true));
         return emotionController != null;
+    }
+
+    private bool TryResolveTTSManager()
+    {
+        if (ttsManager != null && ttsManager.isActiveAndEnabled)
+            return true;
+
+        ttsManager = SelectBestComponent(GetComponentsInChildren<TTSManager>(true));
+        return ttsManager != null;
+    }
+
+    private static EmotionController SelectBestEmotionController(EmotionController[] candidates)
+    {
+        return SelectBestComponent(candidates);
+    }
+
+    private static T SelectBestComponent<T>(T[] candidates) where T : Behaviour
+    {
+        if (candidates == null || candidates.Length == 0)
+            return null;
+
+        T activeInHierarchy = null;
+        T fallback = null;
+
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            T candidate = candidates[i];
+            if (candidate == null)
+                continue;
+
+            if (fallback == null)
+                fallback = candidate;
+
+            if (candidate.isActiveAndEnabled)
+                return candidate;
+
+            if (activeInHierarchy == null && candidate.gameObject.activeInHierarchy)
+                activeInHierarchy = candidate;
+        }
+
+        return activeInHierarchy ?? fallback;
     }
 
     public void ApplyLoginContext(string userId, int simulationLevel)
@@ -416,15 +457,15 @@ public class OpenAIRequest : MonoBehaviour
         });
         PrintChatMessage(chatMessages);
 
-        if (TTSManager.Instance != null)
-            TTSManager.Instance.ConvertTextToSpeech(
+        if (TryResolveTTSManager())
+            ttsManager.ConvertTextToSpeech(
                 responseText,
                 motionCode,
                 turnIndex);
         else
             Debug.LogError("TTSManager instance not found.");
 
-        if (emotionController == null && !TryResolveEmotionController())
+        if (!TryResolveEmotionController())
         {
             Debug.LogError("[OpenAIRequest] EmotionController not found; skipping HandleEmotionCode.");
         }
