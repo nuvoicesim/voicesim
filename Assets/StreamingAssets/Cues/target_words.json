@@ -130,5 +130,137 @@
         "Model": "Say 'Tired'."
       }
     }
+  ,
+    {
+      "script_number": 11,
+      "title": "The grass is ______.",
+      "target_word": "green",
+      "alternate_target": "",
+      "semanticKeywords": ["color", "plant", "nature", "lawn", "leaf", "leaves"],
+      "phonemicKeywords": ["gre", "gr", "grn"],
+      "studentHints": {
+        "Semantic": "It is the color of grass and leaves.",
+        "Phonemic": "It starts with 'Gr' like 'grape'.",
+        "Model": "Say 'green'."
+      }
+    },
+    {
+      "script_number": 12,
+      "title": "Sugar is ______.",
+      "target_word": "sweet",
+      "alternate_target": "white",
+      "semanticKeywords": ["taste", "candy", "dessert", "flavor", "sugary", "syrup"],
+      "phonemicKeywords": ["swe", "sw", "swt", "whi", "wh"],
+      "studentHints": {
+        "Semantic": "It describes the taste of sugar — the opposite of bitter.",
+        "Phonemic": "It starts with 'Sw' like 'swim'.",
+        "Model": "Say 'sweet'."
+      }
+    },
+    {
+      "script_number": 13,
+      "title": "Roses are red, violets are ______.",
+      "target_word": "blue",
+      "alternate_target": "",
+      "semanticKeywords": ["color", "sky", "ocean", "water", "violet", "purple"],
+      "phonemicKeywords": ["bl", "blu", "bloo"],
+      "studentHints": {
+        "Semantic": "It is the color of the sky and the ocean.",
+        "Phonemic": "It starts with 'Bl' like 'black'.",
+        "Model": "Say 'blue'."
+      }
+    },
+    {
+      "script_number": 14,
+      "title": "They fought like cats and ______.",
+      "target_word": "dogs",
+      "alternate_target": "dog",
+      "semanticKeywords": ["pet", "animal", "bark", "puppy", "canine", "paw"],
+      "phonemicKeywords": ["do", "dog", "dg", "daw"],
+      "studentHints": {
+        "Semantic": "It is a common household pet that barks.",
+        "Phonemic": "It starts with 'D' like 'duck'.",
+        "Model": "Say 'dogs'."
+      }
+    },
+    {
+      "script_number": 15,
+      "title": "Christmas is in the month of ______.",
+      "target_word": "december",
+      "alternate_target": "December",
+      "semanticKeywords": ["holiday", "winter", "christmas", "month", "last month", "snow", "xmas"],
+      "phonemicKeywords": ["dec", "de", "des", "dis"],
+      "studentHints": {
+        "Semantic": "It is the last month of the year, when Christmas is celebrated.",
+        "Phonemic": "It starts with 'D' like 'day'.",
+        "Model": "Say 'December'."
+      }
+    }
+  ,
+    {
+      "script_number": 16,
+      "title": "What do you write with?",
+      "target_word": "pen",
+      "alternate_target": "pencil",
+      "semanticKeywords": ["write", "writing", "paper", "ink", "tool", "draw"],
+      "phonemicKeywords": ["pe", "pen", "penc", "pin"],
+      "studentHints": {
+        "Semantic": "It is a tool you use to write on paper.",
+        "Phonemic": "It starts with 'P' like 'paper'.",
+        "Model": "Say 'pen' or 'pencil'."
+      }
+    },
+    {
+      "script_number": 17,
+      "title": "What color is snow?",
+      "target_word": "white",
+      "alternate_target": "",
+      "semanticKeywords": ["color", "snow", "milk", "pure", "bright", "light"],
+      "phonemicKeywords": ["whi", "wh", "whit", "wit"],
+      "studentHints": {
+        "Semantic": "It is the color of snow and milk.",
+        "Phonemic": "It starts with 'Wh' like 'wheel'.",
+        "Model": "Say 'white'."
+      }
+    },
+    {
+      "script_number": 18,
+      "title": "How many days are in a week?",
+      "target_word": "seven",
+      "alternate_target": "7",
+      "semanticKeywords": ["number", "week", "days", "count"],
+      "phonemicKeywords": ["sev", "se", "svn", "sven"],
+      "studentHints": {
+        "Semantic": "It is the number of days in a week.",
+        "Phonemic": "It starts with 'S' like 'sun'.",
+        "Model": "Say 'seven'."
+      }
+    },
+    {
+      "script_number": 19,
+      "title": "Where do nurses work?",
+      "target_word": "hospital",
+      "alternate_target": "",
+      "semanticKeywords": ["medical", "doctor", "nurse", "health", "sick", "patient", "clinic"],
+      "phonemicKeywords": ["hos", "hosp", "ha", "hoss"],
+      "studentHints": {
+        "Semantic": "It is a place where doctors and nurses care for sick patients.",
+        "Phonemic": "It starts with 'H' like 'house'.",
+        "Model": "Say 'hospital'."
+      }
+    },
+    {
+      "script_number": 20,
+      "title": "Where can you get stamps?",
+      "target_word": "post office",
+      "alternate_target": "store",
+      "semanticKeywords": ["mail", "letter", "envelope", "send", "stamp", "package"],
+      "phonemicKeywords": ["po", "pos", "post", "sto", "str"],
+      "studentHints": {
+        "Semantic": "It is a place where you can buy stamps and send letters.",
+        "Phonemic": "It starts with 'P' like 'paper'.",
+        "Model": "Say 'post office' or 'store'."
+      }
+    }
   ]
 }
