@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; // 添加UI支持
+using TMPro;
 
 public class CameraClipboardController : MonoBehaviour
 {
@@ -24,6 +25,10 @@ public class CameraClipboardController : MonoBehaviour
 
     [Header("Integration")]
     public ChecklistManager checklistManager; // checklist管理器的引用
+
+    [Header("Study Feedback")]
+    [SerializeField] private StudyFeedbackPresenter studyFeedbackPresenter;
+    [SerializeField] private bool showRubricFeedbackBlock = true;
 
     private static CameraClipboardController instance;
     public static CameraClipboardController Instance
@@ -70,6 +75,8 @@ public class CameraClipboardController : MonoBehaviour
         {
             checklistManager = FindObjectOfType<ChecklistManager>();
         }
+
+        PrepareStudyFeedbackView();
     }
 
     void Update()
@@ -103,12 +110,7 @@ public class CameraClipboardController : MonoBehaviour
             Debug.Log("ChecklistManager触发了clipboard视图切换");
 
             // 获取ScoreManager用于评估
-            ScoreManager scoreManager = ScoreManager.Instance;
-            if (scoreManager == null)
-            {
-                scoreManager = FindObjectOfType<ScoreManager>();
-                Debug.Log("通过FindObjectOfType找到ScoreManager");
-            }
+            ScoreManager scoreManager = ResolveScoreManagerForReport();
 
             if (scoreManager == null)
             {
@@ -143,12 +145,64 @@ public class CameraClipboardController : MonoBehaviour
         // 视角切换完成后启动评估
         if (scoreManager != null)
         {
+            EnsureGameObjectHierarchyActive(scoreManager.transform);
             Debug.Log("视角切换完成，开始评估");
             scoreManager.SubmitEvaluation();
         }
         else
         {
             Debug.LogError("ScoreManager为空，无法启动评估");
+        }
+    }
+
+    private ScoreManager ResolveScoreManagerForReport()
+    {
+        ScoreManager scoreManager = ScoreManager.Instance;
+        if (scoreManager != null)
+            return scoreManager;
+
+        scoreManager = FindObjectOfType<ScoreManager>();
+        if (scoreManager != null)
+        {
+            Debug.Log("通过FindObjectOfType找到ScoreManager");
+            return scoreManager;
+        }
+
+        ScoreManager[] candidates = FindObjectsByType<ScoreManager>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            ScoreManager candidate = candidates[i];
+            if (candidate == null)
+                continue;
+
+            if (!candidate.gameObject.scene.IsValid())
+                continue;
+
+            Debug.Log("[CameraClipboardController] 在非激活层级中找到ScoreManager，将在评估前激活其层级。");
+            return candidate;
+        }
+
+        return null;
+    }
+
+    private static void EnsureGameObjectHierarchyActive(Transform targetTransform)
+    {
+        if (targetTransform == null)
+            return;
+
+        List<GameObject> hierarchy = new List<GameObject>();
+        Transform current = targetTransform;
+        while (current != null)
+        {
+            hierarchy.Add(current.gameObject);
+            current = current.parent;
+        }
+
+        for (int i = hierarchy.Count - 1; i >= 0; i--)
+        {
+            GameObject node = hierarchy[i];
+            if (!node.activeSelf)
+                node.SetActive(true);
         }
     }
 
@@ -201,6 +255,7 @@ public class CameraClipboardController : MonoBehaviour
         // 激活clipboard区域
         if (clipboardReport != null)
         {
+            PrepareStudyFeedbackView();
             clipboardReport.SetActive(true);
             Debug.Log("激活clipboard区域");
         }
@@ -275,6 +330,53 @@ public class CameraClipboardController : MonoBehaviour
         {
             Debug.LogWarning("ChecklistManager引用为空，无法重置checklist");
         }
+    }
+
+    private void PrepareStudyFeedbackView()
+    {
+        StudyFeedbackPresenter presenter = ResolveStudyFeedbackPresenter();
+        if (presenter == null)
+            return;
+
+        presenter.EnsureDefaultStructure(ResolveAiInteractionReportText());
+        if (showRubricFeedbackBlock)
+            presenter.ShowRubricWaitingState();
+        else
+            presenter.SetRubricBlockVisible(false);
+    }
+
+    private StudyFeedbackPresenter ResolveStudyFeedbackPresenter()
+    {
+        if (studyFeedbackPresenter != null)
+            return studyFeedbackPresenter;
+
+        if (clipboardReport == null)
+            return null;
+
+        studyFeedbackPresenter = clipboardReport.GetComponentInChildren<StudyFeedbackPresenter>(true);
+        if (studyFeedbackPresenter == null)
+            studyFeedbackPresenter = clipboardReport.AddComponent<StudyFeedbackPresenter>();
+
+        return studyFeedbackPresenter;
+    }
+
+    private TextMeshProUGUI ResolveAiInteractionReportText()
+    {
+        ScoreManager scoreManager = ScoreManager.Instance;
+        if (scoreManager == null)
+            scoreManager = FindObjectOfType<ScoreManager>();
+
+        if (scoreManager != null && scoreManager.reportText != null)
+            return scoreManager.reportText;
+
+        if (clipboardReport == null)
+            return null;
+
+        MedicalReportFormatter formatter = clipboardReport.GetComponentInChildren<MedicalReportFormatter>(true);
+        if (formatter != null && formatter.reportText != null)
+            return formatter.reportText;
+
+        return clipboardReport.GetComponentInChildren<TextMeshProUGUI>(true);
     }
 
     // 检查当前是否在查看clipboard

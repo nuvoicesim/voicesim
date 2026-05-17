@@ -17,6 +17,30 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/simucase/sectionD.unity
     guid: 8840fa8b55fa63f499329f74ac0e1409
+  - enabled: 0
+    path: Assets/Scenes/simucase/sectionA.unity
+    guid: 0cad1e007451ace9bba0a92053281921
+  - enabled: 0
+    path: Assets/Scenes/simucase/sectionB.unity
+    guid: 3079899e68c2baae001b01b221976379
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2BenScenarioSelect.unity
+    guid: b0c847c03a9d46a4a2d29cc4f79fb1a1
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2BenSentenceCompletion.unity
+    guid: e29f15a605e34e81ba37f2bcb7d71a43
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2BenObjectNaming.unity
+    guid: d8b62fa51f7541a7905b58780a322d61
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2MariaScenarioSelect.unity
+    guid: a9f5826e4e2446b09128ea9cb5ce5f40
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2MariaSentenceCompletion.unity
+    guid: f4a1d9be4d9243488f67fa28ca6d1b21
+  - enabled: 0
+    path: Assets/Scenes/phase2/phase2MariaObjectNaming.unity
+    guid: c31d4a694e454e889a0bf39c1662b745
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 092f2de8c92414530ad38ed7d9e5dd49, type: 2}
   m_UseUCBPForAssetBundles: 0

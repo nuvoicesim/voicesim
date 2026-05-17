@@ -68,6 +68,7 @@ public class TTSManager : MonoBehaviour
     private Audio2FaceManager audio2FaceManager;
     public EmotionController emotionController;
     private bool hasLoggedMissingMotionTarget;
+    private bool hasLoggedMissingFacialBridge;
     private int previousDirectMotionCode = -1;
     private const string TtsPath = "/tts";
     private static readonly string[] OriginalMotionTriggers =
@@ -218,6 +219,71 @@ public class TTSManager : MonoBehaviour
 
         hasLoggedMissingMotionTarget = false;
         return true;
+    }
+
+    private FacialExpressionRuntimeBridge TryResolveFacialBridge()
+    {
+        if (emotionController == null)
+        {
+            emotionController = GetComponent<EmotionController>();
+            if (emotionController == null)
+                emotionController = GetComponentInChildren<EmotionController>(true);
+            if (emotionController == null)
+                emotionController = GetComponentInParent<EmotionController>();
+            if (emotionController == null)
+                emotionController = FindFirstObjectByType<EmotionController>();
+        }
+
+        if (emotionController == null)
+            return null;
+
+        if (emotionController.facialExpressionBridge != null)
+            return emotionController.facialExpressionBridge;
+
+        FacialExpressionRuntimeBridge bridge = emotionController.GetComponent<FacialExpressionRuntimeBridge>();
+        if (bridge == null)
+            bridge = emotionController.GetComponentInChildren<FacialExpressionRuntimeBridge>(true);
+        if (bridge == null)
+            bridge = emotionController.GetComponentInParent<FacialExpressionRuntimeBridge>();
+
+        if (bridge != null && emotionController.facialExpressionBridge == null)
+            emotionController.facialExpressionBridge = bridge;
+
+        return bridge;
+    }
+
+    private void BeginSpeakingPresentation()
+    {
+        FacialExpressionRuntimeBridge bridge = TryResolveFacialBridge();
+        if (bridge != null)
+        {
+            hasLoggedMissingFacialBridge = false;
+            bridge.BeginSpeakingPresentation();
+            return;
+        }
+
+        if (!hasLoggedMissingFacialBridge)
+        {
+            Debug.LogWarning("[TTSManager] Facial bridge not found; skipping speaking presentation transition.");
+            hasLoggedMissingFacialBridge = true;
+        }
+    }
+
+    private void RestoreIdlePresentation()
+    {
+        FacialExpressionRuntimeBridge bridge = TryResolveFacialBridge();
+        if (bridge != null)
+        {
+            hasLoggedMissingFacialBridge = false;
+            bridge.RestoreIdlePresentation();
+            return;
+        }
+
+        if (!hasLoggedMissingFacialBridge)
+        {
+            Debug.LogWarning("[TTSManager] Facial bridge not found; skipping idle restoration.");
+            hasLoggedMissingFacialBridge = true;
+        }
     }
 
     public void ApplyLoginContext(string userId, int simulationLevel)
@@ -530,6 +596,8 @@ public class TTSManager : MonoBehaviour
                     emotionController.SyncAnimationsWithWordTimings(wordTimings);
                 }
 
+                BeginSpeakingPresentation();
+
                 if (motionCode.HasValue)
                 {
                     UpdateMotion(motionCode.Value);
@@ -553,6 +621,8 @@ public class TTSManager : MonoBehaviour
 
         while (audioSource != null && audioSource.isPlaying)
             yield return null;
+
+        RestoreIdlePresentation();
 
         if (OpenAIRequest.Instance != null)
             OpenAIRequest.Instance.ReportPatientSpeechEnd(requestTurnIndex);

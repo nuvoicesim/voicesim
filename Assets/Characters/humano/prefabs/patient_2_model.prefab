@@ -514,7 +514,7 @@ MonoBehaviour:
   faceRenderer: {fileID: 5030953626406169912}
   lipSync: {fileID: 8911972900448877723}
   autoFindReferences: 1
-  activeBaseState: 0
+  activeBaseState: 2
   baseStateWeight: 1
   activePeakReaction: 0
   peakReactionWeight: 0
@@ -529,39 +529,39 @@ MonoBehaviour:
   blinkPatternPulseWeight: 80
   blinkPatternDutyCycle: 0.11
   baselineBlinkPulseScale: 0.58
-  speechReductionStart: 0.23
-  speechReductionFull: 0.8
+  speechReductionStart: 0.15
+  speechReductionFull: 0.6
   speechSmoothingSpeed: 8
   enableSpeechJawOpenSupplement: 1
   speechJawOpenBlendShapeName: jawOpen
-  speechJawOpenWeight: 14
+  speechJawOpenWeight: 24
   speechJawOpenSmoothingSpeed: 8
-  expressionBlendSpeed: 200
+  expressionBlendSpeed: 260
   baseStatePresets:
   - state: 0
     preset:
       intensity: 1
       blendShapes:
       - blendShape: browDownLeft
-        weight: 3
+        weight: 7
         mouthReduceDuringSpeech: 0
       - blendShape: browDownRight
-        weight: 5
+        weight: 8
         mouthReduceDuringSpeech: 0
       - blendShape: browInnerUp
-        weight: 5
+        weight: 10
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintLeft
-        weight: 2
+        weight: 5
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintRight
-        weight: 4
+        weight: 6
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintLeft
-        weight: 1
+        weight: 2
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintRight
-        weight: 2
+        weight: 3
         mouthReduceDuringSpeech: 0
       - blendShape: eyeWideLeft
         weight: 0
@@ -570,13 +570,16 @@ MonoBehaviour:
         weight: 0
         mouthReduceDuringSpeech: 0
       - blendShape: mouthClose
-        weight: 0
+        weight: 2
         mouthReduceDuringSpeech: 1
+      - blendShape: mouthFrownLeft
+        weight: 6
+        mouthReduceDuringSpeech: 0.75
       - blendShape: mouthFrownRight
-        weight: 5
+        weight: 8
         mouthReduceDuringSpeech: 0.75
       - blendShape: mouthLowerDownRight
-        weight: 4
+        weight: 3
         mouthReduceDuringSpeech: 0.65
   - state: 1
     preset:
@@ -611,41 +614,44 @@ MonoBehaviour:
       intensity: 1
       blendShapes:
       - blendShape: browDownLeft
-        weight: 46
+        weight: 66
         mouthReduceDuringSpeech: 0
       - blendShape: browDownRight
-        weight: 46
+        weight: 68
         mouthReduceDuringSpeech: 0
       - blendShape: browInnerUp
-        weight: 20
+        weight: 36
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintLeft
-        weight: 40
+        weight: 58
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintRight
-        weight: 40
+        weight: 58
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintLeft
-        weight: 20
+        weight: 34
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintRight
-        weight: 20
+        weight: 34
         mouthReduceDuringSpeech: 0
       - blendShape: noseSneerLeft
-        weight: 24
+        weight: 18
         mouthReduceDuringSpeech: 0
       - blendShape: noseSneerRight
-        weight: 24
+        weight: 18
         mouthReduceDuringSpeech: 0
+      - blendShape: mouthClose
+        weight: 3
+        mouthReduceDuringSpeech: 1
       - blendShape: mouthFrownLeft
-        weight: 24
-        mouthReduceDuringSpeech: 0.65
+        weight: 34
+        mouthReduceDuringSpeech: 0.8
       - blendShape: mouthFrownRight
-        weight: 24
-        mouthReduceDuringSpeech: 0.65
+        weight: 34
+        mouthReduceDuringSpeech: 0.8
       - blendShape: jawForward
-        weight: 6
-        mouthReduceDuringSpeech: 0.65
+        weight: 7
+        mouthReduceDuringSpeech: 0.8
   peakReactionPresets:
   - state: 1
     preset:
@@ -763,57 +769,60 @@ MonoBehaviour:
       intensity: 1
       blendShapes:
       - blendShape: browInnerUp
-        weight: 26
+        weight: 44
         mouthReduceDuringSpeech: 0
       - blendShape: browDownLeft
-        weight: 30
+        weight: 48
         mouthReduceDuringSpeech: 0
       - blendShape: browOuterUpRight
-        weight: 12
-        mouthReduceDuringSpeech: 0
-      - blendShape: eyeLookInLeft
-        weight: 18
-        mouthReduceDuringSpeech: 0
-      - blendShape: eyeLookOutRight
         weight: 20
         mouthReduceDuringSpeech: 0
-      - blendShape: eyeSquintLeft
+      - blendShape: eyeLookInLeft
         weight: 28
         mouthReduceDuringSpeech: 0
+      - blendShape: eyeLookOutRight
+        weight: 30
+        mouthReduceDuringSpeech: 0
+      - blendShape: eyeSquintLeft
+        weight: 46
+        mouthReduceDuringSpeech: 0
       - blendShape: eyeWideRight
-        weight: 8
+        weight: 14
         mouthReduceDuringSpeech: 0
       - blendShape: noseSneerLeft
-        weight: 12
+        weight: 10
         mouthReduceDuringSpeech: 0
       - blendShape: jawLeft
-        weight: 9
-        mouthReduceDuringSpeech: 0.65
-      - blendShape: mouthPucker
         weight: 10
-        mouthReduceDuringSpeech: 0.85
+        mouthReduceDuringSpeech: 0.8
+      - blendShape: mouthPucker
+        weight: 9
+        mouthReduceDuringSpeech: 0.9
       - blendShape: mouthFrownLeft
-        weight: 14
-        mouthReduceDuringSpeech: 0.75
+        weight: 24
+        mouthReduceDuringSpeech: 0.85
+      - blendShape: mouthFrownRight
+        weight: 18
+        mouthReduceDuringSpeech: 0.85
   overlayPresets:
   - state: 0
     preset:
       intensity: 1
       blendShapes:
       - blendShape: browDownLeft
-        weight: 70
+        weight: 92
         mouthReduceDuringSpeech: 0
       - blendShape: browDownRight
-        weight: 70
+        weight: 94
         mouthReduceDuringSpeech: 0
       - blendShape: browInnerUp
-        weight: 48
+        weight: 74
         mouthReduceDuringSpeech: 0
       - blendShape: browOuterUpLeft
-        weight: 12
+        weight: 20
         mouthReduceDuringSpeech: 0
       - blendShape: browOuterUpRight
-        weight: 10
+        weight: 18
         mouthReduceDuringSpeech: 0
   - state: 1
     preset:
@@ -842,22 +851,22 @@ MonoBehaviour:
       intensity: 1
       blendShapes:
       - blendShape: eyeLookInLeft
-        weight: 15
+        weight: 24
         mouthReduceDuringSpeech: 0
       - blendShape: eyeLookInRight
-        weight: 15
+        weight: 24
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintLeft
-        weight: 58
+        weight: 82
         mouthReduceDuringSpeech: 0
       - blendShape: eyeSquintRight
-        weight: 58
+        weight: 82
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintLeft
-        weight: 26
+        weight: 42
         mouthReduceDuringSpeech: 0
       - blendShape: cheekSquintRight
-        weight: 26
+        weight: 42
         mouthReduceDuringSpeech: 0
   - state: 3
     preset:
@@ -891,11 +900,16 @@ MonoBehaviour:
   emotionController: {fileID: 6668925248582050730}
   autoResolveReferences: 1
   registerWithEmotionController: 1
+  idleBaseState: 2
   happyOverlayIntensity: 0.65
   stressOverlayIntensity: 1
-  confusedPeakIntensity: 0.98
+  confusedPeakIntensity: 1
   happyPeakIntensity: 0.75
   cryPeakIntensity: 1
   reliefPeakIntensity: 0.66
+  processingBrowTension: 0.9
+  processingEyeTension: 0.78
+  processingBlinkPatternShift: 0.58
+  processingPeakIntensity: 0.9
   resetOverlaysBeforeApply: 1
   enableBridgeLogs: 1

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -29,6 +30,8 @@ public class SimuCaseSectionSelect : MonoBehaviour
     [SerializeField] private Button sectionDStartButton;
 
     [Header("Scene Names")]
+    [SerializeField] private string sectionASceneName = "sectionA";
+    [SerializeField] private string sectionBSceneName = "sectionB";
     [SerializeField] private string sectionCSceneName = "sectionC";
     [SerializeField] private string sectionDSceneName = "sectionD";
 
@@ -40,9 +43,8 @@ public class SimuCaseSectionSelect : MonoBehaviour
         HidePanel(sectionCPanel);
         HidePanel(sectionDPanel);
 
-        if (sectionAButton != null) sectionAButton.interactable = false;
-        if (sectionBButton != null) sectionBButton.interactable = false;
-
+        if (sectionAButton != null) sectionAButton.onClick.AddListener(() => LoadSection(sectionASceneName));
+        if (sectionBButton != null) sectionBButton.onClick.AddListener(() => LoadSection(sectionBSceneName));
         if (sectionCButton != null) sectionCButton.onClick.AddListener(() => ShowDescription(sectionCPanel));
         if (sectionDButton != null) sectionDButton.onClick.AddListener(() => ShowDescription(sectionDPanel));
 
@@ -70,6 +72,66 @@ public class SimuCaseSectionSelect : MonoBehaviour
     private void LoadSection(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
+    }
+
+    public void ApplySectionStatusesJson(string json)
+    {
+        if (!StudySectionStatusAdapter.TryParseSectionStatuses(json, out List<StudySectionStatus> statuses))
+            return;
+
+        ApplySectionStatuses(statuses);
+    }
+
+    public void ApplySectionStatuses(List<StudySectionStatus> statuses)
+    {
+        if (statuses == null)
+            return;
+
+        SetSectionInteractable("A", true);
+        SetSectionInteractable("B", true);
+        SetSectionInteractable("C", true);
+        SetSectionInteractable("D", true);
+
+        Dictionary<string, StudySectionStatus> statusMap = StudySectionStatusAdapter.BuildStatusMap(statuses);
+        foreach (KeyValuePair<string, StudySectionStatus> entry in statusMap)
+        {
+            bool isInteractable = !StudySectionStatusAdapter.IsDisabledStatus(entry.Value.status);
+            SetSectionInteractable(entry.Key, isInteractable);
+        }
+    }
+
+    public void ApplySectionStatus(string sectionId, string status)
+    {
+        string normalizedSectionId = StudySectionStatusAdapter.NormalizeSectionId(sectionId);
+        bool isInteractable = !StudySectionStatusAdapter.IsDisabledStatus(status);
+        SetSectionInteractable(normalizedSectionId, isInteractable);
+    }
+
+    private void SetSectionInteractable(string sectionId, bool isInteractable)
+    {
+        switch (StudySectionStatusAdapter.NormalizeSectionId(sectionId))
+        {
+            case "A":
+                SetButtonInteractable(sectionAButton, isInteractable);
+                break;
+            case "B":
+                SetButtonInteractable(sectionBButton, isInteractable);
+                break;
+            case "C":
+                SetButtonInteractable(sectionCButton, isInteractable);
+                SetButtonInteractable(sectionCStartButton, isInteractable);
+                break;
+            case "D":
+                SetButtonInteractable(sectionDButton, isInteractable);
+                SetButtonInteractable(sectionDStartButton, isInteractable);
+                break;
+        }
+    }
+
+    private static void SetButtonInteractable(Button button, bool isInteractable)
+    {
+        if (button != null)
+            button.interactable = isInteractable;
     }
 
     private static void ShowPanel(GameObject panel)

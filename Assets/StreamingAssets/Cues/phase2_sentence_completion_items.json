@@ -1,0 +1,138 @@
+{
+  "configId": "phase2-sentence-completion-v1",
+  "phaseId": "phase2",
+  "activityType": "training",
+  "scoringMode": "none",
+  "taskType": "sentence_completion_practice",
+  "displayMode": "target_only",
+  "groups": [
+    {
+      "groupId": "ben",
+      "patientProfile": "Ben",
+      "taskId": "phase2-ben-sentence-completion",
+      "sectionId": "phase2-ben-sentence-completion",
+      "scriptNumberStart": 201,
+      "itemIds": [ "P2-SC-01", "P2-SC-02", "P2-SC-03", "P2-SC-04", "P2-SC-05" ]
+    },
+    {
+      "groupId": "maria",
+      "patientProfile": "Maria",
+      "taskId": "phase2-maria-sentence-completion",
+      "sectionId": "phase2-maria-sentence-completion",
+      "scriptNumberStart": 206,
+      "itemIds": [ "P2-SC-06", "P2-SC-07", "P2-SC-08", "P2-SC-09", "P2-SC-10" ]
+    }
+  ],
+  "items": [
+    {
+      "itemId": "P2-SC-01",
+      "ordinal": 1,
+      "targetWord": "toothbrush",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cYou brush your teeth with a _____.\u201d",
+      "phonemicCue": "It starts with \"too...\"",
+      "modelCue": "Say \"toothbrush.\"",
+      "semanticKeywords": [ "brush", "teeth", "dental", "mouth", "clean" ],
+      "phonemicKeywords": [ "too", "tooth", "toothb", "brush" ]
+    },
+    {
+      "itemId": "P2-SC-02",
+      "ordinal": 2,
+      "targetWord": "green",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cThe sky is blue and the grass is _____.\u201d",
+      "phonemicCue": "It starts with \"gr...\"",
+      "modelCue": "Say \"green.\"",
+      "semanticKeywords": [ "grass", "color", "plant", "lawn", "leaves" ],
+      "phonemicKeywords": [ "gre", "gr", "grn" ]
+    },
+    {
+      "itemId": "P2-SC-03",
+      "ordinal": 3,
+      "targetWord": "bed",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cAt night, we go to _____.\u201d",
+      "phonemicCue": "It starts with \"b...\"",
+      "modelCue": "Say \"bed.\"",
+      "semanticKeywords": [ "night", "sleep", "bedroom", "rest" ],
+      "phonemicKeywords": [ "be", "bed", "b" ]
+    },
+    {
+      "itemId": "P2-SC-04",
+      "ordinal": 4,
+      "targetWord": "meow",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cA dog says \"woof\" and a cat says _____.\u201d",
+      "phonemicCue": "It starts with \"m...\"",
+      "modelCue": "Say \"meow.\"",
+      "semanticKeywords": [ "cat", "sound", "animal", "woof" ],
+      "phonemicKeywords": [ "me", "meo", "meow", "m" ]
+    },
+    {
+      "itemId": "P2-SC-05",
+      "ordinal": 5,
+      "targetWord": "stove",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cWe cook food on a _____.\u201d",
+      "phonemicCue": "It starts with \"st...\"",
+      "modelCue": "Say \"stove.\"",
+      "semanticKeywords": [ "cook", "food", "kitchen", "heat" ],
+      "phonemicKeywords": [ "sto", "st", "stov" ]
+    },
+    {
+      "itemId": "P2-SC-06",
+      "ordinal": 6,
+      "targetWord": "tea",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cIn the morning, people drink coffee or _____.\u201d",
+      "phonemicCue": "It starts with \"t...\"",
+      "modelCue": "Say \"tea.\"",
+      "semanticKeywords": [ "morning", "drink", "coffee", "hot", "beverage" ],
+      "phonemicKeywords": [ "te", "tea", "t" ]
+    },
+    {
+      "itemId": "P2-SC-07",
+      "ordinal": 7,
+      "targetWord": "feet",
+      "alternateTarget": "foot",
+      "semanticCue": "Think of a sentence like:\n\u201cYou wear shoes on your _____.\u201d",
+      "phonemicCue": "It starts with \"f...\"",
+      "modelCue": "Say \"feet.\"",
+      "semanticKeywords": [ "shoes", "wear", "body", "walk", "toes" ],
+      "phonemicKeywords": [ "fee", "feet", "foo", "f" ]
+    },
+    {
+      "itemId": "P2-SC-08",
+      "ordinal": 8,
+      "targetWord": "umbrella",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cWhen it rains, you use an _____.\u201d",
+      "phonemicCue": "It starts with \"um...\"",
+      "modelCue": "Say \"umbrella.\"",
+      "semanticKeywords": [ "rain", "rains", "wet", "cover", "weather" ],
+      "phonemicKeywords": [ "um", "umb", "umbre" ]
+    },
+    {
+      "itemId": "P2-SC-09",
+      "ordinal": 9,
+      "targetWord": "television",
+      "alternateTarget": "TV",
+      "semanticCue": "Think of a sentence like:\n\u201cWe read a book and watch _____.\u201d",
+      "phonemicCue": "It starts with \"tel...\"",
+      "modelCue": "Say \"television\" or \"TV.\"",
+      "semanticKeywords": [ "watch", "screen", "show", "shows", "book" ],
+      "phonemicKeywords": [ "tel", "tele", "tv" ]
+    },
+    {
+      "itemId": "P2-SC-10",
+      "ordinal": 10,
+      "targetWord": "swim",
+      "alternateTarget": "",
+      "semanticCue": "Think of a sentence like:\n\u201cBirds fly and fish _____.\u201d",
+      "phonemicCue": "It starts with \"sw...\"",
+      "modelCue": "Say \"swim.\"",
+      "semanticKeywords": [ "fish", "water", "fly", "move", "ocean" ],
+      "phonemicKeywords": [ "swi", "sw", "swim" ]
+    }
+  ]
+}

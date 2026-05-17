@@ -149,6 +149,8 @@ public class ScoreManager : MonoBehaviour
             yield break;
         }
 
+        StudyTaskResultPayload studyPayload = TryBuildStudyTaskPayload();
+
         var requestBody = new ScoringRequestPayload
         {
             conversationTurns = conversationTurns
@@ -162,10 +164,14 @@ public class ScoreManager : MonoBehaviour
             {
                 turnIndex = conversationTurns.Count,
                 client = "unity-webgl"
-            }
+            },
+            taskContext = BuildScoringTaskContext(studyPayload),
+            studyTaskContext = BuildScoringStudyTaskContext(studyPayload)
         };
 
-        string jsonBody = JsonConvert.SerializeObject(requestBody);
+        string jsonBody = JsonConvert.SerializeObject(
+            requestBody,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
         if (progressBarUI != null)
             progressBarUI.UpdateProgress(0.5f, "Consulting evaluation system...");
@@ -282,6 +288,7 @@ public class ScoreManager : MonoBehaviour
         if (formatter != null)
         {
             formatter.ApplyFormattedReport(evaluation, conversationTurns.Count);
+            ApplyRubricAssessment(evaluation);
             Debug.Log("使用格式化器显示报告");
         }
         else
@@ -382,6 +389,330 @@ public class ScoreManager : MonoBehaviour
     {
         return conversationTurns;
     }
+
+    private static StudyTaskResultPayload TryBuildStudyTaskPayload()
+    {
+        try
+        {
+            return StudyTaskResultBuffer.BuildPayload(StudyDataDefaults.StatusCompleted);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[ScoreManager] Could not build study task payload for /llm-scoring context: " + ex.Message);
+            return null;
+        }
+    }
+
+    private static ScoringTaskContext BuildScoringTaskContext(StudyTaskResultPayload payload)
+    {
+        string phaseId = ResolveContextString(
+            payload?.taskContext?.phaseId,
+            StudyRuntimeContext.PhaseId,
+            StudyDataDefaults.PhaseUnknown);
+
+        string activityType = ResolveContextString(
+            payload?.taskContext?.activityType,
+            StudyRuntimeContext.ActivityType,
+            StudyDataDefaults.ActivityUnspecified);
+
+        string taskType = ResolveContextString(
+            payload?.taskContext?.taskType,
+            StudyRuntimeContext.TaskType,
+            StudyDataDefaults.TaskTypeUnspecified);
+
+        string scoringMode = ResolveContextString(
+            payload?.taskContext?.scoringMode,
+            StudyRuntimeContext.ScoringMode,
+            StudyDataDefaults.ScoringNone);
+
+        string patientProfile = ResolveContextString(
+            payload?.taskContext?.patientId,
+            StudyRuntimeContext.PatientId,
+            "");
+
+        string sessionRef = ResolveContextString(
+            payload?.sessionContext?.sessionId,
+            StudyRuntimeContext.SessionContext?.sessionId,
+            "");
+
+        string feedbackUse = DeriveFeedbackUse(phaseId);
+
+        bool hasAnyContext =
+            !string.IsNullOrEmpty(feedbackUse) ||
+            !string.IsNullOrEmpty(phaseId) ||
+            !string.IsNullOrEmpty(activityType) ||
+            !string.IsNullOrEmpty(taskType) ||
+            !string.IsNullOrEmpty(patientProfile);
+
+        if (!hasAnyContext)
+            return null;
+
+        return new ScoringTaskContext
+        {
+            feedbackUse = string.IsNullOrEmpty(feedbackUse) ? null : feedbackUse,
+            phaseId = string.IsNullOrEmpty(phaseId) ? null : phaseId,
+            activityType = string.IsNullOrEmpty(activityType) ? null : activityType,
+            taskType = string.IsNullOrEmpty(taskType) ? null : taskType,
+            patientProfile = string.IsNullOrEmpty(patientProfile) ? null : patientProfile,
+            scoringMode = string.IsNullOrEmpty(scoringMode) ? null : scoringMode,
+            sessionRef = string.IsNullOrEmpty(sessionRef) ? null : sessionRef
+        };
+    }
+
+    private static ScoringStudyTaskContext BuildScoringStudyTaskContext(StudyTaskResultPayload payload)
+    {
+        if (payload == null)
+            return null;
+
+        bool hasItems = payload.itemResults != null && payload.itemResults.Count > 0;
+        if (!hasItems)
+            return null;
+
+        ScoringStudyTaskContext ctx = new ScoringStudyTaskContext
+        {
+            status = string.IsNullOrEmpty(payload.status) ? null : payload.status,
+            startedAt = string.IsNullOrEmpty(payload.startedAt) ? null : payload.startedAt,
+            completedAt = string.IsNullOrEmpty(payload.completedAt) ? null : payload.completedAt,
+            items = new List<ScoringItemContext>(payload.itemResults.Count)
+        };
+
+        List<ScoringTranscriptTurn> aggregatedTurns = new List<ScoringTranscriptTurn>();
+        List<ScoringInteractionEvent> aggregatedEvents = new List<ScoringInteractionEvent>();
+
+        for (int i = 0; i < payload.itemResults.Count; i++)
+        {
+            StudyItemResult item = payload.itemResults[i];
+            if (item == null)
+                continue;
+
+            ctx.items.Add(ProjectScoringItem(item));
+
+            if (item.transcriptTurns != null)
+            {
+                int turnFallbackIndex = aggregatedTurns.Count;
+                foreach (StudyTranscriptTurn t in item.transcriptTurns)
+                {
+                    if (t == null)
+                        continue;
+                    aggregatedTurns.Add(ProjectScoringTranscriptTurn(t, turnFallbackIndex++));
+                }
+            }
+
+            if (item.interactionEvents != null)
+            {
+                foreach (StudyInteractionEvent e in item.interactionEvents)
+                {
+                    if (e == null)
+                        continue;
+                    aggregatedEvents.Add(ProjectScoringInteractionEvent(e));
+                }
+            }
+        }
+
+        ctx.transcriptTurns = aggregatedTurns.Count > 0 ? aggregatedTurns : null;
+        ctx.interactionEvents = aggregatedEvents.Count > 0 ? aggregatedEvents : null;
+        return ctx;
+    }
+
+    private static ScoringItemContext ProjectScoringItem(StudyItemResult item)
+    {
+        return new ScoringItemContext
+        {
+            itemId = string.IsNullOrEmpty(item.itemId) ? null : item.itemId,
+            taskId = string.IsNullOrEmpty(item.taskId) ? null : item.taskId,
+            taskType = string.IsNullOrEmpty(item.taskType) ? null : item.taskType,
+            sectionId = string.IsNullOrEmpty(item.sectionId) ? null : item.sectionId,
+            sectionType = string.IsNullOrEmpty(item.sectionType) ? null : item.sectionType,
+            scriptNumber = item.scriptNumber,
+            promptText = string.IsNullOrEmpty(item.promptText) ? null : item.promptText,
+            stimulusRef = string.IsNullOrEmpty(item.stimulusRef) ? null : item.stimulusRef,
+            targetAnswer = string.IsNullOrEmpty(item.targetAnswer) ? null : item.targetAnswer,
+            alternateTarget = string.IsNullOrEmpty(item.alternateTarget) ? null : item.alternateTarget,
+            patientFinalResponse = string.IsNullOrEmpty(item.patientFinalResponse) ? null : item.patientFinalResponse,
+            studentSelectedScore = item.studentSelectedScore,
+            expectedScore = item.expectedScore,
+            scoreMatchesExpected = item.scoreMatchesExpected,
+            completionChecked = item.completionChecked,
+            cueUsed = item.cueUsed,
+            cueLevel = string.IsNullOrEmpty(item.cueLevel) ? null : item.cueLevel,
+            startedAt = string.IsNullOrEmpty(item.startedAt) ? null : item.startedAt,
+            completedAt = string.IsNullOrEmpty(item.completedAt) ? null : item.completedAt
+        };
+    }
+
+    private static ScoringTranscriptTurn ProjectScoringTranscriptTurn(StudyTranscriptTurn turn, int fallbackTurnIndex)
+    {
+        return new ScoringTranscriptTurn
+        {
+            turnIndex = turn.turnIndex ?? fallbackTurnIndex,
+            speakerRole = string.IsNullOrEmpty(turn.speaker) ? null : turn.speaker,
+            text = string.IsNullOrEmpty(turn.text) ? null : turn.text,
+            cueLevel = null,
+            itemId = string.IsNullOrEmpty(turn.itemId) ? null : turn.itemId
+        };
+    }
+
+    private static ScoringInteractionEvent ProjectScoringInteractionEvent(StudyInteractionEvent ev)
+    {
+        return new ScoringInteractionEvent
+        {
+            eventType = string.IsNullOrEmpty(ev.eventType) ? null : ev.eventType,
+            itemId = string.IsNullOrEmpty(ev.itemId) ? null : ev.itemId,
+            cueLevel = string.IsNullOrEmpty(ev.cueLevel) ? null : ev.cueLevel,
+            message = string.IsNullOrEmpty(ev.message) ? null : ev.message,
+            occurredAt = string.IsNullOrEmpty(ev.timestamp) ? null : ev.timestamp
+        };
+    }
+
+    private static string DeriveFeedbackUse(string phaseId)
+    {
+        if (string.Equals(phaseId, StudyDataDefaults.Phase1, StringComparison.OrdinalIgnoreCase))
+            return "phase1_ai_interaction";
+        if (string.Equals(phaseId, StudyDataDefaults.Phase2, StringComparison.OrdinalIgnoreCase))
+            return "phase2_training";
+        return null;
+    }
+
+    private static string ResolveContextString(string primary, string fallback, string treatAsEmpty)
+    {
+        if (!IsBlankOrSentinel(primary, treatAsEmpty))
+            return primary.Trim();
+        if (!IsBlankOrSentinel(fallback, treatAsEmpty))
+            return fallback.Trim();
+        return "";
+    }
+
+    private static bool IsBlankOrSentinel(string value, string sentinel)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return true;
+        if (string.IsNullOrEmpty(sentinel))
+            return false;
+        return string.Equals(value.Trim(), sentinel, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void ApplyRubricAssessment(DynamicEvaluationResult evaluation)
+    {
+        if (evaluation == null || evaluation.rubricAssessment == null)
+            return;
+
+        StudyRubricFeedbackBlock block = BuildRubricFeedbackBlockFromAssessment(evaluation.rubricAssessment);
+        if (block == null)
+            return;
+
+        StudyFeedbackPresenter[] presenters = FindObjectsByType<StudyFeedbackPresenter>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+        foreach (StudyFeedbackPresenter presenter in presenters)
+        {
+            if (presenter == null)
+                continue;
+            presenter.SetRubricFeedback(block);
+        }
+    }
+
+    private static StudyRubricFeedbackBlock BuildRubricFeedbackBlockFromAssessment(RubricAssessmentResult assessment)
+    {
+        if (assessment == null)
+            return null;
+
+        string granularity = NormalizeAssessmentGranularity(assessment);
+        if (string.IsNullOrEmpty(granularity))
+            return null;
+
+        StudyRubricFeedbackBlock block = new StudyRubricFeedbackBlock
+        {
+            taskId = string.IsNullOrEmpty(assessment.sectionId) ? null : assessment.sectionId,
+            taskSummary = string.IsNullOrEmpty(assessment.taskSummary) ? null : assessment.taskSummary,
+            assessmentGranularity = granularity,
+            itemFeedback = null,
+            taskFeedback = null
+        };
+
+        if (string.Equals(granularity, "task_level", StringComparison.OrdinalIgnoreCase))
+        {
+            if (assessment.taskFeedback == null)
+                return null;
+            block.taskFeedback = ProjectTaskFeedback(assessment.taskFeedback);
+            if (block.taskFeedback == null)
+                return null;
+            return block;
+        }
+
+        // item_level
+        if (assessment.itemFeedback == null || assessment.itemFeedback.Count == 0)
+            return null;
+
+        List<StudyRubricFeedbackItem> items = new List<StudyRubricFeedbackItem>(assessment.itemFeedback.Count);
+        foreach (RubricAssessmentItem src in assessment.itemFeedback)
+        {
+            if (src == null)
+                continue;
+            items.Add(ProjectItemFeedback(src));
+        }
+
+        if (items.Count == 0)
+            return null;
+
+        block.itemFeedback = items;
+        return block;
+    }
+
+    private static string NormalizeAssessmentGranularity(RubricAssessmentResult assessment)
+    {
+        string declared = assessment.assessmentGranularity;
+        if (!string.IsNullOrWhiteSpace(declared))
+        {
+            string normalized = declared.Trim().ToLowerInvariant();
+            if (normalized == "item_level" || normalized == "task_level")
+                return normalized;
+            // Unknown declared value — fall through to inference.
+        }
+
+        bool hasItems = assessment.itemFeedback != null && assessment.itemFeedback.Count > 0;
+        bool hasTask = assessment.taskFeedback != null;
+        if (hasItems && hasTask)
+            return "item_level"; // Safe deterministic default: prefer item-level when both are inadvertently present.
+        if (hasItems)
+            return "item_level";
+        if (hasTask)
+            return "task_level";
+        return null;
+    }
+
+    private static StudyRubricFeedbackItem ProjectItemFeedback(RubricAssessmentItem src)
+    {
+        return new StudyRubricFeedbackItem
+        {
+            itemId = string.IsNullOrEmpty(src.itemId) ? null : src.itemId,
+            studentSelectedScore = src.studentSelectedScore,
+            expectedScore = src.expectedScore,
+            scoreMatchesExpected = src.scoreMatchesExpected,
+            rubricReason = string.IsNullOrEmpty(src.rubricReason) ? null : src.rubricReason
+        };
+    }
+
+    private static StudyRubricFeedbackTask ProjectTaskFeedback(RubricAssessmentTask src)
+    {
+        StudyRubricFeedbackTask task = new StudyRubricFeedbackTask
+        {
+            taskId = string.IsNullOrEmpty(src.taskId) ? null : src.taskId,
+            studentSelectedScore = src.studentSelectedScore,
+            expectedScore = src.expectedScore,
+            scoreMatchesExpected = src.scoreMatchesExpected,
+            rubricReason = string.IsNullOrEmpty(src.rubricReason) ? null : src.rubricReason
+        };
+
+        if (src.scoringDetail != null)
+        {
+            task.validUniqueResponseCount = src.scoringDetail.validUniqueResponseCount;
+            task.excludedExampleCount = src.scoringDetail.excludedExampleCount;
+            task.repeatedResponseCount = src.scoringDetail.repeatedResponseCount;
+            task.offCategoryCount = src.scoringDetail.offCategoryCount;
+        }
+
+        return task;
+    }
 }
 
 [Serializable]
@@ -411,6 +742,75 @@ public class ScoringRequestPayload
 {
     public List<ScoringTurn> conversationTurns;
     public ScoringMetadata metadata;
+    public ScoringTaskContext taskContext;
+    public ScoringStudyTaskContext studyTaskContext;
+}
+
+[Serializable]
+public class ScoringTaskContext
+{
+    public string feedbackUse;
+    public string phaseId;
+    public string activityType;
+    public string taskType;
+    public string patientProfile;
+    public string scoringMode;
+    public string sessionRef;
+}
+
+[Serializable]
+public class ScoringStudyTaskContext
+{
+    public string status;
+    public string startedAt;
+    public string completedAt;
+    public List<ScoringItemContext> items;
+    public List<ScoringTranscriptTurn> transcriptTurns;
+    public List<ScoringInteractionEvent> interactionEvents;
+}
+
+[Serializable]
+public class ScoringItemContext
+{
+    public string itemId;
+    public string taskId;
+    public string taskType;
+    public string sectionId;
+    public string sectionType;
+    public int? scriptNumber;
+    public string promptText;
+    public string stimulusRef;
+    public string targetAnswer;
+    public string alternateTarget;
+    public string patientFinalResponse;
+    public int? studentSelectedScore;
+    public int? expectedScore;
+    public bool? scoreMatchesExpected;
+    public bool? completionChecked;
+    public bool? cueUsed;
+    public string cueLevel;
+    public string startedAt;
+    public string completedAt;
+}
+
+[Serializable]
+public class ScoringTranscriptTurn
+{
+    public int? turnIndex;
+    public string speakerRole;
+    public string text;
+    public string cueLevel;
+    public string itemId;
+}
+
+[Serializable]
+public class ScoringInteractionEvent
+{
+    public string eventType;
+    public string itemId;
+    public string cueLevel;
+    public string message;
+    public string occurredAt;
 }
 
 [Serializable]
@@ -420,6 +820,12 @@ public class DynamicEvaluationResult
     public int totalScore;
     public string performanceLevel;
     public string overallExplanation;
+
+    public string feedbackUse;
+    public string feedbackSource;
+    public List<NarrativeFeedbackSection> feedbackSections;
+    public RubricAssessmentResult rubricAssessment;
+    public FeedbackReportMetadata metadata;
 }
 
 [Serializable]
@@ -429,4 +835,65 @@ public class CriterionScore
     public int score;
     public int maxScore;
     public string explanation;
+}
+
+[Serializable]
+public class NarrativeFeedbackSection
+{
+    public string sectionId;
+    public string title;
+    public string body;
+}
+
+[Serializable]
+public class RubricAssessmentResult
+{
+    public string assessmentGranularity;
+    public string sectionId;
+    public string taskSummary;
+    public List<RubricAssessmentItem> itemFeedback;
+    public RubricAssessmentTask taskFeedback;
+}
+
+[Serializable]
+public class RubricAssessmentItem
+{
+    public string itemId;
+    public int? studentSelectedScore;
+    public int? expectedScore;
+    public bool? scoreMatchesExpected;
+    public string rubricReason;
+    public bool? cueUsed;
+    public string cueType;
+}
+
+[Serializable]
+public class RubricAssessmentTask
+{
+    public string taskId;
+    public int? studentSelectedScore;
+    public int? expectedScore;
+    public bool? scoreMatchesExpected;
+    public string rubricReason;
+    public RubricAssessmentTaskScoringDetail scoringDetail;
+}
+
+[Serializable]
+public class RubricAssessmentTaskScoringDetail
+{
+    public int? validUniqueResponseCount;
+    public int? excludedExampleCount;
+    public int? repeatedResponseCount;
+    public int? offCategoryCount;
+}
+
+[Serializable]
+public class FeedbackReportMetadata
+{
+    public string phaseId;
+    public string taskType;
+    public string patientProfile;
+    public string sessionRef;
+    public string facultyId;
+    public string comparisonGroupId;
 }

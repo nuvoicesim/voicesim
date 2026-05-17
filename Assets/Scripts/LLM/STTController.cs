@@ -59,6 +59,8 @@ public class STTController : MonoBehaviour
 
     private void StartRecording()
     {
+        if (!Phase1SessionInputGate.IsEnabled)
+            return;
 #if UNITY_WEBGL
         if (transcriptText != null)
         {

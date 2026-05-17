@@ -581,6 +581,7 @@ MonoBehaviour:
   clipboardReport: {fileID: 1100157941}
   subtitleUI: {fileID: 0}
   checklistManager: {fileID: 0}
+  studyFeedbackPresenter: {fileID: 0}
 --- !u!1001 &87249374
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10003,6 +10004,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5728829771069155132, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9990483
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728829771069155132, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728829771069155132, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.043619405
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728829771069155132, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728829771069155132, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5745433677890408355, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: transcriptText
       value: 
@@ -10010,7 +10031,7 @@ PrefabInstance:
     - target: {fileID: 6075935923360704971, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: cueSkipGuard
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 7979805923932996263}
     - target: {fileID: 6075935923360704971, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: targetButtonUI
       value: 
@@ -10018,7 +10039,11 @@ PrefabInstance:
     - target: {fileID: 6075935923360704971, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: cueControllerObject
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 7979805923932996262}
+    - target: {fileID: 6075935923360704971, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
+      propertyPath: simuCaseTargetButtonUI
+      value: 
+      objectReference: {fileID: 7979805923932996264}
     - target: {fileID: 8775519409753461753, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_Name
       value: Humano_Aphasia_V3
@@ -10037,31 +10062,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.069233835
+      value: 0.068660565
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.011110711
+      value: 0.01422162
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.99612993
+      value: 0.9975066
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.052995026
+      value: 0.008003781
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -5.972
+      value: -0.803
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 171.96
+      value: 172.113
       objectReference: {fileID: 0}
     - target: {fileID: 8828566245728799470, guid: 0fc68127a2a17422e96bb9b307606bfc, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 1.698
+      value: 1.689
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10165,6 +10190,33 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bf8c25c225a78b48b01eb85b6fea26e, type: 3}
+--- !u!1 &7979805923932996262 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 853724229465159370, guid: 2bf8c25c225a78b48b01eb85b6fea26e, type: 3}
+  m_PrefabInstance: {fileID: 7979805923932996261}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7979805923932996263 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1745481931192168901, guid: 2bf8c25c225a78b48b01eb85b6fea26e, type: 3}
+  m_PrefabInstance: {fileID: 7979805923932996261}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e43d36edb41b4e7a9ffed81089d0d5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CueSkipGuard
+--- !u!114 &7979805923932996264 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4900118401623707485, guid: 2bf8c25c225a78b48b01eb85b6fea26e, type: 3}
+  m_PrefabInstance: {fileID: 7979805923932996261}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5daf7662fa6098b4a9aefc0998851d9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimuCaseTargetButtonUI
 --- !u!1001 &9040450946290668613
 PrefabInstance:
   m_ObjectHideFlags: 0

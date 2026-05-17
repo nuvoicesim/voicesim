@@ -133,67 +133,67 @@
   ,
     {
       "script_number": 11,
-      "title": "The grass is ______.",
+      "title": "The grass is ____.",
       "target_word": "green",
       "alternate_target": "",
       "semanticKeywords": ["color", "plant", "nature", "lawn", "leaf", "leaves"],
       "phonemicKeywords": ["gre", "gr", "grn"],
       "studentHints": {
-        "Semantic": "It is the color of grass and leaves.",
-        "Phonemic": "It starts with 'Gr' like 'grape'.",
-        "Model": "Say 'green'."
+        "Semantic": "Think about the color of grass.",
+        "Phonemic": "It starts with \"gr...\"",
+        "Model": "Say \"green.\""
       }
     },
     {
       "script_number": 12,
-      "title": "Sugar is ______.",
+      "title": "Sugar is ____.",
       "target_word": "sweet",
       "alternate_target": "white",
       "semanticKeywords": ["taste", "candy", "dessert", "flavor", "sugary", "syrup"],
       "phonemicKeywords": ["swe", "sw", "swt", "whi", "wh"],
       "studentHints": {
-        "Semantic": "It describes the taste of sugar — the opposite of bitter.",
-        "Phonemic": "It starts with 'Sw' like 'swim'.",
-        "Model": "Say 'sweet'."
+        "Semantic": "Think about how sugar tastes.",
+        "Phonemic": "It starts with \"sw...\"",
+        "Model": "Say \"sweet.\""
       }
     },
     {
       "script_number": 13,
-      "title": "Roses are red, violets are ______.",
+      "title": "Roses are red, violets are ____.",
       "target_word": "blue",
       "alternate_target": "",
       "semanticKeywords": ["color", "sky", "ocean", "water", "violet", "purple"],
       "phonemicKeywords": ["bl", "blu", "bloo"],
       "studentHints": {
-        "Semantic": "It is the color of the sky and the ocean.",
-        "Phonemic": "It starts with 'Bl' like 'black'.",
-        "Model": "Say 'blue'."
+        "Semantic": "Think about the usual color in this familiar saying.",
+        "Phonemic": "It starts with \"bl...\"",
+        "Model": "Say \"blue.\""
       }
     },
     {
       "script_number": 14,
-      "title": "They fought like cats and ______.",
+      "title": "They fought like cats and ____.",
       "target_word": "dogs",
-      "alternate_target": "dog",
+      "alternate_target": "",
       "semanticKeywords": ["pet", "animal", "bark", "puppy", "canine", "paw"],
       "phonemicKeywords": ["do", "dog", "dg", "daw"],
       "studentHints": {
-        "Semantic": "It is a common household pet that barks.",
-        "Phonemic": "It starts with 'D' like 'duck'.",
-        "Model": "Say 'dogs'."
+        "Semantic": "Think about the other animal in this common phrase.",
+        "Phonemic": "It starts with \"d...\"",
+        "Model": "Say \"dogs.\""
       }
     },
     {
       "script_number": 15,
-      "title": "Christmas is in the month of ______.",
-      "target_word": "december",
-      "alternate_target": "December",
-      "semanticKeywords": ["holiday", "winter", "christmas", "month", "last month", "snow", "xmas"],
-      "phonemicKeywords": ["dec", "de", "des", "dis"],
+      "title": "Christmas is in the month of ____.",
+      "target_word": "December",
+      "alternate_target": "",
+      "semanticKeywords": ["christmas", "holiday", "month", "year", "winter", "december"],
+      "phonemicKeywords": ["de", "dec", "dece", "decem"],
       "studentHints": {
-        "Semantic": "It is the last month of the year, when Christmas is celebrated.",
-        "Phonemic": "It starts with 'D' like 'day'.",
-        "Model": "Say 'December'."
+        "Semantic": "Think about the holiday month near the end of the year.",
+        "Phonemic": "It starts with \"Dec...\"",
+        "Model": "Say \"December.\""
       }
     }
   ,

@@ -37,6 +37,10 @@ public class OpenAIRequest : MonoBehaviour
     [Header("Cue Warning System")]
     [SerializeField] private CueSkipGuard cueSkipGuard;
     [SerializeField] private TargetButtonUI targetButtonUI;
+    [SerializeField] private SimuCaseTargetButtonUI simuCaseTargetButtonUI;
+
+    [Header("Study Data")]
+    [SerializeField] private MonoBehaviour studyItemMetadataProviderBehaviour;
 
     // Internal state
     private const string DialoguePath = "/llm-dialogue";
@@ -54,6 +58,8 @@ public class OpenAIRequest : MonoBehaviour
     private bool hasReportedUserSpeechEndForCurrentTurn;
     private string sessionId = "";
     private int turnIndex = 0;
+    private ScoreManager cachedScoreManager;
+    private IStudyItemMetadataProvider studyItemMetadataProvider;
 
     [Serializable]
     private class StructuredDialogueResponse
@@ -129,8 +135,11 @@ public class OpenAIRequest : MonoBehaviour
         if (cueSkipGuard == null)
             Debug.LogWarning("OpenAIRequest: cueSkipGuard not assigned. Cue order warnings will not fire.");
 
-        if (targetButtonUI == null)
-            Debug.LogWarning("OpenAIRequest: targetButtonUI not assigned. Target word will be empty.");
+        bool hasSimuCaseTargetProvider = TryResolveSimuCaseTargetButtonUI() != null;
+        bool hasLegacyTargetProvider = TryResolveLegacyTargetButtonUI() != null;
+        bool hasStudyItemMetadataProvider = TryResolveStudyItemMetadataProvider() != null;
+        if (!hasSimuCaseTargetProvider && !hasLegacyTargetProvider && !hasStudyItemMetadataProvider)
+            Debug.LogWarning("OpenAIRequest: no supported target button provider is assigned. Target word will be empty.");
 
         RuntimeSessionContext.Changed += HandleRuntimeContextChanged;
         ApplyRuntimeContextFromHost();
@@ -153,6 +162,38 @@ public class OpenAIRequest : MonoBehaviour
 
         emotionController = SelectBestEmotionController(GetComponentsInChildren<EmotionController>(true));
         return emotionController != null;
+    }
+
+    private FacialExpressionRuntimeBridge TryResolveFacialExpressionBridge()
+    {
+        if (!TryResolveEmotionController() || emotionController == null)
+            return null;
+
+        if (emotionController.facialExpressionBridge != null)
+            return emotionController.facialExpressionBridge;
+
+        FacialExpressionRuntimeBridge bridge = emotionController.GetComponent<FacialExpressionRuntimeBridge>();
+        if (bridge == null)
+            bridge = emotionController.GetComponentInChildren<FacialExpressionRuntimeBridge>(true);
+        if (bridge == null)
+            bridge = emotionController.GetComponentInParent<FacialExpressionRuntimeBridge>();
+
+        if (bridge != null && emotionController.facialExpressionBridge == null)
+            emotionController.facialExpressionBridge = bridge;
+
+        return bridge;
+    }
+
+    private void BeginProcessingPresentation()
+    {
+        FacialExpressionRuntimeBridge bridge = TryResolveFacialExpressionBridge();
+        if (bridge != null)
+        {
+            bridge.BeginProcessingPresentation();
+            return;
+        }
+
+        Debug.LogWarning("[OpenAIRequest] Facial bridge not found; skipping processing presentation.");
     }
 
     private bool TryResolveTTSManager()
@@ -206,8 +247,9 @@ public class OpenAIRequest : MonoBehaviour
         turnIndex = 0;
         InitializeChat();
 
-        if (ScoreManager.Instance != null)
-            ScoreManager.Instance.Initialize(currentScenario);
+        ScoreManager scoreManager = TryResolveScoreManager(includeInactive: true);
+        if (scoreManager != null)
+            scoreManager.Initialize(currentScenario);
 
         Debug.Log($"[OpenAIRequest] Legacy local context applied. userID={CurrentUserId}, contextLabel={currentScenario}");
     }
@@ -229,7 +271,9 @@ public class OpenAIRequest : MonoBehaviour
         // Check cue order before sending to GPT
         if (cueSkipGuard != null)
         {
-            string targetWord = targetButtonUI != null ? targetButtonUI.CurrentTargetWord : "";
+            string targetWord;
+            if (!TryResolveCurrentTargetWord(out targetWord))
+                targetWord = "";
             cueSkipGuard.CheckStudentUtterance(transcribedText, targetWord);
             Debug.Log($"[OpenAIRequest] CueSkipGuard checked: text=\"{transcribedText}\" target=\"{targetWord}\"");
         }
@@ -245,6 +289,11 @@ public class OpenAIRequest : MonoBehaviour
             return;
         }
 
+        string trimmedNurseMessage = nurseMessage.Trim();
+        string normalizedUserSpeechStartAt = NormalizeOptionalTimestamp(userSpeechStartAt);
+        string normalizedUserSpeechEndAt = NormalizeOptionalTimestamp(userSpeechEndAt);
+        TryRecordStudentStudyTurn(trimmedNurseMessage, normalizedUserSpeechStartAt, normalizedUserSpeechEndAt, turnIndex + 1);
+
         if (!RuntimeSessionContext.HasRuntimeToken)
         {
             Debug.LogError("[OpenAIRequest] Cannot send dialogue request without a runtime token.");
@@ -252,7 +301,7 @@ public class OpenAIRequest : MonoBehaviour
             return;
         }
 
-        Debug.LogError($"[OpenAIRequest] NurseResponds accepted message=\"{nurseMessage.Trim()}\" chatCountBefore={chatMessages.Count}");
+        Debug.LogError($"[OpenAIRequest] NurseResponds accepted message=\"{trimmedNurseMessage}\" chatCountBefore={chatMessages.Count}");
 
         if (chatMessages.Count == 0 && !string.IsNullOrEmpty(currentScenario))
             InitializeChat();
@@ -260,12 +309,12 @@ public class OpenAIRequest : MonoBehaviour
         chatMessages.Add(new Dictionary<string, string>
         {
             { "role", "user" },
-            { "content", nurseMessage.Trim() }
+            { "content", trimmedNurseMessage }
         });
         PrintChatMessage(chatMessages);
-        pendingNurseMessage = nurseMessage.Trim();
-        activeUserSpeechStartAt = NormalizeOptionalTimestamp(userSpeechStartAt);
-        activeUserSpeechEndAt = NormalizeOptionalTimestamp(userSpeechEndAt);
+        pendingNurseMessage = trimmedNurseMessage;
+        activeUserSpeechStartAt = normalizedUserSpeechStartAt;
+        activeUserSpeechEndAt = normalizedUserSpeechEndAt;
         hasReportedUserSpeechEndForCurrentTurn = false;
         Debug.LogError($"[OpenAIRequest] pendingNurseMessage set. turnIndex(before increment)={turnIndex}");
 
@@ -279,6 +328,7 @@ public class OpenAIRequest : MonoBehaviour
         }
         else
         {
+            BeginProcessingPresentation();
             StartCoroutine(PostDialogueRequest());
         }
 
@@ -442,6 +492,7 @@ public class OpenAIRequest : MonoBehaviour
     private void HandlePatientResponse(string responseText, int emotionCode, int motionCode)
     {
         currentPatientResponse = responseText;
+        TryRecordPatientStudyTurn(responseText, turnIndex > 0 ? turnIndex : (int?)null);
 
         var assistantPayload = new StructuredDialogueResponse
         {
@@ -477,11 +528,170 @@ public class OpenAIRequest : MonoBehaviour
         if (cueController != null)
             cueController.HandleResponse(responseText);
 
-        if (ScoreManager.Instance != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
+        ScoreManager scoreManager = TryResolveScoreManager(includeInactive: true);
+        if (scoreManager != null && !string.IsNullOrWhiteSpace(pendingNurseMessage))
         {
-            ScoreManager.Instance.RecordTurn(currentPatientResponse, pendingNurseMessage);
+            scoreManager.RecordTurn(currentPatientResponse, pendingNurseMessage);
             pendingNurseMessage = "";
         }
+    }
+
+    private ScoreManager TryResolveScoreManager(bool includeInactive)
+    {
+        if (cachedScoreManager != null)
+            return cachedScoreManager;
+
+        if (ScoreManager.Instance != null)
+        {
+            cachedScoreManager = ScoreManager.Instance;
+            return cachedScoreManager;
+        }
+
+        cachedScoreManager = FindObjectOfType<ScoreManager>();
+        if (cachedScoreManager != null || !includeInactive)
+            return cachedScoreManager;
+
+        ScoreManager[] candidates = FindObjectsByType<ScoreManager>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            ScoreManager candidate = candidates[i];
+            if (candidate == null)
+                continue;
+
+            if (!candidate.gameObject.scene.IsValid())
+                continue;
+
+            cachedScoreManager = candidate;
+            return cachedScoreManager;
+        }
+
+        return null;
+    }
+
+    private void TryRecordStudentStudyTurn(string text, string userSpeechStartAt, string userSpeechEndAt, int? trackingTurnIndex)
+    {
+        if (!TryResolveCurrentStudyItemMetadata(out StudyItemMetadata metadata))
+            return;
+
+        StudyActiveItemTracker.RecordStudentUtterance(
+            metadata,
+            text,
+            trackingTurnIndex,
+            userSpeechStartAt,
+            userSpeechEndAt);
+    }
+
+    private void TryRecordPatientStudyTurn(string text, int? trackingTurnIndex)
+    {
+        if (!TryResolveCurrentStudyItemMetadata(out StudyItemMetadata metadata))
+            return;
+
+        StudyActiveItemTracker.RecordPatientResponse(
+            metadata,
+            text,
+            trackingTurnIndex);
+    }
+
+    private bool TryResolveCurrentStudyItemMetadata(out StudyItemMetadata metadata)
+    {
+        metadata = null;
+        IStudyItemMetadataProvider provider = TryResolveStudyItemMetadataProvider();
+        return provider != null && provider.TryGetCurrentStudyItemMetadata(out metadata);
+    }
+
+    private IStudyItemMetadataProvider TryResolveStudyItemMetadataProvider()
+    {
+        if (IsUsableStudyItemMetadataProvider(studyItemMetadataProvider))
+            return studyItemMetadataProvider;
+
+        studyItemMetadataProvider = null;
+
+        if (studyItemMetadataProviderBehaviour is IStudyItemMetadataProvider configuredProvider &&
+            studyItemMetadataProviderBehaviour.isActiveAndEnabled)
+        {
+            studyItemMetadataProvider = configuredProvider;
+            return studyItemMetadataProvider;
+        }
+
+        SimuCaseTargetButtonUI simuCaseTargetButton = TryResolveSimuCaseTargetButtonUI();
+        if (simuCaseTargetButton != null)
+        {
+            studyItemMetadataProviderBehaviour = simuCaseTargetButton;
+            studyItemMetadataProvider = simuCaseTargetButton;
+            return studyItemMetadataProvider;
+        }
+
+        MonoBehaviour[] candidates = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < candidates.Length; i++)
+        {
+            MonoBehaviour candidate = candidates[i];
+            if (candidate == null || candidate == this)
+                continue;
+
+            if (candidate is IStudyItemMetadataProvider provider && candidate.isActiveAndEnabled)
+            {
+                studyItemMetadataProviderBehaviour = candidate;
+                studyItemMetadataProvider = provider;
+                return studyItemMetadataProvider;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsUsableStudyItemMetadataProvider(IStudyItemMetadataProvider provider)
+    {
+        if (provider == null)
+            return false;
+
+        MonoBehaviour behaviour = provider as MonoBehaviour;
+        return behaviour == null || behaviour.isActiveAndEnabled;
+    }
+
+    private bool TryResolveCurrentTargetWord(out string targetWord)
+    {
+        targetWord = string.Empty;
+
+        if (TryResolveCurrentStudyItemMetadata(out StudyItemMetadata metadata) &&
+            !string.IsNullOrWhiteSpace(metadata.targetAnswer))
+        {
+            targetWord = metadata.targetAnswer;
+            return true;
+        }
+
+        SimuCaseTargetButtonUI simuCaseTargetButton = TryResolveSimuCaseTargetButtonUI();
+        if (simuCaseTargetButton != null)
+        {
+            targetWord = simuCaseTargetButton.CurrentTargetWord ?? string.Empty;
+            return true;
+        }
+
+        TargetButtonUI legacyTargetButton = TryResolveLegacyTargetButtonUI();
+        if (legacyTargetButton != null)
+        {
+            targetWord = legacyTargetButton.CurrentTargetWord ?? string.Empty;
+            return true;
+        }
+
+        return false;
+    }
+
+    private SimuCaseTargetButtonUI TryResolveSimuCaseTargetButtonUI()
+    {
+        if (simuCaseTargetButtonUI != null && simuCaseTargetButtonUI.isActiveAndEnabled)
+            return simuCaseTargetButtonUI;
+
+        simuCaseTargetButtonUI = FindObjectOfType<SimuCaseTargetButtonUI>();
+        return simuCaseTargetButtonUI;
+    }
+
+    private TargetButtonUI TryResolveLegacyTargetButtonUI()
+    {
+        if (targetButtonUI != null && targetButtonUI.isActiveAndEnabled)
+            return targetButtonUI;
+
+        targetButtonUI = FindObjectOfType<TargetButtonUI>();
+        return targetButtonUI;
     }
 
     public static void PrintChatMessage(List<Dictionary<string, string>> messages)
@@ -560,8 +770,9 @@ public class OpenAIRequest : MonoBehaviour
         {
             turnIndex = 0;
             InitializeChat();
-            if (ScoreManager.Instance != null)
-                ScoreManager.Instance.Initialize(currentScenario);
+            ScoreManager scoreManager = TryResolveScoreManager(includeInactive: true);
+            if (scoreManager != null)
+                scoreManager.Initialize(currentScenario);
         }
 
         Debug.Log($"[OpenAIRequest] Runtime context applied. sessionId={sessionId}, assignmentId={RuntimeSessionContext.AssignmentId}, sceneId={RuntimeSessionContext.SceneId}, contextLabel={currentScenario}");

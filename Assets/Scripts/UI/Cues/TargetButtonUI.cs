@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 using UI.Cues;
 using UI.Cues.WarningSystem;
 
@@ -9,6 +10,8 @@ public class TargetButtonUI : MonoBehaviour
     [SerializeField] private CueSkipGuard cueSkipGuard;
     [SerializeField] private TMP_Text buttonText;
     [SerializeField] private CueController cueController;
+    [SerializeField] private int startingTargetIndex = 1;
+    [SerializeField] private int endingTargetIndex = -1;
 
     // Must match the order of scripts in CueController (1-indexed)
     private static readonly string[] TargetWords =
@@ -27,14 +30,22 @@ public class TargetButtonUI : MonoBehaviour
     };
 
     private int currentTargetIndex = 1;
-    private int MaxTargetIndex => TargetWords.Length - 1;
+    private int MaxAvailableTargetIndex => TargetWords.Length - 1;
+    private int MinTargetIndex => Mathf.Clamp(startingTargetIndex, 1, MaxAvailableTargetIndex);
+    private int MaxTargetIndex => Mathf.Clamp(endingTargetIndex > 0 ? endingTargetIndex : MaxAvailableTargetIndex, MinTargetIndex, MaxAvailableTargetIndex);
     private Button targetButton;
+
+    public event Action<int> BeforeTargetAdvanced;
 
     /// <summary>
     /// Returns the current target word in lowercase, e.g. "coffee".
     /// </summary>
     public string CurrentTargetWord =>
         currentTargetIndex < TargetWords.Length ? TargetWords[currentTargetIndex] : "";
+
+    public int CurrentTargetIndex => currentTargetIndex;
+    public int CurrentTargetOrdinal => Mathf.Max(1, currentTargetIndex - MinTargetIndex + 1);
+    public int TargetCount => Mathf.Max(1, MaxTargetIndex - MinTargetIndex + 1);
 
     void Awake()
     {
@@ -43,6 +54,27 @@ public class TargetButtonUI : MonoBehaviour
 
     void Start()
     {
+        currentTargetIndex = Mathf.Clamp(currentTargetIndex, MinTargetIndex, MaxTargetIndex);
+        UpdateButtonLabel();
+        UpdateButtonInteractivity();
+    }
+
+    public void ConfigureTargetRange(int startIndex, int endIndex)
+    {
+        startingTargetIndex = Mathf.Clamp(startIndex, 1, MaxAvailableTargetIndex);
+        endingTargetIndex = Mathf.Clamp(endIndex, startingTargetIndex, MaxAvailableTargetIndex);
+        currentTargetIndex = MinTargetIndex;
+
+        if (cueController != null)
+        {
+            cueController.scriptNum = currentTargetIndex;
+            if (cueController.TryGetScriptEntry(currentTargetIndex, out _))
+            {
+                cueController.SetCurrentScript(currentTargetIndex);
+                cueController.ResetCueing();
+            }
+        }
+
         UpdateButtonLabel();
         UpdateButtonInteractivity();
     }
@@ -55,6 +87,8 @@ public class TargetButtonUI : MonoBehaviour
             return;
         }
 
+        BeforeTargetAdvanced?.Invoke(currentTargetIndex);
+
         currentTargetIndex++;
 
         UpdateButtonLabel();
@@ -62,6 +96,7 @@ public class TargetButtonUI : MonoBehaviour
 
         if (cueController != null)
         {
+            cueController.scriptNum = currentTargetIndex;
             cueController.SetCurrentScript(currentTargetIndex);
             cueController.ResetCueing();
         }
@@ -88,9 +123,9 @@ public class TargetButtonUI : MonoBehaviour
         if (buttonText != null)
         {
             if (currentTargetIndex >= MaxTargetIndex)
-                buttonText.text = $"Final Target ({currentTargetIndex}/{MaxTargetIndex})";
+                buttonText.text = $"Final Target ({CurrentTargetOrdinal}/{TargetCount})";
             else
-                buttonText.text = $"Next Target ({currentTargetIndex}/{MaxTargetIndex})";
+                buttonText.text = $"Next Target ({CurrentTargetOrdinal}/{TargetCount})";
         }
     }
 

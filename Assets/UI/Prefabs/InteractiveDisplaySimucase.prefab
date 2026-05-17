@@ -1441,7 +1441,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Section A
+  m_text: Section A Object Naming
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -1834,7 +1834,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Section B
+  m_text: Section B Word Fluency
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -2978,14 +2978,16 @@ MonoBehaviour:
   sectionBPanel: {fileID: 0}
   sectionCPanel: {fileID: 3353730371567358231}
   sectionDPanel: {fileID: 6925589809926682227}
-  sectionAButton: {fileID: 0}
-  sectionBButton: {fileID: 0}
+  sectionAButton: {fileID: 5785606756426592921}
+  sectionBButton: {fileID: 4742789790782842715}
   sectionCButton: {fileID: 668994334647577600}
   sectionDButton: {fileID: 4809480271254688328}
   sectionCBackButton: {fileID: 774485831150578711}
   sectionDBackButton: {fileID: 8642463617104171800}
   sectionCStartButton: {fileID: 2390035734885901895}
   sectionDStartButton: {fileID: 3671713340381454596}
+  sectionASceneName: sectionA
+  sectionBSceneName: sectionB
   sectionCSceneName: sectionC
   sectionDSceneName: sectionD
 --- !u!4 &8533901453037167881 stripped

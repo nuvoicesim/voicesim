@@ -60,6 +60,8 @@ namespace UI.Cues
     {
         public bool cueingActive = false;
 
+        public event System.Action<CueLevel> CuePressedEvent;
+
         public int scriptNum = 1;
         public ScriptEntry currentScript;
         private ScriptData allScripts;
@@ -74,6 +76,7 @@ namespace UI.Cues
 
         private CueLevel pressedCueButton = CueLevel.None;
         private string lastComputedHint = "";
+        private bool usingRuntimeScripts = false;
 
         [Header("Cue UI")]
         [SerializeField] private GameObject cueButtonPanel;
@@ -88,6 +91,8 @@ namespace UI.Cues
         [Header("Target UI")]
         [SerializeField] private TextMeshProUGUI targetText;
         [SerializeField] private Image targetImage;
+        [SerializeField] private bool includePromptInTargetText = false;
+        [SerializeField] private string targetLabelPrefix = "Target:";
 
         [Header("Target Images Mapping")]
         [SerializeField] private List<TargetImageEntry> targetImages = new List<TargetImageEntry>();
@@ -120,7 +125,14 @@ namespace UI.Cues
             if (confirmTargetButton != null)
                 confirmTargetButton.onClick.AddListener(() => OnConfirmTargetButtonPressed());
 
-            yield return LoadScriptsFromStreamingAssets();
+            if (!usingRuntimeScripts)
+                yield return LoadScriptsFromStreamingAssets();
+
+            if (usingRuntimeScripts)
+            {
+                UpdateTargetText();
+                yield break;
+            }
 
             if (!SetCurrentScript(scriptNum))
                 yield break;
@@ -130,6 +142,9 @@ namespace UI.Cues
 
         private void LoadAllScripts(string jsonText)
         {
+            if (usingRuntimeScripts)
+                return;
+
             if (string.IsNullOrEmpty(jsonText))
             {
                 Debug.LogError("JSON text is empty");
@@ -159,6 +174,9 @@ namespace UI.Cues
                         Debug.LogError("Failed to load target_words.json from StreamingAssets: " + request.error + " Path: " + path);
                         yield break;
                     }
+                    if (usingRuntimeScripts)
+                        yield break;
+
                     LoadAllScripts(request.downloadHandler.text);
                     Debug.Log("Loaded scripts from StreamingAssets via UnityWebRequest");
                 }
@@ -171,6 +189,9 @@ namespace UI.Cues
                 Debug.LogError("Could not find target_words.json in StreamingAssets at path: " + path);
                 yield break;
             }
+
+            if (usingRuntimeScripts)
+                yield break;
 
             LoadAllScripts(File.ReadAllText(path));
             Debug.Log("Loaded scripts from StreamingAssets");
@@ -212,11 +233,54 @@ namespace UI.Cues
             return false;
         }
 
+        public bool TryGetScriptEntry(int scriptNumber, out ScriptEntry scriptEntry)
+        {
+            scriptEntry = null;
+            if (allScripts == null || allScripts.scripts == null)
+                return false;
+
+            foreach (ScriptEntry entry in allScripts.scripts)
+            {
+                if (entry != null && entry.script_number == scriptNumber)
+                {
+                    scriptEntry = entry;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool UseRuntimeScripts(ScriptEntry[] scripts, int initialScriptNumber)
+        {
+            if (scripts == null || scripts.Length == 0)
+            {
+                Debug.LogError("CueController: runtime script data is empty.");
+                return false;
+            }
+
+            allScripts = new ScriptData { scripts = scripts };
+            usingRuntimeScripts = true;
+            return SetCurrentScript(initialScriptNumber);
+        }
+
+        public void SetIncludePromptInTargetText(bool includePrompt)
+        {
+            includePromptInTargetText = includePrompt;
+            UpdateTargetText();
+        }
+
+        public void SetTargetLabelPrefix(string labelPrefix)
+        {
+            targetLabelPrefix = string.IsNullOrWhiteSpace(labelPrefix) ? "Target:" : labelPrefix.Trim();
+            UpdateTargetText();
+        }
+
         private void UpdateTargetText()
         {
             if (targetText != null && currentScript != null)
             {
-                targetText.text = "Target: " + currentScript.target_word;
+                targetText.text = BuildTargetDisplayText();
             }
         }
 
@@ -226,9 +290,26 @@ namespace UI.Cues
                 return;
 
             if (targetText != null)
-                targetText.text = "Target: " + currentScript.target_word;
+                targetText.text = BuildTargetDisplayText();
 
             UpdateTargetImage();
+        }
+
+        private string BuildTargetDisplayText()
+        {
+            if (currentScript == null)
+                return string.Empty;
+
+            string prefix = string.IsNullOrWhiteSpace(targetLabelPrefix) ? "Target:" : targetLabelPrefix.Trim();
+            string targetLine = prefix + " " + currentScript.target_word;
+            if (!string.IsNullOrWhiteSpace(currentScript.alternate_target))
+                targetLine += "/" + currentScript.alternate_target;
+
+            if (!includePromptInTargetText)
+                return targetLine;
+
+            string prompt = currentScript.title ?? string.Empty;
+            return string.IsNullOrWhiteSpace(prompt) ? targetLine : prompt.Trim() + "\n" + targetLine;
         }
 
         private void UpdateTargetImage()
@@ -679,6 +760,16 @@ namespace UI.Cues
             pressedCueButton = pressedCue;
             Debug.Log("Cue button pressed: " + pressedCue);
             ShowHintIfAllowed();
+            CuePressedEvent?.Invoke(pressedCue);
+        }
+
+        public void SetTargetImages(List<TargetImageEntry> entries)
+        {
+            if (entries == null)
+                targetImages = new List<TargetImageEntry>();
+            else
+                targetImages = new List<TargetImageEntry>(entries);
+            UpdateTargetImage();
         }
 
         public void OnConfirmTargetButtonPressed()
@@ -702,7 +793,7 @@ namespace UI.Cues
 
                 hintText.text = lastComputedHint;
                 hintBox.SetActive(true);
-                
+
                 // do not show warning banner if the pressed cue button is semantic
                 if (pressedCueButton != CueLevel.Semantic)
                 {

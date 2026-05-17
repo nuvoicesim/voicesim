@@ -23,6 +23,9 @@ public class FacialExpressionRuntimeBridge : MonoBehaviour
     [SerializeField] bool autoResolveReferences = true;
     [SerializeField] bool registerWithEmotionController = true;
 
+    [Header("Idle Presentation")]
+    [SerializeField] FacialExpressionTestController.BaseState idleBaseState = FacialExpressionTestController.BaseState.Neutral;
+
     [Header("Default Trigger Intensities")]
     [SerializeField, Range(0f, 1f)] float happyOverlayIntensity = 0.55f;
     [SerializeField, Range(0f, 1f)] float stressOverlayIntensity = 0.6f;
@@ -32,12 +35,20 @@ public class FacialExpressionRuntimeBridge : MonoBehaviour
     [SerializeField, Range(0f, 1f)] float reliefPeakIntensity = 0.6f;
     [SerializeField] bool resetOverlaysBeforeApply = true;
 
+    [Header("Processing Presentation")]
+    [SerializeField, Range(0f, 1f)] float processingBrowTension = 0.28f;
+    [SerializeField, Range(0f, 1f)] float processingEyeTension = 0.22f;
+    [SerializeField, Range(0f, 1f)] float processingBlinkPatternShift = 0.2f;
+    [SerializeField, Range(0f, 1f)] float processingPeakIntensity = 0.38f;
+
     [Header("Debug")]
     [SerializeField] bool enableBridgeLogs = true;
 
     int _lastLoggedEmotionCode = int.MinValue;
     int _lastLoggedMotionCode = int.MinValue;
     bool _hasLoggedMissingController = false;
+    bool _isProcessingPresentationActive = false;
+    bool _hasResponseDrivenPresentation = false;
 
     void Awake()
     {
@@ -54,6 +65,16 @@ public class FacialExpressionRuntimeBridge : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        RestoreIdlePresentation();
+
+        if (enableBridgeLogs)
+        {
+            Debug.Log($"[FacialBridge] Startup idle presentation applied on '{name}'.");
+        }
+    }
+
     void OnValidate()
     {
         if (autoResolveReferences)
@@ -65,6 +86,13 @@ public class FacialExpressionRuntimeBridge : MonoBehaviour
     public void HandleEmotionAndMotion(int emotionCode, int motionCode)
     {
         if (!EnsureController()) return;
+
+        if (_isProcessingPresentationActive)
+        {
+            ClearProcessingPresentation();
+        }
+
+        _hasResponseDrivenPresentation = true;
 
         FacialMapResult mapping = BuildMapping(emotionCode, motionCode);
         bool shouldLog = ShouldLogTransition(emotionCode, motionCode);
@@ -194,6 +222,79 @@ public class FacialExpressionRuntimeBridge : MonoBehaviour
             default:
                 return;
         }
+    }
+
+    public void BeginProcessingPresentation()
+    {
+        if (!EnsureController()) return;
+
+        _isProcessingPresentationActive = true;
+        _hasResponseDrivenPresentation = false;
+
+        ApplyProcessingPresentation();
+    }
+
+    public void BeginSpeakingPresentation()
+    {
+        if (!EnsureController()) return;
+
+        if (_isProcessingPresentationActive)
+        {
+            ClearProcessingPresentation();
+        }
+
+        if (_hasResponseDrivenPresentation)
+        {
+            if (enableBridgeLogs)
+            {
+                Debug.Log($"[FacialBridge] Speaking presentation requested on '{name}' while response mapping is active. Keeping response-driven expression.");
+            }
+            return;
+        }
+
+        RestoreIdlePresentation();
+    }
+
+    public void RestoreIdlePresentation()
+    {
+        if (!EnsureController()) return;
+
+        _isProcessingPresentationActive = false;
+        _hasResponseDrivenPresentation = false;
+
+        TriggerBaseExpression(idleBaseState, 1f);
+        ClearAllOverlays();
+        facialController.ClearPeakReaction();
+    }
+
+    void ApplyProcessingPresentation()
+    {
+        TriggerBaseExpression(idleBaseState, 1f);
+        ClearAllOverlays();
+        TriggerOverlay(FacialExpressionTestController.Overlay.BrowTension, processingBrowTension);
+        TriggerOverlay(FacialExpressionTestController.Overlay.EyeTension, processingEyeTension);
+        TriggerOverlay(FacialExpressionTestController.Overlay.BlinkPatternShift, processingBlinkPatternShift);
+        TriggerPeakReaction(FacialExpressionTestController.PeakReaction.Confused, processingPeakIntensity, false);
+
+        if (enableBridgeLogs)
+        {
+            Debug.Log($"[FacialBridge] Processing presentation applied on '{name}'.");
+        }
+    }
+
+    void ClearProcessingPresentation()
+    {
+        _isProcessingPresentationActive = false;
+        ClearAllOverlays();
+        facialController.ClearPeakReaction();
+    }
+
+    void ClearAllOverlays()
+    {
+        TriggerOverlay(FacialExpressionTestController.Overlay.BrowTension, 0f);
+        TriggerOverlay(FacialExpressionTestController.Overlay.SoftSmile, 0f);
+        TriggerOverlay(FacialExpressionTestController.Overlay.EyeTension, 0f);
+        TriggerOverlay(FacialExpressionTestController.Overlay.BlinkPatternShift, 0f);
     }
 
     bool EnsureController()
