@@ -61,7 +61,17 @@ public class ScoreManager : MonoBehaviour
 
     public void SubmitEvaluation()
     {
-        if (conversationTurns.Count == 0)
+        // Phase 2 evidence persistence is valid with zero conversation turns
+        // (e.g. Phase 2 Object Naming has no SLP-student dialogue). The legacy
+        // CreateNoConversationReport() activates evaluationCanvas and returns
+        // before POST /llm-scoring fires, which would block Phase 2 evidence
+        // from ever reaching the backend. Detect Phase 2 study flow from the
+        // finalized study payload BEFORE the zero-turn guard so Phase 2
+        // continues into EvaluateFullConversationCoroutine() even with zero
+        // turns. Non-Phase-2 zero-turn callers (Phase 1 rubric in C/D, legacy
+        // non-study paths) keep the existing placeholder behavior unchanged.
+        bool isPhase2StudyFlow = IsPhase2StudyFlow();
+        if (conversationTurns.Count == 0 && !isPhase2StudyFlow)
         {
             Debug.LogWarning("No conversation turns recorded. Creating a placeholder report.");
             CreateNoConversationReport();
@@ -74,6 +84,15 @@ public class ScoreManager : MonoBehaviour
             progressBarUI.ShowProgressBar();
 
         StartCoroutine(EvaluateFullConversationCoroutine());
+    }
+
+    private static bool IsPhase2StudyFlow()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        return string.Equals(
+            payload?.taskContext?.phaseId,
+            StudyDataDefaults.Phase2,
+            System.StringComparison.OrdinalIgnoreCase);
     }
 
     private void CreateNoConversationReport()
@@ -242,8 +261,24 @@ public class ScoreManager : MonoBehaviour
         {
             var jsonResponse = JObject.Parse(responseText);
             var reportToken = jsonResponse["report"];
+
+            // Backend compatibility (May 18):
+            //   - Phase 1 rubric branch returns a flat envelope centered on
+            //     rubricAssessment, no `report` wrapper.
+            //   - Phase 2 evidence branch returns a lightweight success envelope,
+            //     also no `report` wrapper.
+            // Treat absence of `report` as accepted HTTP 2xx and skip the legacy
+            // narrative rendering path. UI rendering for rubricAssessment is
+            // intentionally deferred to a later branch; this pass only ensures
+            // the Finish flow does not surface the missing-report error
+            // placeholder when the backend response is one of the new shapes.
             if (reportToken == null)
-                throw new Exception("Missing `report` in scoring response.");
+            {
+                Debug.Log("[ScoreManager] /llm-scoring response did not include a legacy `report` wrapper; treating as accepted (Phase 1 rubric / Phase 2 evidence envelope). Skipping legacy narrative rendering.");
+                if (progressBarUI != null)
+                    progressBarUI.HideProgressBar();
+                return;
+            }
 
             var evaluation = reportToken.ToObject<DynamicEvaluationResult>();
             if (evaluation == null)
