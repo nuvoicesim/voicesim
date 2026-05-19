@@ -4973,9 +4973,25 @@ PrefabInstance:
       propertyPath: m_fontColor32.rgba
       value: 4278197547
       objectReference: {fileID: 0}
+    - target: {fileID: 1261478975745658567, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_UseGraphicAlpha
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1261478975745658567, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_EffectDistance.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1261478975745658567, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_EffectDistance.y
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2124943741712005178, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
       propertyPath: m_Name
       value: Cues_V3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2685603973233217320, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_Name
+      value: Border
       objectReference: {fileID: 0}
     - target: {fileID: 2947295086104516225, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
       propertyPath: warningBanner
@@ -4985,6 +5001,14 @@ PrefabInstance:
       propertyPath: confirmTargetButton
       value: 
       objectReference: {fileID: 6389407810937877652}
+    - target: {fileID: 3289978893383760782, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3289978893383760782, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
+      propertyPath: m_Color.r
+      value: 0.18039216
+      objectReference: {fileID: 0}
     - target: {fileID: 3713482680831143992, guid: e62dcdfecefff4b75ae5e1d0fc32d1a5, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
