@@ -95,6 +95,43 @@ public class ScoreManager : MonoBehaviour
             System.StringComparison.OrdinalIgnoreCase);
     }
 
+    // Returns true when the active flow is a Phase 1 or Phase 2 study task.
+    // Used to gate the post-/llm-scoring task-progress PUT so legacy non-study
+    // callers do not trigger task-progress completion side effects.
+    private static bool IsStudyFlow()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        string phaseId = payload?.taskContext?.phaseId;
+        return string.Equals(phaseId, StudyDataDefaults.Phase1, System.StringComparison.OrdinalIgnoreCase)
+            || string.Equals(phaseId, StudyDataDefaults.Phase2, System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Builds the task-progress request body from the current finalized study
+    // payload's taskContext. Returns null when the required identity fields
+    // (phaseId, taskId-or-sectionId) are not present, which lets the caller
+    // skip the task-progress PUT cleanly without invoking the client.
+    private static SessionTaskProgressClient.TaskProgressRequest
+        BuildTaskProgressRequestFromCurrentStudyContext()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        StudyTaskContext taskContext = payload?.taskContext;
+        if (taskContext == null) return null;
+        if (string.IsNullOrWhiteSpace(taskContext.phaseId)) return null;
+
+        bool hasTaskOrSection =
+            !string.IsNullOrWhiteSpace(taskContext.taskId) ||
+            !string.IsNullOrWhiteSpace(taskContext.sectionId);
+        if (!hasTaskOrSection) return null;
+
+        return new SessionTaskProgressClient.TaskProgressRequest
+        {
+            phaseId = taskContext.phaseId,
+            taskId = taskContext.taskId,
+            sectionId = taskContext.sectionId,
+            taskType = taskContext.taskType,
+        };
+    }
+
     private void CreateNoConversationReport()
     {
         if (progressBarUI != null)
@@ -239,6 +276,45 @@ public class ScoreManager : MonoBehaviour
         yield return new WaitForSeconds(0.3f);
 
         yield return StartCoroutine(ProcessAIResponse(request.downloadHandler.text));
+
+        // After /llm-scoring success and ProcessAIResponse has returned
+        // cleanly, record TASK-LEVEL completion for this internal task via
+        // PUT /sessions/{sessionId}/task-progress/{progressKey}/complete.
+        //
+        // CRITICAL: this is the TASK-level endpoint, NOT the whole-session
+        // endpoint. A prior experiment that called
+        // PUT /sessions/{sessionId}/complete after each task Finish was
+        // intentionally reverted; do not re-introduce that here.
+        //
+        // Gated by IsStudyFlow() so only Phase 1 (rubric) and Phase 2
+        // (training evidence) submissions trigger task-progress; legacy
+        // non-study callers are unaffected. Failure here logs at Warning
+        // level and never disturbs the already-accepted Finish flow.
+        if (IsStudyFlow())
+        {
+            SessionTaskProgressClient.TaskProgressRequest taskProgressRequest =
+                BuildTaskProgressRequestFromCurrentStudyContext();
+            if (taskProgressRequest != null)
+            {
+                yield return StartCoroutine(
+                    SessionTaskProgressClient.MarkTaskComplete(
+                        this,
+                        "ScoreManager",
+                        taskProgressRequest,
+                        outcome =>
+                        {
+                            if (!outcome.IsSuccess)
+                            {
+                                Debug.LogWarning(
+                                    $"[ScoreManager] Task-progress completion did not succeed: result={outcome.result} httpStatus={outcome.httpStatusCode}");
+                            }
+                        }));
+            }
+            else
+            {
+                Debug.LogWarning("[ScoreManager] Skipping task-progress PUT: current study context is missing phaseId or taskId/sectionId.");
+            }
+        }
     }
 
     private IEnumerator ProcessAIResponse(string responseText)
