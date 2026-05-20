@@ -13200,6 +13200,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI_V8_simucase
       objectReference: {fileID: 0}
+    - target: {fileID: 8486977929118016940, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: backButton
+      value:
+      objectReference: {fileID: 1954227787}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 2669283070709392116, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
