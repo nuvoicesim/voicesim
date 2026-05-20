@@ -644,13 +644,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 844224380180900024, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
-      value: 'In this task, you will practice supporting the patient during object
-        naming.
+      value: 'In this task, you will practice helping the patient name five pictured
+        items.
 
-        The patient will see an image and try to name the item. Provide cueing support
-        when needed, and move through the items one at a time.
+        The image and target word for the current item will appear on the right side
+        of the screen. If the patient has difficulty, use the Cue button in the
+        upper-right corner as guidance for choosing support strategies in sequence:
+        Semantic Cue first, then Phonemic Cue, and then Model Cue if additional support
+        is needed.
 
-        When you are ready, click Start Task.'
+        After completing each item, open the Tasks panel on the left and mark it as
+        completed. Once all five items are finished, click Finish to complete the task.'
       objectReference: {fileID: 0}
     - target: {fileID: 1267761794279778947, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
@@ -658,13 +662,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 839298963996416127, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
-      value: 'In this task, you will practice using sentence completion to support word
-        retrieval.
+      value: 'In this task, you will practice helping the patient retrieve five target
+        words through sentence completion.
 
-        For each item, create a sentence starter or prompt that helps guide the patient
-        toward the target word. Work through the items one at a time.
+        The current target word will appear on the right side of the screen. Create a
+        sentence starter or prompt that helps guide the patient toward that word. If
+        the patient has difficulty, use the Cue button in the upper-right corner as
+        guidance for choosing support strategies in sequence: Semantic Cue first, then
+        Phonemic Cue, and then Model Cue if additional support is needed.
 
-        When you are ready, click Start Task.'
+        After completing each item, open the Tasks panel on the left and mark it as
+        completed. Once all five items are finished, click Finish to complete the task.'
       objectReference: {fileID: 0}
     - target: {fileID: 726925667719132327, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
