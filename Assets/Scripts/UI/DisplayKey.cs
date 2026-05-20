@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 namespace UI
 {
@@ -12,6 +13,17 @@ namespace UI
         [SerializeField] private Sprite blackKeySprite;
         [SerializeField] private Sprite whiteKeySprite;
         [SerializeField] private TextMeshProUGUI promptText;
+
+        private bool IsAnyTMPInputFieldFocused()
+        {
+            EventSystem es = EventSystem.current;
+            if (es == null) return false;
+
+            GameObject selected = es.currentSelectedGameObject;
+            if (selected == null) return false;
+
+            return selected.GetComponentInParent<TMP_InputField>() != null;
+        }
 
 		private void Start()
 		{
@@ -35,6 +47,12 @@ namespace UI
 
         private void Update()
         {
+            if (IsAnyTMPInputFieldFocused())
+            {
+                keyDisplay.sprite = blackKeySprite;
+                return;
+            }
+
             if (Input.GetKey(KeyCode.R))
             {
                 keyDisplay.sprite = whiteKeySprite;

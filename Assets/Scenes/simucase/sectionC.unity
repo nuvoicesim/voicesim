@@ -10194,9 +10194,21 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -148.3
       objectReference: {fileID: 0}
+    - target: {fileID: 2853337401849594341, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: m_text
+      value: '<size=29>They fought like cats and ____.  Target: dogs</size>
+
+        <size=31>Score:</size>'
+      objectReference: {fileID: 0}
     - target: {fileID: 2896452483329939064, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
       propertyPath: m_Name
       value: UI_V8_simucase
+      objectReference: {fileID: 0}
+    - target: {fileID: 4221080810930561059, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: m_text
+      value: '<size=29>Roses are red, violets are ____. Target: blue</size>
+
+        <size=31>Score:</size>'
       objectReference: {fileID: 0}
     - target: {fileID: 5076661136498734717, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
       propertyPath: m_AnchoredPosition.y

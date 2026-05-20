@@ -45,13 +45,20 @@ public class SimuCaseSectionSelect : MonoBehaviour
     private List<GameObject> sectionPanelList;
     private List<string> sceneNameList;
 
+    private void Awake()
+    {
+        EnsureListsInitialized();
+    }
+
+    private void OnEnable()
+    {
+        EnsureListsInitialized();
+        RefreshCompletionTags();
+    }
+
     private void Start()
     {
-        startButtonList = new List<Button> { sectionAStartButton, sectionBStartButton, sectionCStartButton, sectionDStartButton };
-        backButtonList = new List<Button> { sectionABackButton, sectionBBackButton, sectionCBackButton, sectionDBackButton };
-        sectionButtonList = new List<Button> { sectionAButton, sectionBButton, sectionCButton, sectionDButton };
-        sectionPanelList = new List<GameObject> { sectionAPanel, sectionBPanel, sectionCPanel, sectionDPanel };
-        sceneNameList = new List<string> { sectionASceneName, sectionBSceneName, sectionCSceneName, sectionDSceneName };
+        EnsureListsInitialized();
 
         ShowPanel(sectionSelectPanel);
         HidePanel(sectionAPanel);
@@ -72,6 +79,22 @@ public class SimuCaseSectionSelect : MonoBehaviour
             if (button != null)
                 button.onClick.AddListener(() => BackToSelect(sectionPanelList[backButtonList.IndexOf(button)]));
         }
+
+        RefreshCompletionTags();
+    }
+
+    private void EnsureListsInitialized()
+    {
+        if (startButtonList == null)
+            startButtonList = new List<Button> { sectionAStartButton, sectionBStartButton, sectionCStartButton, sectionDStartButton };
+        if (backButtonList == null)
+            backButtonList = new List<Button> { sectionABackButton, sectionBBackButton, sectionCBackButton, sectionDBackButton };
+        if (sectionButtonList == null)
+            sectionButtonList = new List<Button> { sectionAButton, sectionBButton, sectionCButton, sectionDButton };
+        if (sectionPanelList == null)
+            sectionPanelList = new List<GameObject> { sectionAPanel, sectionBPanel, sectionCPanel, sectionDPanel };
+        if (sceneNameList == null)
+            sceneNameList = new List<string> { sectionASceneName, sectionBSceneName, sectionCSceneName, sectionDSceneName };
     }
 
     private void ShowDescription(GameObject panel)
@@ -161,5 +184,51 @@ public class SimuCaseSectionSelect : MonoBehaviour
     private static void HidePanel(GameObject panel)
     {
         if (panel != null) panel.SetActive(false);
+    }
+
+    private void RefreshCompletionTags()
+    {
+        // Only affects ScenarioSelectV2 UI; section scenes won't have these tags.
+        string[] sectionIds = { "A", "B", "C", "D" };
+        for (int i = 0; i < sectionIds.Length && i < sectionButtonList.Count; i++)
+        {
+            Button sectionButton = sectionButtonList[i];
+            if (sectionButton == null) continue;
+
+            bool isCompleted = SimuCaseSectionCompletionStore.IsCompleted(sectionIds[i]);
+
+            foreach (Transform complete in FindChildrenByName(sectionButton.transform, "Complete Tag"))
+            {
+                if (complete != null) 
+                {
+                    Debug.Log("Setting complete tag active: " + isCompleted);
+                    complete.gameObject.SetActive(isCompleted);
+                }
+            }
+
+            foreach (Transform incomplete in FindChildrenByName(sectionButton.transform, "Incomplete Tag"))
+            {
+                if (incomplete != null)
+                {
+                    Debug.Log("Setting incomplete tag active: " + !isCompleted);
+                    incomplete.gameObject.SetActive(!isCompleted);
+                }
+            }
+        }
+    }
+
+    private static List<Transform> FindChildrenByName(Transform root, string name)
+    {
+        List<Transform> results = new List<Transform>();
+        if (root == null || string.IsNullOrWhiteSpace(name))
+            return results;
+
+        Transform[] children = root.GetComponentsInChildren<Transform>(true);
+        foreach (Transform t in children)
+        {
+            if (t != null && t.name == name)
+                results.Add(t);
+        }
+        return results;
     }
 }

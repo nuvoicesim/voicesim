@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using UnityEngine.EventSystems;
 
 public class STTController : MonoBehaviour
 {
@@ -18,6 +19,17 @@ public class STTController : MonoBehaviour
 
     private const int RecordingLengthSeconds = 10;
     private const int RecordingFrequency = 44100;
+
+    private bool IsAnyTMPInputFieldFocused()
+    {
+        EventSystem es = EventSystem.current;
+        if (es == null) return false;
+
+        GameObject selected = es.currentSelectedGameObject;
+        if (selected == null) return false;
+
+        return selected.GetComponentInParent<TMP_InputField>() != null;
+    }
 
     private void Start()
     {
@@ -46,6 +58,9 @@ public class STTController : MonoBehaviour
         // WebGL: do nothing for microphone hotkey in this phase.
         return;
 #else
+        if (IsAnyTMPInputFieldFocused())
+            return;
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             StartRecording();
