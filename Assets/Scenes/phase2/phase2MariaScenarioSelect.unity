@@ -647,11 +647,13 @@ PrefabInstance:
       value: 'In this task, you will practice helping the patient name five pictured
         items.
 
+
         The image and target word for the current item will appear on the right side
         of the screen. If the patient has difficulty, use the Cue button in the
         upper-right corner as guidance for choosing support strategies in sequence:
         Semantic Cue first, then Phonemic Cue, and then Model Cue if additional support
         is needed.
+
 
         After completing each item, open the Tasks panel on the left and mark it as
         completed. Once all five items are finished, click Finish to complete the task.'
@@ -665,11 +667,13 @@ PrefabInstance:
       value: 'In this task, you will practice helping the patient retrieve five target
         words through sentence completion.
 
+
         The current target word will appear on the right side of the screen. Create a
         sentence starter or prompt that helps guide the patient toward that word. If
         the patient has difficulty, use the Cue button in the upper-right corner as
         guidance for choosing support strategies in sequence: Semantic Cue first, then
         Phonemic Cue, and then Model Cue if additional support is needed.
+
 
         After completing each item, open the Tasks panel on the left and mark it as
         completed. Once all five items are finished, click Finish to complete the task.'
