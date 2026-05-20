@@ -25,6 +25,13 @@ public class StudyCompletionChecklistManager : MonoBehaviour
     [SerializeField] private bool submitPayloadOnFinish = true;
     [SerializeField] private CameraClipboardController cameraClipboardController;
     [SerializeField] private Button backButton;
+    // Phase 2 manual completion overlay. When set AND the active flow is
+    // Phase 2, this GameObject is activated on Finish in place of the legacy
+    // clipboard report view. Typical contents: a "Task Completed" label that
+    // sits alongside the backButton (the Return control) inside the existing
+    // scene-level back canvas. Leaving this null preserves the legacy
+    // post-Finish flow exactly.
+    [SerializeField] private GameObject completedOverlay;
     [SerializeField] private string scenarioSelectSceneName = "";
     public UnityEvent onFinish;
 
@@ -180,11 +187,47 @@ public class StudyCompletionChecklistManager : MonoBehaviour
         HidePanel();
         onFinish?.Invoke();
 
-        if (cameraClipboardController != null)
+        // Phase 2 manual completion overlay: skip the legacy clipboard report
+        // view (which is now empty for Phase 2 because the May 18 backend
+        // change removed the narrative report) and instead reveal a small
+        // scene-level overlay carrying the "Task Completed" label + Return
+        // button. Non-Phase-2 flows preserve the legacy TriggerClipboardView
+        // path exactly. /llm-scoring + task-progress PUT submissions still
+        // fire — they are kicked off by separate code paths and are
+        // unaffected by this UI branch.
+        if (IsPhase2StudyFlow())
+        {
+            if (completedOverlay != null)
+                completedOverlay.SetActive(true);
+        }
+        else if (cameraClipboardController != null)
+        {
             cameraClipboardController.TriggerClipboardView();
+        }
 
         if (backButton != null)
             backButton.gameObject.SetActive(true);
+    }
+
+    // Returns true when the active flow is a Phase 2 study task. Reads from
+    // the same finalized study payload source ScoreManager uses for its
+    // outbound /llm-scoring payload, so the detection is consistent across
+    // all paths that branch on Phase 2 (zero-turn scoring guard, task-progress
+    // gate, this completion overlay).
+    private static bool IsPhase2StudyFlow()
+    {
+        try
+        {
+            StudyTaskResultPayload payload = StudyTaskResultBuffer.BuildPayload(StudyDataDefaults.StatusCompleted);
+            return string.Equals(
+                payload?.taskContext?.phaseId,
+                StudyDataDefaults.Phase2,
+                System.StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void ResetStudyResultBufferForCurrentTask()

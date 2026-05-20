@@ -165,8 +165,16 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   objectNamingSceneName: phase2MariaObjectNaming
   sentenceCompletionSceneName: phase2MariaSentenceCompletion
+  selectorPanel: {fileID: 0}
+  titleObject: {fileID: 0}
   objectNamingButton: {fileID: 0}
   sentenceCompletionButton: {fileID: 0}
+  objectNamingInstructionPanel: {fileID: 0}
+  objectNamingBackButton: {fileID: 0}
+  objectNamingStartButton: {fileID: 0}
+  sentenceCompletionInstructionPanel: {fileID: 0}
+  sentenceCompletionBackButton: {fileID: 0}
+  sentenceCompletionStartButton: {fileID: 0}
 --- !u!1001 &670931401
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -630,19 +638,51 @@ PrefabInstance:
       propertyPath: m_text
       value: Sentence Completion Practice
       objectReference: {fileID: 0}
+    - target: {fileID: 8273012353477674596, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: Object Naming with Cueing Practice
+      objectReference: {fileID: 0}
+    - target: {fileID: 844224380180900024, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: 'In this task, you will practice helping the patient name five pictured
+        items.
+
+
+        The image and target word for the current item will appear on the right side
+        of the screen. If the patient has difficulty, use the Cue button in the
+        upper-right corner as guidance for choosing support strategies in sequence:
+        Semantic Cue first, then Phonemic Cue, and then Model Cue if additional support
+        is needed.
+
+
+        After completing each item, open the Tasks panel on the left and mark it as
+        completed. Once all five items are finished, click Finish to complete the task.'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1267761794279778947, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: Sentence Completion Practice
+      objectReference: {fileID: 0}
+    - target: {fileID: 839298963996416127, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: 'In this task, you will practice helping the patient retrieve five target
+        words through sentence completion.
+
+
+        The current target word will appear on the right side of the screen. Create a
+        sentence starter or prompt that helps guide the patient toward that word. If
+        the patient has difficulty, use the Cue button in the upper-right corner as
+        guidance for choosing support strategies in sequence: Semantic Cue first, then
+        Phonemic Cue, and then Model Cue if additional support is needed.
+
+
+        After completing each item, open the Tasks panel on the left and mark it as
+        completed. Once all five items are finished, click Finish to complete the task.'
+      objectReference: {fileID: 0}
     - target: {fileID: 726925667719132327, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1585161577245341526, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3353730371567358231, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6925589809926682227, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
