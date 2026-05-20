@@ -22,6 +22,17 @@ public class SimuCaseChecklistManager : MonoBehaviour
     [Header("On Finish")]
     public UnityEvent onFinish;
     [SerializeField] private string scenarioSelectSceneName = "ScenarioSelect";
+    // Post-Finish manual return to the selector. The clipboard/report view
+    // animation, /llm-scoring submission, rubric rendering, and task-progress
+    // PUT all happen inside the TriggerClipboardView() coroutine; the section
+    // scene must therefore remain loaded until the student has read the
+    // report. The Back button is hidden during the task and revealed at the
+    // end of OnFinishClicked(); clicking it loads scenarioSelectSceneName.
+    // Falls back to FindObjectsOfType<Button>() by name if the Inspector
+    // slot is unwired, mirroring the auto-resolve pattern used for the
+    // Section B optional fields.
+    [SerializeField] private Button backButton;
+    [SerializeField] private string backButtonObjectName = "BackButton";
 
     [Header("Score Capture")]
     [SerializeField] private string scoreObjectNamePrefix = "Score";
@@ -44,10 +55,17 @@ public class SimuCaseChecklistManager : MonoBehaviour
         ResetStudyResultBufferForSection();
 
         TryAutoResolveSectionBOptionalFields();
+        TryAutoResolveBackButton();
 
         if (checklistIconButton != null) checklistIconButton.onClick.AddListener(ShowPanel);
         if (closeButton != null)         closeButton.onClick.AddListener(HidePanel);
         if (finishButton != null)        finishButton.onClick.AddListener(OnFinishClicked);
+
+        if (backButton != null)
+        {
+            backButton.gameObject.SetActive(false);
+            backButton.onClick.AddListener(() => SceneManager.LoadScene(scenarioSelectSceneName));
+        }
 
         if (startAsIcon) HidePanel(); else ShowPanel();
         RefreshFinishButton();
@@ -126,9 +144,14 @@ public class SimuCaseChecklistManager : MonoBehaviour
 
         HidePanel();
         onFinish?.Invoke();
+        // Kicks off the camera transition, POST /llm-scoring, rubric
+        // rendering, and the task-progress PUT. Returning to the selector
+        // before this coroutine completes destroys the section scene and
+        // cancels the entire chain. The student returns manually via the
+        // Back button revealed below.
         cameraClipboardController?.TriggerClipboardView();
         ResetAll();
-        SceneManager.LoadScene(scenarioSelectSceneName);
+        if (backButton != null) backButton.gameObject.SetActive(true);
     }
 
     private void MarkCurrentSectionCompleted()
@@ -146,6 +169,31 @@ public class SimuCaseChecklistManager : MonoBehaviour
         SimuCaseTargetButtonUI targetButton = TryResolveTargetButtonUI();
         if (targetButton != null && targetButton.TryGetCurrentStudyItemMetadata(out StudyItemMetadata metadata))
             SimuCaseSectionCompletionStore.MarkCompleted(metadata.sectionId);
+    }
+
+    private void TryAutoResolveBackButton()
+    {
+        // Allow per-scene Inspector wiring to win; fall back to a Button
+        // named backButtonObjectName so the pilot scene works even without
+        // an explicit prefab-instance override.
+        if (backButton != null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(backButtonObjectName))
+            return;
+
+        Button[] buttons = FindObjectsOfType<Button>(true);
+        foreach (Button button in buttons)
+        {
+            if (button == null || button.gameObject == null)
+                continue;
+
+            if (button.gameObject.name == backButtonObjectName)
+            {
+                backButton = button;
+                return;
+            }
+        }
     }
 
     private void TryAutoResolveSectionBOptionalFields()

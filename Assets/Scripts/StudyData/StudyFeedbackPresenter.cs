@@ -48,7 +48,7 @@ public class StudyFeedbackPresenter : MonoBehaviour
     [Header("Rubric Feedback")]
     [SerializeField] private bool showRubricBlockWhenEmpty = true;
     [SerializeField] private string rubricPlaceholderText =
-        "Rubric scoring feedback will appear here once backend scoring is connected.";
+        "Your rubric-based feedback is being generated. Please wait...";
 
     private GameObject rubricBlock;
     private TextMeshProUGUI rubricBodyText;
@@ -124,6 +124,27 @@ public class StudyFeedbackPresenter : MonoBehaviour
         RebuildLayout();
     }
 
+    // Toggle the legacy AI Interaction Feedback block, which carries the
+    // ScoreManager-owned narrative report text. The block is created
+    // unconditionally by EnsureAiInteractionBlock() and is the right
+    // container for legacy `report`-wrapper responses, the no-conversation
+    // placeholder, and HTTP-error reports — they all populate
+    // ScoreManager.reportText which this block hosts. For the flat Phase 1
+    // rubricAssessment envelope nothing writes that text, so the block
+    // appears empty next to the rubric content; ScoreManager hides it
+    // immediately after applying that envelope. Other flows leave it
+    // visible, matching the default created state.
+    public void SetAiInteractionBlockVisible(bool visible)
+    {
+        if (aiInteractionBlock == null)
+            EnsureDefaultStructure();
+
+        if (aiInteractionBlock != null)
+            aiInteractionBlock.SetActive(visible);
+
+        RebuildLayout();
+    }
+
     private RectTransform ResolveContentRoot()
     {
         if (contentRoot != null)
@@ -194,6 +215,7 @@ public class StudyFeedbackPresenter : MonoBehaviour
     {
         Transform existing = contentRoot.Find("AIInteractionFeedbackBlock");
         aiInteractionBlock = existing != null ? existing.gameObject : CreateFeedbackBlock("AIInteractionFeedbackBlock");
+        aiInteractionBlock.SetActive(true);
         aiInteractionBlock.transform.SetAsLastSibling();
 
         aiInteractionHeaderText = EnsureTextChild(

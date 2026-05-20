@@ -36,8 +36,20 @@ public class ScoreManager : MonoBehaviour
 
     void Start()
     {
-        if (evaluationCanvas != null)
-            evaluationCanvas.gameObject.SetActive(false);
+        // The outer ReportPanel's initial hidden state is already owned by
+        // scene setup (m_IsActive: 0 on the panel itself) and by
+        // CameraClipboardController.Start(), which always runs at scene load
+        // because that controller sits on an always-active GameObject.
+        // ScoreManager, by contrast, lives under ReportUIController which is
+        // m_IsActive: 0 in the section scenes, so ScoreManager.Start() runs
+        // LATE — specifically, one frame after the Finish coroutine in
+        // CameraClipboardController calls EnsureGameObjectHierarchyActive(...)
+        // and activates this subsystem. A redundant SetActive(false) on
+        // evaluationCanvas here would therefore re-hide the ReportPanel that
+        // SwitchToClipboard just activated, breaking the restored Phase 1
+        // clipboard/report flow. Initial hide responsibility stays with the
+        // scene and CameraClipboardController; this Start() only wires the
+        // close-button listener.
 
         if (closeButton != null)
             closeButton.onClick.AddListener(HideEvaluationPanel);
@@ -344,12 +356,28 @@ public class ScoreManager : MonoBehaviour
             //   - Phase 2 evidence branch returns a lightweight success envelope,
             //     also no `report` wrapper.
             // Treat absence of `report` as accepted HTTP 2xx and skip the legacy
-            // narrative rendering path. UI rendering for rubricAssessment is
-            // intentionally deferred to a later branch; this pass only ensures
-            // the Finish flow does not surface the missing-report error
-            // placeholder when the backend response is one of the new shapes.
+            // narrative rendering path. For the Phase 1 envelope, extract the
+            // top-level rubricAssessment and route it through the existing
+            // ApplyRubricAssessment helper so StudyFeedbackPresenter renders
+            // the returned itemFeedback / taskFeedback in place of its
+            // waiting-state placeholder. Phase 2 envelopes have no
+            // rubricAssessment field; the token resolves to null and the
+            // rubric apply step is skipped, preserving the prior behavior.
             if (reportToken == null)
             {
+                JToken rubricToken = jsonResponse["rubricAssessment"];
+                if (rubricToken != null)
+                {
+                    RubricAssessmentResult rubricAssessment = rubricToken.ToObject<RubricAssessmentResult>();
+                    if (rubricAssessment != null)
+                    {
+                        ApplyRubricAssessment(new DynamicEvaluationResult
+                        {
+                            rubricAssessment = rubricAssessment
+                        }, hideAiInteractionBlock: true);
+                    }
+                }
+
                 Debug.Log("[ScoreManager] /llm-scoring response did not include a legacy `report` wrapper; treating as accepted (Phase 1 rubric / Phase 2 evidence envelope). Skipping legacy narrative rendering.");
                 if (progressBarUI != null)
                     progressBarUI.HideProgressBar();
@@ -702,7 +730,7 @@ public class ScoreManager : MonoBehaviour
         return string.Equals(value.Trim(), sentinel, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static void ApplyRubricAssessment(DynamicEvaluationResult evaluation)
+    private static void ApplyRubricAssessment(DynamicEvaluationResult evaluation, bool hideAiInteractionBlock = false)
     {
         if (evaluation == null || evaluation.rubricAssessment == null)
             return;
@@ -718,6 +746,8 @@ public class ScoreManager : MonoBehaviour
         {
             if (presenter == null)
                 continue;
+            if (hideAiInteractionBlock)
+                presenter.SetAiInteractionBlockVisible(false);
             presenter.SetRubricFeedback(block);
         }
     }
