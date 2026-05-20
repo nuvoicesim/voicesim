@@ -21,13 +21,17 @@ public class SimuCaseSectionSelect : MonoBehaviour
     [SerializeField] private Button sectionCButton;
     [SerializeField] private Button sectionDButton;
 
-    [Header("Description Back Buttons")]
-    [SerializeField] private Button sectionCBackButton;
-    [SerializeField] private Button sectionDBackButton;
-
     [Header("Description Start Buttons")]
+    [SerializeField] private Button sectionAStartButton;
+    [SerializeField] private Button sectionBStartButton;
     [SerializeField] private Button sectionCStartButton;
     [SerializeField] private Button sectionDStartButton;
+
+    [Header("Description Back Buttons")]
+    [SerializeField] private Button sectionABackButton;
+    [SerializeField] private Button sectionBBackButton;
+    [SerializeField] private Button sectionCBackButton;
+    [SerializeField] private Button sectionDBackButton;
 
     [Header("Scene Names")]
     [SerializeField] private string sectionASceneName = "sectionA";
@@ -35,24 +39,39 @@ public class SimuCaseSectionSelect : MonoBehaviour
     [SerializeField] private string sectionCSceneName = "sectionC";
     [SerializeField] private string sectionDSceneName = "sectionD";
 
+    private List<Button> startButtonList;
+    private List<Button> backButtonList;
+    private List<Button> sectionButtonList;
+    private List<GameObject> sectionPanelList;
+    private List<string> sceneNameList;
+
     private void Start()
     {
+        startButtonList = new List<Button> { sectionAStartButton, sectionBStartButton, sectionCStartButton, sectionDStartButton };
+        backButtonList = new List<Button> { sectionABackButton, sectionBBackButton, sectionCBackButton, sectionDBackButton };
+        sectionButtonList = new List<Button> { sectionAButton, sectionBButton, sectionCButton, sectionDButton };
+        sectionPanelList = new List<GameObject> { sectionAPanel, sectionBPanel, sectionCPanel, sectionDPanel };
+        sceneNameList = new List<string> { sectionASceneName, sectionBSceneName, sectionCSceneName, sectionDSceneName };
+
         ShowPanel(sectionSelectPanel);
         HidePanel(sectionAPanel);
         HidePanel(sectionBPanel);
         HidePanel(sectionCPanel);
         HidePanel(sectionDPanel);
 
-        if (sectionAButton != null) sectionAButton.onClick.AddListener(() => LoadSection(sectionASceneName));
-        if (sectionBButton != null) sectionBButton.onClick.AddListener(() => LoadSection(sectionBSceneName));
-        if (sectionCButton != null) sectionCButton.onClick.AddListener(() => ShowDescription(sectionCPanel));
-        if (sectionDButton != null) sectionDButton.onClick.AddListener(() => ShowDescription(sectionDPanel));
+        foreach (Button button in sectionButtonList) {
+            if (button != null)
+                button.onClick.AddListener(() => ShowDescription(sectionPanelList[sectionButtonList.IndexOf(button)]));
+        }
 
-        if (sectionCBackButton != null) sectionCBackButton.onClick.AddListener(() => BackToSelect(sectionCPanel));
-        if (sectionDBackButton != null) sectionDBackButton.onClick.AddListener(() => BackToSelect(sectionDPanel));
-
-        if (sectionCStartButton != null) sectionCStartButton.onClick.AddListener(() => LoadSection(sectionCSceneName));
-        if (sectionDStartButton != null) sectionDStartButton.onClick.AddListener(() => LoadSection(sectionDSceneName));
+        foreach (Button button in startButtonList) {
+            if (button != null)
+                button.onClick.AddListener(() => LoadSection(sceneNameList[startButtonList.IndexOf(button)]));
+        }
+        foreach (Button button in backButtonList) {
+            if (button != null)
+                button.onClick.AddListener(() => BackToSelect(sectionPanelList[backButtonList.IndexOf(button)]));
+        }
     }
 
     private void ShowDescription(GameObject panel)
