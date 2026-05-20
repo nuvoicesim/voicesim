@@ -356,12 +356,28 @@ public class ScoreManager : MonoBehaviour
             //   - Phase 2 evidence branch returns a lightweight success envelope,
             //     also no `report` wrapper.
             // Treat absence of `report` as accepted HTTP 2xx and skip the legacy
-            // narrative rendering path. UI rendering for rubricAssessment is
-            // intentionally deferred to a later branch; this pass only ensures
-            // the Finish flow does not surface the missing-report error
-            // placeholder when the backend response is one of the new shapes.
+            // narrative rendering path. For the Phase 1 envelope, extract the
+            // top-level rubricAssessment and route it through the existing
+            // ApplyRubricAssessment helper so StudyFeedbackPresenter renders
+            // the returned itemFeedback / taskFeedback in place of its
+            // waiting-state placeholder. Phase 2 envelopes have no
+            // rubricAssessment field; the token resolves to null and the
+            // rubric apply step is skipped, preserving the prior behavior.
             if (reportToken == null)
             {
+                JToken rubricToken = jsonResponse["rubricAssessment"];
+                if (rubricToken != null)
+                {
+                    RubricAssessmentResult rubricAssessment = rubricToken.ToObject<RubricAssessmentResult>();
+                    if (rubricAssessment != null)
+                    {
+                        ApplyRubricAssessment(new DynamicEvaluationResult
+                        {
+                            rubricAssessment = rubricAssessment
+                        });
+                    }
+                }
+
                 Debug.Log("[ScoreManager] /llm-scoring response did not include a legacy `report` wrapper; treating as accepted (Phase 1 rubric / Phase 2 evidence envelope). Skipping legacy narrative rendering.");
                 if (progressBarUI != null)
                     progressBarUI.HideProgressBar();
