@@ -165,8 +165,16 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   objectNamingSceneName: phase2BenObjectNaming
   sentenceCompletionSceneName: phase2BenSentenceCompletion
+  selectorPanel: {fileID: 0}
+  titleObject: {fileID: 0}
   objectNamingButton: {fileID: 0}
   sentenceCompletionButton: {fileID: 0}
+  objectNamingInstructionPanel: {fileID: 0}
+  objectNamingBackButton: {fileID: 0}
+  objectNamingStartButton: {fileID: 0}
+  sentenceCompletionInstructionPanel: {fileID: 0}
+  sentenceCompletionBackButton: {fileID: 0}
+  sentenceCompletionStartButton: {fileID: 0}
 --- !u!1001 &670931401
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -630,19 +638,27 @@ PrefabInstance:
       propertyPath: m_text
       value: Sentence Completion Practice
       objectReference: {fileID: 0}
+    - target: {fileID: 8273012353477674596, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: Object Naming with Cueing Practice
+      objectReference: {fileID: 0}
+    - target: {fileID: 844224380180900024, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: You will practice helping the patient name presented items. Use supportive cueing when needed, then begin the task when ready.
+      objectReference: {fileID: 0}
+    - target: {fileID: 1267761794279778947, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: Sentence Completion Practice
+      objectReference: {fileID: 0}
+    - target: {fileID: 839298963996416127, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
+      propertyPath: m_text
+      value: You will practice helping the patient complete sentence prompts. Use the available context to support word retrieval, then begin the task when ready.
+      objectReference: {fileID: 0}
     - target: {fileID: 726925667719132327, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1585161577245341526, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3353730371567358231, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6925589809926682227, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}

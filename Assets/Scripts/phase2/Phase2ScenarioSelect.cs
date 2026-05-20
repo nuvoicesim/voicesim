@@ -6,22 +6,65 @@ public class Phase2ScenarioSelect : MonoBehaviour
 {
     private const string DefaultObjectNamingButtonName = "Scene1Button";
     private const string DefaultSentenceCompletionButtonName = "Scene2Button";
+    private const string DefaultSelectorPanelName = "SectionSelectPanel";
+    private const string DefaultTitleObjectName = "Title";
+    private const string DefaultObjectNamingInstructionPanelName = "SectionCPanel";
+    private const string DefaultSentenceCompletionInstructionPanelName = "SectionDPanel";
+    private const string DefaultObjectNamingBackButtonName = "BackC Button";
+    private const string DefaultObjectNamingStartButtonName = "StartC Button";
+    private const string DefaultSentenceCompletionBackButtonName = "BackD Button";
+    private const string DefaultSentenceCompletionStartButtonName = "StartD Button";
 
     [Header("Scene Names")]
     [SerializeField] private string objectNamingSceneName = "";
     [SerializeField] private string sentenceCompletionSceneName = "";
 
-    [Header("Buttons")]
+    [Header("Selector")]
+    [SerializeField] private GameObject selectorPanel;
+    [SerializeField] private GameObject titleObject;
     [SerializeField] private Button objectNamingButton;
     [SerializeField] private Button sentenceCompletionButton;
 
+    [Header("Object Naming Instruction")]
+    [SerializeField] private GameObject objectNamingInstructionPanel;
+    [SerializeField] private Button objectNamingBackButton;
+    [SerializeField] private Button objectNamingStartButton;
+
+    [Header("Sentence Completion Instruction")]
+    [SerializeField] private GameObject sentenceCompletionInstructionPanel;
+    [SerializeField] private Button sentenceCompletionBackButton;
+    [SerializeField] private Button sentenceCompletionStartButton;
+
     private void Awake()
     {
-        if (objectNamingButton == null)
-            objectNamingButton = FindButtonInCurrentScene(DefaultObjectNamingButtonName);
+        if (selectorPanel == null)
+            selectorPanel = FindGameObjectInCurrentScene(DefaultSelectorPanelName);
+        if (titleObject == null)
+            titleObject = FindGameObjectInCurrentScene(DefaultTitleObjectName);
 
+        if (objectNamingButton == null)
+            objectNamingButton = FindInCurrentScene<Button>(DefaultObjectNamingButtonName);
         if (sentenceCompletionButton == null)
-            sentenceCompletionButton = FindButtonInCurrentScene(DefaultSentenceCompletionButtonName);
+            sentenceCompletionButton = FindInCurrentScene<Button>(DefaultSentenceCompletionButtonName);
+
+        if (objectNamingInstructionPanel == null)
+            objectNamingInstructionPanel = FindGameObjectInCurrentScene(DefaultObjectNamingInstructionPanelName);
+        if (objectNamingBackButton == null)
+            objectNamingBackButton = FindInCurrentScene<Button>(DefaultObjectNamingBackButtonName);
+        if (objectNamingStartButton == null)
+            objectNamingStartButton = FindInCurrentScene<Button>(DefaultObjectNamingStartButtonName);
+
+        if (sentenceCompletionInstructionPanel == null)
+            sentenceCompletionInstructionPanel = FindGameObjectInCurrentScene(DefaultSentenceCompletionInstructionPanelName);
+        if (sentenceCompletionBackButton == null)
+            sentenceCompletionBackButton = FindInCurrentScene<Button>(DefaultSentenceCompletionBackButtonName);
+        if (sentenceCompletionStartButton == null)
+            sentenceCompletionStartButton = FindInCurrentScene<Button>(DefaultSentenceCompletionStartButtonName);
+
+        ShowPanel(selectorPanel);
+        ShowPanel(titleObject);
+        HidePanel(objectNamingInstructionPanel);
+        HidePanel(sentenceCompletionInstructionPanel);
 
         if (objectNamingButton != null)
             objectNamingButton.onClick.AddListener(OpenObjectNaming);
@@ -32,25 +75,75 @@ public class Phase2ScenarioSelect : MonoBehaviour
             sentenceCompletionButton.onClick.AddListener(OpenSentenceCompletion);
         else
             Debug.LogWarning("Phase2ScenarioSelect: Sentence Completion button is not assigned or found.");
+
+        if (objectNamingBackButton != null)
+            objectNamingBackButton.onClick.AddListener(BackFromObjectNaming);
+        if (objectNamingStartButton != null)
+            objectNamingStartButton.onClick.AddListener(StartObjectNaming);
+        if (sentenceCompletionBackButton != null)
+            sentenceCompletionBackButton.onClick.AddListener(BackFromSentenceCompletion);
+        if (sentenceCompletionStartButton != null)
+            sentenceCompletionStartButton.onClick.AddListener(StartSentenceCompletion);
     }
 
     private void OnDestroy()
     {
         if (objectNamingButton != null)
             objectNamingButton.onClick.RemoveListener(OpenObjectNaming);
-
         if (sentenceCompletionButton != null)
             sentenceCompletionButton.onClick.RemoveListener(OpenSentenceCompletion);
+        if (objectNamingBackButton != null)
+            objectNamingBackButton.onClick.RemoveListener(BackFromObjectNaming);
+        if (objectNamingStartButton != null)
+            objectNamingStartButton.onClick.RemoveListener(StartObjectNaming);
+        if (sentenceCompletionBackButton != null)
+            sentenceCompletionBackButton.onClick.RemoveListener(BackFromSentenceCompletion);
+        if (sentenceCompletionStartButton != null)
+            sentenceCompletionStartButton.onClick.RemoveListener(StartSentenceCompletion);
     }
 
     public void OpenObjectNaming()
     {
-        LoadScene(objectNamingSceneName);
+        ShowInstruction(objectNamingInstructionPanel);
     }
 
     public void OpenSentenceCompletion()
     {
+        ShowInstruction(sentenceCompletionInstructionPanel);
+    }
+
+    private void BackFromObjectNaming()
+    {
+        BackToSelector(objectNamingInstructionPanel);
+    }
+
+    private void BackFromSentenceCompletion()
+    {
+        BackToSelector(sentenceCompletionInstructionPanel);
+    }
+
+    private void StartObjectNaming()
+    {
+        LoadScene(objectNamingSceneName);
+    }
+
+    private void StartSentenceCompletion()
+    {
         LoadScene(sentenceCompletionSceneName);
+    }
+
+    private void ShowInstruction(GameObject instructionPanel)
+    {
+        HidePanel(selectorPanel);
+        HidePanel(titleObject);
+        ShowPanel(instructionPanel);
+    }
+
+    private void BackToSelector(GameObject instructionPanel)
+    {
+        HidePanel(instructionPanel);
+        ShowPanel(selectorPanel);
+        ShowPanel(titleObject);
     }
 
     private void LoadScene(string sceneName)
@@ -64,18 +157,34 @@ public class Phase2ScenarioSelect : MonoBehaviour
         SceneManager.LoadScene(sceneName);
     }
 
-    private Button FindButtonInCurrentScene(string buttonObjectName)
+    private T FindInCurrentScene<T>(string objectName) where T : Component
     {
-        Button[] buttons = Resources.FindObjectsOfTypeAll<Button>();
-        foreach (Button button in buttons)
+        T[] components = Resources.FindObjectsOfTypeAll<T>();
+        foreach (T component in components)
         {
-            if (button == null || button.gameObject.scene != gameObject.scene)
+            if (component == null || component.gameObject.scene != gameObject.scene)
                 continue;
 
-            if (button.gameObject.name == buttonObjectName)
-                return button;
+            if (component.gameObject.name == objectName)
+                return component;
         }
 
         return null;
+    }
+
+    private GameObject FindGameObjectInCurrentScene(string objectName)
+    {
+        Transform transform = FindInCurrentScene<Transform>(objectName);
+        return transform != null ? transform.gameObject : null;
+    }
+
+    private static void ShowPanel(GameObject panel)
+    {
+        if (panel != null) panel.SetActive(true);
+    }
+
+    private static void HidePanel(GameObject panel)
+    {
+        if (panel != null) panel.SetActive(false);
     }
 }
