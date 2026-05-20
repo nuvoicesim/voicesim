@@ -3460,7 +3460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416 and SLPA 6417 Section D
+  m_text: VOICE - Summer SLPA 6416/6417 Section D
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -3900,7 +3900,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416 and SLPA 6417 Section A
+  m_text: VOICE - Summer SLPA 6416/6417 Section A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -8589,7 +8589,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416 and SLPA 6417 Activities
+  m_text: VOICE - Summer SLPA 6416/6417 Activities
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -9545,7 +9545,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416 and SLPA 6417 Section B
+  m_text: VOICE - Summer SLPA 6416/6417 Section B
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -10741,7 +10741,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416 and SLPA 6417 Section C
+  m_text: VOICE - Summer SLPA 6416/6417 Section C
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
