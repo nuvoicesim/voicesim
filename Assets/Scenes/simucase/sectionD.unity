@@ -5797,6 +5797,30 @@ PrefabInstance:
       propertyPath: backButton
       value:
       objectReference: {fileID: 1954227787}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: startingScriptNumber
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: targetWords.Array.data[0]
+      value: pen
+      objectReference: {fileID: 0}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: targetWords.Array.data[1]
+      value: white
+      objectReference: {fileID: 0}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: targetWords.Array.data[2]
+      value: seven
+      objectReference: {fileID: 0}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: targetWords.Array.data[3]
+      value: hospital
+      objectReference: {fileID: 0}
+    - target: {fileID: 6314032361063180591, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
+      propertyPath: targetWords.Array.data[4]
+      value: post office
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 1784201516264472345, guid: cfb4e13dbd4d0de4e8954beea33e0c73, type: 3}
