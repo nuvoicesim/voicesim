@@ -261,6 +261,71 @@
         "Phonemic": "It starts with 'P' like 'paper'.",
         "Model": "Say 'post office' or 'store'."
       }
+    },
+    {
+      "script_number": 21,
+      "title": "What item is this?",
+      "target_word": "Book",
+      "alternate_target": "",
+      "semanticKeywords": ["read", "library", "school", "study", "learn", "knowledge"],
+      "phonemicKeywords": ["bo", "book", "bk", "b"],
+      "studentHints": {
+        "Semantic": "It is a thing you read to learn.",
+        "Phonemic": "It starts with 'B' like 'boy'.",
+        "Model": "Say 'book'."
+      }
+    },
+    {
+      "script_number": 22,
+      "title": "What item is this?",
+      "target_word": "Ball",  
+      "alternate_target": "",
+      "semanticKeywords": ["play", "sport", "game", "throw", "catch", "ball"],
+      "phonemicKeywords": ["ba", "bal", "ball", "b"],
+      "studentHints": {
+        "Semantic": "It is a thing you play with.",
+        "Phonemic": "It starts with 'B' like 'boy'.",
+        "Model": "Say 'ball'."
+      }
+    },
+    {
+      "script_number": 23,
+      "title": "What item is this?",
+      "target_word": "Knife",
+      "alternate_target": "",
+      "semanticKeywords": ["cut", "slice", "stab", "knife", "sharp", "blade"],
+      "phonemicKeywords": ["kn", "kne", "knife", "k"],
+      "studentHints": {
+        "Semantic": "It is a thing you use to cut things.",
+        "Phonemic": "It starts with '/n/' like 'nose'.",
+        "Model": "Say 'knife'."
+      }
+    },
+    {
+      "script_number": 24,
+      "title": "What item is this?",
+      "target_word": "Cup",
+      "alternate_target": "",
+      "semanticKeywords": ["drink", "liquid", "container", "cup", "mug", "glass"],
+      "phonemicKeywords": ["cu", "cup", "c"],
+      "studentHints": {
+        "Semantic": "It is a thing you use to drink from.",
+        "Phonemic": "It starts with 'C' like 'cat'.",
+        "Model": "Say 'cup'."
+      }
+    },
+    {
+      "script_number": 25,
+      "title": "What item is this?",
+      "target_word": "Safety Pin",
+      "alternate_target": "",
+      "semanticKeywords": ["pin", "hold", "secure", "safety", "pin", "clip"],
+      "phonemicKeywords": ["sa", "saf", "safe", "s"],
+      "studentHints": {
+        "Semantic": "It is a thing you use to hold things together.",
+        "Phonemic": "It starts with 'S' like 'sun'.",
+        "Model": "Say 'safety pin'."
+      }
     }
   ]
 }

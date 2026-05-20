@@ -20,7 +20,6 @@ public class SimuCaseChecklistManager : MonoBehaviour
 
     [Header("On Finish")]
     public UnityEvent onFinish;
-    [SerializeField] private Button backButton;
     [SerializeField] private string scenarioSelectSceneName = "ScenarioSelect";
 
     [Header("Score Capture")]
@@ -41,11 +40,6 @@ public class SimuCaseChecklistManager : MonoBehaviour
         if (checklistIconButton != null) checklistIconButton.onClick.AddListener(ShowPanel);
         if (closeButton != null)         closeButton.onClick.AddListener(HidePanel);
         if (finishButton != null)        finishButton.onClick.AddListener(OnFinishClicked);
-        if (backButton != null)
-        {
-            backButton.gameObject.SetActive(false);
-            backButton.onClick.AddListener(() => SceneManager.LoadScene(scenarioSelectSceneName));
-        }
 
         if (startAsIcon) HidePanel(); else ShowPanel();
         RefreshFinishButton();
@@ -113,7 +107,7 @@ public class SimuCaseChecklistManager : MonoBehaviour
         onFinish?.Invoke();
         cameraClipboardController?.TriggerClipboardView();
         ResetAll();
-        if (backButton != null) backButton.gameObject.SetActive(true);
+        SceneManager.LoadScene(scenarioSelectSceneName);
     }
 
     private void RefreshFinishButton()
