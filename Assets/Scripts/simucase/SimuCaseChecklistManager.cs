@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -20,17 +21,21 @@ public class SimuCaseChecklistManager : MonoBehaviour
 
     [Header("On Finish")]
     public UnityEvent onFinish;
-    [SerializeField] private Button backButton;
     [SerializeField] private string scenarioSelectSceneName = "ScenarioSelect";
 
     [Header("Score Capture")]
     [SerializeField] private string scoreObjectNamePrefix = "Score";
+
+    [Header("Section B (optional)")]
+    [SerializeField] private TMP_InputField sectionBNotesInput;
+    [SerializeField] private Toggle sectionBCompletionToggle;
 
     private CameraClipboardController cameraClipboardController;
 
     private int questionCount;
     private bool[] answered;
     private int?[] selectedScores;
+    private readonly List<Transform> questionItemRows = new List<Transform>();
 
     private void Start()
     {
@@ -38,14 +43,11 @@ public class SimuCaseChecklistManager : MonoBehaviour
         SetupQuestions();
         ResetStudyResultBufferForSection();
 
+        TryAutoResolveSectionBOptionalFields();
+
         if (checklistIconButton != null) checklistIconButton.onClick.AddListener(ShowPanel);
         if (closeButton != null)         closeButton.onClick.AddListener(HidePanel);
         if (finishButton != null)        finishButton.onClick.AddListener(OnFinishClicked);
-        if (backButton != null)
-        {
-            backButton.gameObject.SetActive(false);
-            backButton.onClick.AddListener(() => SceneManager.LoadScene(scenarioSelectSceneName));
-        }
 
         if (startAsIcon) HidePanel(); else ShowPanel();
         RefreshFinishButton();
@@ -53,13 +55,24 @@ public class SimuCaseChecklistManager : MonoBehaviour
 
     private void SetupQuestions()
     {
-        questionCount = contentParent.childCount;
+        questionItemRows.Clear();
+        if (contentParent != null)
+        {
+            for (int i = 0; i < contentParent.childCount; i++)
+            {
+                Transform item = contentParent.GetChild(i);
+                if (item.GetComponentsInChildren<Toggle>(true).Length > 0)
+                    questionItemRows.Add(item);
+            }
+        }
+
+        questionCount = questionItemRows.Count;
         answered = new bool[questionCount];
         selectedScores = new int?[questionCount];
 
         for (int i = 0; i < questionCount; i++)
         {
-            Transform item = contentParent.GetChild(i);
+            Transform item = questionItemRows[i];
             int capturedIndex = i;
 
             // Add ToggleGroup if not already present (makes toggles single-select)
@@ -109,20 +122,78 @@ public class SimuCaseChecklistManager : MonoBehaviour
         StudyTaskResultPayload payload = StudyTaskResultBuffer.BuildPayload(StudyDataDefaults.StatusCompleted);
         StudyTaskResultSubmissionHook.SubmitStudyTaskResults(payload);
 
+        MarkCurrentSectionCompleted();
+
         HidePanel();
         onFinish?.Invoke();
         cameraClipboardController?.TriggerClipboardView();
         ResetAll();
-        if (backButton != null) backButton.gameObject.SetActive(true);
+        SceneManager.LoadScene(scenarioSelectSceneName);
+    }
+
+    private void MarkCurrentSectionCompleted()
+    {
+        // Prefer inferring from scene name (it is authoritative for the section scenes).
+        // Some metadata sources in this project can report a fixed/incorrect sectionId.
+        string sceneName = SceneManager.GetActiveScene().name ?? "";
+        string lower = sceneName.ToLowerInvariant();
+        if (lower.Contains("sectiona")) { SimuCaseSectionCompletionStore.MarkCompleted("A"); return; }
+        if (lower.Contains("sectionb")) { SimuCaseSectionCompletionStore.MarkCompleted("B"); return; }
+        if (lower.Contains("sectionc")) { SimuCaseSectionCompletionStore.MarkCompleted("C"); return; }
+        if (lower.Contains("sectiond")) { SimuCaseSectionCompletionStore.MarkCompleted("D"); return; }
+
+        // Fallback: use metadata if scene name is not informative.
+        SimuCaseTargetButtonUI targetButton = TryResolveTargetButtonUI();
+        if (targetButton != null && targetButton.TryGetCurrentStudyItemMetadata(out StudyItemMetadata metadata))
+            SimuCaseSectionCompletionStore.MarkCompleted(metadata.sectionId);
+    }
+
+    private void TryAutoResolveSectionBOptionalFields()
+    {
+        // Section B swaps QuestionItems for a single notes input + checkbox.
+        // These refs can be wired in the Inspector, but we also try to resolve by name
+        // so the scene works even if the fields weren't manually assigned.
+        if (sectionBNotesInput == null)
+        {
+            TMP_InputField[] inputs = FindObjectsOfType<TMP_InputField>(true);
+            foreach (TMP_InputField input in inputs)
+            {
+                if (input != null && input.gameObject != null && input.gameObject.name == "SectionBNotesInput")
+                {
+                    sectionBNotesInput = input;
+                    break;
+                }
+            }
+        }
+
+        if (sectionBCompletionToggle == null)
+        {
+            // Common checkbox object names in this project UI.
+            Toggle[] toggles = FindObjectsOfType<Toggle>(true);
+            foreach (Toggle toggle in toggles)
+            {
+                if (toggle == null || toggle.gameObject == null) continue;
+                string n = toggle.gameObject.name;
+                if (n == "Score2" || n == "Score3" || n == "CompletionToggle" || n == "Completion")
+                {
+                    sectionBCompletionToggle = toggle;
+                    break;
+                }
+            }
+        }
     }
 
     private void RefreshFinishButton()
     {
         if (finishButton == null) return;
 
-        bool allAnswered = questionCount > 0;
-        foreach (bool a in answered)
-            if (!a) { allAnswered = false; break; }
+        bool allAnswered = questionCount == 0;
+        if (questionCount > 0)
+        {
+            allAnswered = true;
+            foreach (bool a in answered)
+                if (!a) { allAnswered = false; break; }
+        }
 
         finishButton.interactable = allAnswered;
         ColorBlock cb = finishButton.colors;
@@ -137,7 +208,8 @@ public class SimuCaseChecklistManager : MonoBehaviour
         {
             answered[i] = false;
             selectedScores[i] = null;
-            ToggleGroup group = contentParent.GetChild(i).GetComponentInChildren<ToggleGroup>();
+            Transform item = questionItemRows[i];
+            ToggleGroup group = item.GetComponentInChildren<ToggleGroup>();
             if (group != null) group.SetAllTogglesOff();
         }
         RefreshFinishButton();
@@ -196,7 +268,31 @@ public class SimuCaseChecklistManager : MonoBehaviour
             return false;
 
         int? selectedScore = GetSelectedScore(targetButton.CurrentTargetIndex);
-        return StudyTaskResultBuffer.TryFinalizeCurrentItem(metadata, selectedScore, out _);
+        bool? completionChecked = sectionBCompletionToggle != null ? sectionBCompletionToggle.isOn : (bool?)null;
+        bool finalized = StudyTaskResultBuffer.TryFinalizeCurrentItem(metadata, selectedScore, completionChecked, out StudyItemResult result);
+        if (!finalized || result == null)
+            return finalized;
+
+        string notes = sectionBNotesInput != null ? sectionBNotesInput.text : null;
+        if (!string.IsNullOrWhiteSpace(notes))
+        {
+            result.interactionEvents.Add(new StudyInteractionEvent
+            {
+                eventId = null,
+                sessionId = StudyRuntimeContext.SessionContext?.sessionId,
+                taskId = metadata.taskId,
+                sectionId = metadata.sectionId,
+                itemId = metadata.itemId,
+                eventType = "section_b_notes",
+                timestamp = StudyDataDefaults.NowIso(),
+                cueLevel = null,
+                scoreValue = null,
+                message = notes,
+                metadataJson = null
+            });
+        }
+
+        return true;
     }
 
     private SimuCaseTargetButtonUI TryResolveTargetButtonUI()

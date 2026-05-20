@@ -139,6 +139,8 @@ public class Phase1SectionBChecklistManager : MonoBehaviour
         StudyTaskResultPayload payload = StudyTaskResultBuffer.BuildPayload(StudyDataDefaults.StatusCompleted);
         StudyTaskResultSubmissionHook.SubmitStudyTaskResults(payload);
 
+        SimuCaseSectionCompletionStore.MarkCompleted("B");
+
         HidePanel();
         onFinish?.Invoke();
         cameraClipboardController?.TriggerClipboardView();

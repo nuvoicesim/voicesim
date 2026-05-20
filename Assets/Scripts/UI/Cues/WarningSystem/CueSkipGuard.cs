@@ -42,7 +42,6 @@ namespace UI.Cues.WarningSystem
         private string _lastWarningKey = "";
         private float _pauseUntilTime = 0f;
         private bool _targetSucceeded = false;
-        private bool _levelInitialized = false; // 新增：标记是否已从 CueController 初始化过
 
         public bool WarningsPaused => Time.time < _pauseUntilTime;
 
@@ -130,7 +129,6 @@ namespace UI.Cues.WarningSystem
             Debug.Log("CueSkipGuard: Resetting cueing level.");
 
             _targetSucceeded = false;
-            _levelInitialized = false; // 重置初始化标记，允许下次重新从 CueController 同步
 
             if (_cueController != null)
             {
@@ -144,11 +142,6 @@ namespace UI.Cues.WarningSystem
 
             expectedLevel = CueLevel.Semantic;
             Debug.Log("CueSkipGuard: expectedLevel reset to Semantic.");
-
-            if (_cueController != null)
-            {
-                Debug.Log("CueSkipGuard: CueController current level after reset: " + _cueController.GetCurrentCueLevel());
-            }
         }
 
         public void PauseWarnings(float seconds = -1f)
@@ -185,21 +178,6 @@ namespace UI.Cues.WarningSystem
 
             if (WarningsPaused)
                 return;
-
-            if (_cueController == null)
-            {
-                Debug.LogError("CueSkipGuard: CueController reference not set. Cannot sync expectedLevel with current cue.");
-                return;
-            }
-
-            // 方案B：只在首次（未初始化时）从 CueController 同步，之后由 CueSkipGuard 自己维护状态
-            if (!_levelInitialized)
-            {
-                CueLevel controllerLevel = _cueController.GetCurrentCueLevel();
-                expectedLevel = (controllerLevel == CueLevel.None) ? CueLevel.Semantic : controllerLevel;
-                _levelInitialized = true;
-                Debug.Log($"CueSkipGuard: Initialized expectedLevel from CueController => {expectedLevel}");
-            }
 
             ClassificationResult result = ClassifyDetailed(studentText, targetWord);
             CueLevel used = result.Level;

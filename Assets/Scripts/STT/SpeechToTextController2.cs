@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using System;
 using UI.Cues.WarningSystem;
+using UnityEngine.EventSystems;
 
 public class SpeechToTextController2 : MonoBehaviour
 {
@@ -21,6 +22,17 @@ public class SpeechToTextController2 : MonoBehaviour
 
     private const int RecordingLengthSeconds = 30;
     private const int RecordingFrequency = 44100;
+
+    private bool IsAnyTMPInputFieldFocused()
+    {
+        EventSystem es = EventSystem.current;
+        if (es == null) return false;
+
+        GameObject selected = es.currentSelectedGameObject;
+        if (selected == null) return false;
+
+        return selected.GetComponentInParent<TMP_InputField>() != null;
+    }
 
     private void Start()
     {
@@ -44,6 +56,9 @@ public class SpeechToTextController2 : MonoBehaviour
         // WebGL: disable microphone hotkey in Phase 1.
         return;
 #else
+        if (IsAnyTMPInputFieldFocused())
+            return;
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             StartRecording();
