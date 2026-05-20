@@ -48,7 +48,7 @@ public class StudyFeedbackPresenter : MonoBehaviour
     [Header("Rubric Feedback")]
     [SerializeField] private bool showRubricBlockWhenEmpty = true;
     [SerializeField] private string rubricPlaceholderText =
-        "Rubric scoring feedback will appear here once backend scoring is connected.";
+        "Your rubric-based feedback is being generated. Please wait...";
 
     private GameObject rubricBlock;
     private TextMeshProUGUI rubricBodyText;
