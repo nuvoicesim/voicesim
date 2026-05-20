@@ -644,7 +644,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 844224380180900024, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
-      value: You will practice helping the patient name presented items. Use supportive cueing when needed, then begin the task when ready.
+      value: 'In this task, you will practice supporting the patient during object
+        naming.
+
+        The patient will see an image and try to name the item. Provide cueing support
+        when needed, and move through the items one at a time.
+
+        When you are ready, click Start Task.'
       objectReference: {fileID: 0}
     - target: {fileID: 1267761794279778947, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
@@ -652,7 +658,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 839298963996416127, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_text
-      value: You will practice helping the patient complete sentence prompts. Use the available context to support word retrieval, then begin the task when ready.
+      value: 'In this task, you will practice using sentence completion to support word
+        retrieval.
+
+        For each item, create a sentence starter or prompt that helps guide the patient
+        toward the target word. Work through the items one at a time.
+
+        When you are ready, click Start Task.'
       objectReference: {fileID: 0}
     - target: {fileID: 726925667719132327, guid: 40bf1b17ba6609c49bba0a0cd7027a9f, type: 3}
       propertyPath: m_IsActive
