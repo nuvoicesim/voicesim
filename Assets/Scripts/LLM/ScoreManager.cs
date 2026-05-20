@@ -374,7 +374,7 @@ public class ScoreManager : MonoBehaviour
                         ApplyRubricAssessment(new DynamicEvaluationResult
                         {
                             rubricAssessment = rubricAssessment
-                        });
+                        }, hideAiInteractionBlock: true);
                     }
                 }
 
@@ -730,7 +730,7 @@ public class ScoreManager : MonoBehaviour
         return string.Equals(value.Trim(), sentinel, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static void ApplyRubricAssessment(DynamicEvaluationResult evaluation)
+    private static void ApplyRubricAssessment(DynamicEvaluationResult evaluation, bool hideAiInteractionBlock = false)
     {
         if (evaluation == null || evaluation.rubricAssessment == null)
             return;
@@ -746,6 +746,8 @@ public class ScoreManager : MonoBehaviour
         {
             if (presenter == null)
                 continue;
+            if (hideAiInteractionBlock)
+                presenter.SetAiInteractionBlockVisible(false);
             presenter.SetRubricFeedback(block);
         }
     }

@@ -194,6 +194,7 @@ public class StudyFeedbackPresenter : MonoBehaviour
     {
         Transform existing = contentRoot.Find("AIInteractionFeedbackBlock");
         aiInteractionBlock = existing != null ? existing.gameObject : CreateFeedbackBlock("AIInteractionFeedbackBlock");
+        aiInteractionBlock.SetActive(true);
         aiInteractionBlock.transform.SetAsLastSibling();
 
         aiInteractionHeaderText = EnsureTextChild(
@@ -214,6 +215,17 @@ public class StudyFeedbackPresenter : MonoBehaviour
             aiInteractionReportText.color = new Color(0.2f, 0.2f, 0.2f, 1f);
             aiInteractionReportText.transform.SetAsLastSibling();
         }
+    }
+
+    public void SetAiInteractionBlockVisible(bool visible)
+    {
+        if (aiInteractionBlock == null)
+            EnsureDefaultStructure();
+
+        if (aiInteractionBlock != null)
+            aiInteractionBlock.SetActive(visible);
+
+        RebuildLayout();
     }
 
     private GameObject CreateFeedbackBlock(string objectName)
