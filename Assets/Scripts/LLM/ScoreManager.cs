@@ -36,8 +36,20 @@ public class ScoreManager : MonoBehaviour
 
     void Start()
     {
-        if (evaluationCanvas != null)
-            evaluationCanvas.gameObject.SetActive(false);
+        // The outer ReportPanel's initial hidden state is already owned by
+        // scene setup (m_IsActive: 0 on the panel itself) and by
+        // CameraClipboardController.Start(), which always runs at scene load
+        // because that controller sits on an always-active GameObject.
+        // ScoreManager, by contrast, lives under ReportUIController which is
+        // m_IsActive: 0 in the section scenes, so ScoreManager.Start() runs
+        // LATE — specifically, one frame after the Finish coroutine in
+        // CameraClipboardController calls EnsureGameObjectHierarchyActive(...)
+        // and activates this subsystem. A redundant SetActive(false) on
+        // evaluationCanvas here would therefore re-hide the ReportPanel that
+        // SwitchToClipboard just activated, breaking the restored Phase 1
+        // clipboard/report flow. Initial hide responsibility stays with the
+        // scene and CameraClipboardController; this Start() only wires the
+        // close-button listener.
 
         if (closeButton != null)
             closeButton.onClick.AddListener(HideEvaluationPanel);
