@@ -238,17 +238,6 @@ public class StudyFeedbackPresenter : MonoBehaviour
         }
     }
 
-    public void SetAiInteractionBlockVisible(bool visible)
-    {
-        if (aiInteractionBlock == null)
-            EnsureDefaultStructure();
-
-        if (aiInteractionBlock != null)
-            aiInteractionBlock.SetActive(visible);
-
-        RebuildLayout();
-    }
-
     private GameObject CreateFeedbackBlock(string objectName)
     {
         GameObject block = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
