@@ -61,7 +61,17 @@ public class ScoreManager : MonoBehaviour
 
     public void SubmitEvaluation()
     {
-        if (conversationTurns.Count == 0)
+        // Phase 2 evidence persistence is valid with zero conversation turns
+        // (e.g. Phase 2 Object Naming has no SLP-student dialogue). The legacy
+        // CreateNoConversationReport() activates evaluationCanvas and returns
+        // before POST /llm-scoring fires, which would block Phase 2 evidence
+        // from ever reaching the backend. Detect Phase 2 study flow from the
+        // finalized study payload BEFORE the zero-turn guard so Phase 2
+        // continues into EvaluateFullConversationCoroutine() even with zero
+        // turns. Non-Phase-2 zero-turn callers (Phase 1 rubric in C/D, legacy
+        // non-study paths) keep the existing placeholder behavior unchanged.
+        bool isPhase2StudyFlow = IsPhase2StudyFlow();
+        if (conversationTurns.Count == 0 && !isPhase2StudyFlow)
         {
             Debug.LogWarning("No conversation turns recorded. Creating a placeholder report.");
             CreateNoConversationReport();
@@ -74,6 +84,52 @@ public class ScoreManager : MonoBehaviour
             progressBarUI.ShowProgressBar();
 
         StartCoroutine(EvaluateFullConversationCoroutine());
+    }
+
+    private static bool IsPhase2StudyFlow()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        return string.Equals(
+            payload?.taskContext?.phaseId,
+            StudyDataDefaults.Phase2,
+            System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Returns true when the active flow is a Phase 1 or Phase 2 study task.
+    // Used to gate the post-/llm-scoring task-progress PUT so legacy non-study
+    // callers do not trigger task-progress completion side effects.
+    private static bool IsStudyFlow()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        string phaseId = payload?.taskContext?.phaseId;
+        return string.Equals(phaseId, StudyDataDefaults.Phase1, System.StringComparison.OrdinalIgnoreCase)
+            || string.Equals(phaseId, StudyDataDefaults.Phase2, System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Builds the task-progress request body from the current finalized study
+    // payload's taskContext. Returns null when the required identity fields
+    // (phaseId, taskId-or-sectionId) are not present, which lets the caller
+    // skip the task-progress PUT cleanly without invoking the client.
+    private static SessionTaskProgressClient.TaskProgressRequest
+        BuildTaskProgressRequestFromCurrentStudyContext()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        StudyTaskContext taskContext = payload?.taskContext;
+        if (taskContext == null) return null;
+        if (string.IsNullOrWhiteSpace(taskContext.phaseId)) return null;
+
+        bool hasTaskOrSection =
+            !string.IsNullOrWhiteSpace(taskContext.taskId) ||
+            !string.IsNullOrWhiteSpace(taskContext.sectionId);
+        if (!hasTaskOrSection) return null;
+
+        return new SessionTaskProgressClient.TaskProgressRequest
+        {
+            phaseId = taskContext.phaseId,
+            taskId = taskContext.taskId,
+            sectionId = taskContext.sectionId,
+            taskType = taskContext.taskType,
+        };
     }
 
     private void CreateNoConversationReport()
@@ -220,6 +276,45 @@ public class ScoreManager : MonoBehaviour
         yield return new WaitForSeconds(0.3f);
 
         yield return StartCoroutine(ProcessAIResponse(request.downloadHandler.text));
+
+        // After /llm-scoring success and ProcessAIResponse has returned
+        // cleanly, record TASK-LEVEL completion for this internal task via
+        // PUT /sessions/{sessionId}/task-progress/{progressKey}/complete.
+        //
+        // CRITICAL: this is the TASK-level endpoint, NOT the whole-session
+        // endpoint. A prior experiment that called
+        // PUT /sessions/{sessionId}/complete after each task Finish was
+        // intentionally reverted; do not re-introduce that here.
+        //
+        // Gated by IsStudyFlow() so only Phase 1 (rubric) and Phase 2
+        // (training evidence) submissions trigger task-progress; legacy
+        // non-study callers are unaffected. Failure here logs at Warning
+        // level and never disturbs the already-accepted Finish flow.
+        if (IsStudyFlow())
+        {
+            SessionTaskProgressClient.TaskProgressRequest taskProgressRequest =
+                BuildTaskProgressRequestFromCurrentStudyContext();
+            if (taskProgressRequest != null)
+            {
+                yield return StartCoroutine(
+                    SessionTaskProgressClient.MarkTaskComplete(
+                        this,
+                        "ScoreManager",
+                        taskProgressRequest,
+                        outcome =>
+                        {
+                            if (!outcome.IsSuccess)
+                            {
+                                Debug.LogWarning(
+                                    $"[ScoreManager] Task-progress completion did not succeed: result={outcome.result} httpStatus={outcome.httpStatusCode}");
+                            }
+                        }));
+            }
+            else
+            {
+                Debug.LogWarning("[ScoreManager] Skipping task-progress PUT: current study context is missing phaseId or taskId/sectionId.");
+            }
+        }
     }
 
     private IEnumerator ProcessAIResponse(string responseText)
@@ -242,8 +337,24 @@ public class ScoreManager : MonoBehaviour
         {
             var jsonResponse = JObject.Parse(responseText);
             var reportToken = jsonResponse["report"];
+
+            // Backend compatibility (May 18):
+            //   - Phase 1 rubric branch returns a flat envelope centered on
+            //     rubricAssessment, no `report` wrapper.
+            //   - Phase 2 evidence branch returns a lightweight success envelope,
+            //     also no `report` wrapper.
+            // Treat absence of `report` as accepted HTTP 2xx and skip the legacy
+            // narrative rendering path. UI rendering for rubricAssessment is
+            // intentionally deferred to a later branch; this pass only ensures
+            // the Finish flow does not surface the missing-report error
+            // placeholder when the backend response is one of the new shapes.
             if (reportToken == null)
-                throw new Exception("Missing `report` in scoring response.");
+            {
+                Debug.Log("[ScoreManager] /llm-scoring response did not include a legacy `report` wrapper; treating as accepted (Phase 1 rubric / Phase 2 evidence envelope). Skipping legacy narrative rendering.");
+                if (progressBarUI != null)
+                    progressBarUI.HideProgressBar();
+                return;
+            }
 
             var evaluation = reportToken.ToObject<DynamicEvaluationResult>();
             if (evaluation == null)
