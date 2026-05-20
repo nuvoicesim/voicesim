@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/GameScenarios/BrocasAphasiaScenario.unity
     guid: 3064c4367a1d7874ea1e32384f458606
   - enabled: 1
+    path: Assets/Scenes/simucase/ScenarioSelectV2.unity
+    guid: 26ac16fba117b774d88e3b444aaa5301
+  - enabled: 0
     path: Assets/Scenes/simucase/ScenarioSelect.unity
     guid: d8292a66d3e2e454ea47493afa44dfc9
   - enabled: 1
