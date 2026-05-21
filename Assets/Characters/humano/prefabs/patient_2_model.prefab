@@ -536,7 +536,7 @@ MonoBehaviour:
   speechJawOpenBlendShapeName: jawOpen
   speechJawOpenWeight: 24
   speechJawOpenSmoothingSpeed: 8
-  expressionBlendSpeed: 180
+  expressionBlendSpeed: 140
   baseStatePresets:
   - state: 0
     preset:
@@ -907,9 +907,9 @@ MonoBehaviour:
   happyPeakIntensity: 0.75
   cryPeakIntensity: 1
   reliefPeakIntensity: 0.66
-  processingBrowTension: 0.72
-  processingEyeTension: 0.62
-  processingBlinkPatternShift: 0.58
-  processingPeakIntensity: 0.72
+  processingBrowTension: 0.55
+  processingEyeTension: 0.45
+  processingBlinkPatternShift: 0.4
+  processingPeakIntensity: 0.5
   resetOverlaysBeforeApply: 1
   enableBridgeLogs: 1
