@@ -326,6 +326,19 @@
         "Phonemic": "It starts with 'S' like 'sun'.",
         "Model": "Say 'safety pin'."
       }
+    },
+    {
+      "script_number": 26,
+      "title": "Ask the patient to name as many animals as possible in 30 Seconds",
+      "target_word": "",
+      "alternate_target": "",
+      "semanticKeywords": ["animal", "zoo", "farm", "wild", "forest", "sea"],
+      "phonemicKeywords": ["ani", "anm", "anml", "anmls"],
+      "studentHints": {
+        "Semantic": "Think of animals on a farm, in a zoo, or in the wild",
+        "Phonemic": "Try thinking of animals that start with sounds like /h/, /b/, or /m/.",
+        "Model": "Say 'horse'."
+      }
     }
   ]
 }
