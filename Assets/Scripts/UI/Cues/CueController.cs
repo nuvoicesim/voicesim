@@ -75,11 +75,15 @@ namespace UI.Cues
         [Header("Target UI")]
         [SerializeField] private TextMeshProUGUI targetText;
         [SerializeField] private Image targetImage;
+        [SerializeField] private Image imageBorder;
+        [SerializeField] private float imageBorderPadding = 5f;
         [SerializeField] private bool includePromptInTargetText = false;
         [SerializeField] private string targetLabelPrefix = "Target:";
 
         [Header("Target Images Mapping")]
         [SerializeField] private List<TargetImageEntry> targetImages = new List<TargetImageEntry>();
+
+        private Vector2? targetImageMaxSize;
 
         private IEnumerator Start()
         {
@@ -308,6 +312,8 @@ namespace UI.Cues
                     targetImage.sprite = entry.image;
                     targetImage.enabled = true;
                     targetImage.preserveAspect = true;
+                    ResizeTargetImageToSprite();
+                    UpdateImageBorderSize();
 
                     Debug.Log("Updated target image for: " + currentScript.target_word);
                     return;
@@ -317,6 +323,57 @@ namespace UI.Cues
             Debug.LogWarning("No image mapping found for target word: " + currentScript.target_word);
             targetImage.sprite = null;
             targetImage.enabled = false;
+            UpdateImageBorderSize();
+        }
+
+        private Vector2 GetTargetImageMaxSize(RectTransform targetRect)
+        {
+            if (!targetImageMaxSize.HasValue)
+                targetImageMaxSize = targetRect.sizeDelta;
+
+            return targetImageMaxSize.Value;
+        }
+
+        private void ResizeTargetImageToSprite()
+        {
+            if (targetImage == null || targetImage.sprite == null)
+                return;
+
+            RectTransform targetRect = targetImage.rectTransform;
+            Vector2 maxSize = GetTargetImageMaxSize(targetRect);
+            Vector2 displaySize = GetSpriteDisplaySize(targetImage.sprite, maxSize);
+            targetRect.sizeDelta = displaySize;
+        }
+
+        private void UpdateImageBorderSize()
+        {
+            if (imageBorder == null)
+                return;
+
+            if (targetImage == null || !targetImage.enabled || targetImage.sprite == null)
+            {
+                imageBorder.enabled = false;
+                return;
+            }
+
+            Vector2 targetSize = targetImage.rectTransform.sizeDelta;
+
+            float padding = Mathf.Max(0f, imageBorderPadding) * 2f;
+            RectTransform borderRect = imageBorder.rectTransform;
+            borderRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetSize.x + padding);
+            borderRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetSize.y + padding);
+            imageBorder.enabled = true;
+        }
+
+        private static Vector2 GetSpriteDisplaySize(Sprite sprite, Vector2 maxSize)
+        {
+            float spriteWidth = sprite.rect.width;
+            float spriteHeight = sprite.rect.height;
+            if (spriteWidth <= 0f || spriteHeight <= 0f || maxSize.x <= 0f || maxSize.y <= 0f)
+                return maxSize;
+
+            float scale = Mathf.Min(maxSize.x / spriteWidth, maxSize.y / spriteHeight);
+            return new Vector2(spriteWidth * scale, spriteHeight * scale);
         }
 
         private static string NormalizeWord(string word)
