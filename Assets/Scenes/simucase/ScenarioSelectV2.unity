@@ -664,23 +664,33 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Administration Time</b>
+  m_text: '<color=#C65A32><b>Directions</b></color>
 
-    Self-paced
+    Ask the patient to name as many animals as possible. This section is one word fluency task, not an item-by-item task.
 
-    <b>Directions</b>
+    <color=#C65A32><b>For this task:</b></color>
 
-    Say,
-    <i>Name as many animals as you can in one minute.</i> If the patient is hesitant,
-    cue him or her by saying, <i>Think of a domestic animal like the horse, or a
-    wild animal like the tiger.</i> After 30 seconds, prompt the patient to continue
-    if necessary.
+    1. Press and hold the R key on your keyboard while speaking to the patient. Keep holding R for your entire spoken turn, then release R when you finish speaking.
 
-    <b>Scoring</b>
+    2. Release R and wait for the patient''s response.
 
-    Score <i>1 point</i> for each unique animal
-    named (except for horse or tiger if given as an example), even if distorted by
-    phonemic paraphasias.'
+    3. If the patient is hesitant or stops early, use the cue buttons on the right to give step-by-step support. Start with category-based help, then give sound-based help, and use a model only if needed:
+
+    Semantic Cue → Phonemic Cue → Model Cue.
+
+    4. Use the timer as a guide if needed. It does not automatically stop the task.
+
+    <color=#C65A32><b>Scoring</b></color>
+
+    Use the checklist panel on the left side to enter the total Word Fluency score.
+
+    1 point = Each unique animal named by the patient.
+
+    Do not count repeated animals.
+
+    Recognizable animal names may count even if the speech is distorted.
+
+    Enter the total score from 0 to 20 in the input box. When scoring is completed, click Finish to generate the section report.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
   m_sharedMaterial: {fileID: -2009162042594335899, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
@@ -707,8 +717,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 13
+  m_fontSizeBase: 13
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2699,23 +2709,31 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Administration Time</b>
+  m_text: '<color=#C65A32><b>Directions</b></color>
 
-    Self-paced
+    Ask the patient to complete each sentence shown on the right side of the screen. The sentence stem and target word are shown for the current item.
 
-    <b>Directions</b>
+    <color=#C65A32><b>For each item:</b></color>
 
-    Say,
-    <i>Complete what I say.</i> For example, <i>ice is . . . (cold).</i> Present
-    the test items.
+    1. Press and hold the R key on your keyboard while speaking to the patient. Keep holding R for your entire spoken turn, then release R when you finish speaking.
 
-    <b>Scoring</b>
+    2. Release R and wait for the patient''s response.
 
-    Score <i>2 points</i> if the target
-    response or a reasonable alternative response is given (e.g., Sugar is . . .
-    fattening). Score <i>1 point</i> for a phonemic paraphasia or off-target alternative
-    responses (e.g., Grass is . . . brown). Score <i>0 points</i> for an unreasonable
-    response (e.g., Grass is . . . cold).'
+    3. If the patient cannot complete the sentence, use the cue buttons on the right to give step-by-step support. Start with meaning-based help, then give the first sound, and use a model only if needed:
+
+    Semantic Cue → Phonemic Cue → Model Cue.
+
+    <color=#C65A32><b>Scoring</b></color>
+
+    Use the checklist on the left side to score each response.
+
+    2 = Correct target word or a reasonable alternative.
+
+    1 = Phonemic paraphasia, partial production, or related but off-target response.
+
+    0 = Incorrect, unreasonable, no response, or still incorrect after cueing.
+
+    After scoring the item, click the green check button to continue. When all items are completed, click Finish to generate the section report.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
   m_sharedMaterial: {fileID: -2009162042594335899, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
@@ -2742,8 +2760,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 13
+  m_fontSizeBase: 13
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3618,7 +3636,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416/6417 Section D
+  m_text: VOICE - WAB-R Part 1 Part-Task Trainer (SLP) Section D
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -4098,7 +4116,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416/6417 Section A
+  m_text: VOICE - WAB-R Part 1 Part-Task Trainer (SLP) Section A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -8669,7 +8687,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416/6417 Activities
+  m_text: VOICE - WAB-R Part 1 Part-Task Trainer (SLP)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -8845,40 +8863,35 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Administration Time</b>
+  m_text: '<color=#C65A32><b>Directions</b></color>
 
-    Self-paced
+    Ask the patient to name each object shown on the right side of the screen. The image is the object stimulus for the current item.
 
-    <b>Directions</b>
+    <color=#C65A32><b>For each item:</b></color>
 
-    Present
-    the objects in the order listed. Say, <i>What is this?</i> or <i>What is the
-    name of this object?</i> If the patient does not respond or responds incorrectly,
-    ask him or her to hold the object (tactile cue) and to tell you what it is. If
-    the patient still does not respond or responds incorrectly, present the first
-    phoneme of the word (phonemic cue), or, if it is a compound word, the first half
-    of the word (semantic cue).
+    1. Press and hold the R key on your keyboard while speaking to the patient. Keep holding R for your entire spoken turn, then release R when you finish speaking.
 
-    <b>Materials</b>
+    2. Release R and wait for the patient''s response.
 
-    Book, ball, knife, cup,
-    safety pin, hammer, toothbrush, eraser, (pad)lock, pencil, screwdriver, key,
-    paper clip, watch, comb, rubber band, spoon, tape, fork, matches.
+    3. If the patient cannot name the object, use the cue buttons on the right to give step-by-step support. Start with meaning-based help, then give the first sound, and use a model only if needed:
 
-    <b>Time
-    Limit</b>
+    Semantic Cue → Phonemic Cue → Model Cue.
 
-    Allow <i>20 seconds maximum</i> for each item.
+    4. Use the timer as a guide if needed. It does not automatically stop the task.
 
-    <b>Scoring</b>
+    <color=#C65A32><b>Scoring</b></color>
 
-    Score
-    <i>3 points</i> if the object is named correctly or with a minor articulatory
-    error (e.g., dysarthric slurring) and no cue is needed. Score <i>2 points</i>
-    if the object name is recognizable, but with a phonemic paraphasia (e.g., "fife"
-    for "knife") and no cue is needed .If a tactile, phonemic, or semantic cue is
-    needed, select Tactile, Phonemic, or Semantic and score as <i>1 point</i>. Score
-    an incorrect or no response after cueing as <i>0 points</i>.'
+    Use the checklist on the left side to score each response.
+
+    <b>3</b> = Correct object name without cueing.
+
+    <b>2</b> = Recognizable object name with a speech or phonemic error, without cueing.
+
+    <b>1</b> = Correct or partially correct after semantic, phonemic, or model cueing.
+
+    <b>0</b> = Incorrect, no response, or still incorrect after cueing.
+
+    After scoring the item, click the green check button to continue. When all items are completed, click Finish to generate the section report.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
   m_sharedMaterial: {fileID: -2009162042594335899, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
@@ -9486,7 +9499,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416/6417 Section B
+  m_text: VOICE - WAB-R Part 1 Part-Task Trainer (SLP) Section B
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -10764,7 +10777,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: VOICE - Summer SLPA 6416/6417 Section C
+  m_text: VOICE - WAB-R Part 1 Part-Task Trainer (SLP) Section C
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
   m_sharedMaterial: {fileID: -7472687217148228796, guid: 59ee34472c5892a4196858080cc2141e, type: 2}
@@ -11007,23 +11020,31 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<b>Administration Time</b>
+  m_text: '<color=#C65A32><b>Directions</b></color>
 
-    Self-paced
+    Ask the patient each question shown on the right side of the screen. The question and target answer are shown for the current item.
 
-    <b>Directions</b>
+    <color=#C65A32><b>For each item:</b></color>
 
-    Say,
-    <i>Answer the following questions.</i> Present the items.
+    1. Press and hold the R key on your keyboard while speaking to the patient. Keep holding R for your entire spoken turn, then release R when you finish speaking.
 
-    <b>Scoring</b>
+    2. Release R and wait for the patient''s response.
 
-    Score
-    <i>2 points</i> if the target response or a reasonable alternative response is
-    given (e.g., Nurses work in a ... clinic). Score <i>1 point</i> for a phonemic
-    paraphasia or off-target alternative responses (e.g., Nurses work in an... office).
-    Score <i>0 points</i> for an unreasonable response (e.g., Nurses work in a...
-    store).'
+    3. If the patient cannot answer the question, use the cue buttons on the right to give step-by-step support. Start with meaning-based help, then give the first sound, and use a model only if needed:
+
+    Semantic Cue → Phonemic Cue → Model Cue.
+
+    <color=#C65A32><b>Scoring</b></color>
+
+    Use the checklist on the left side to score each response.
+
+    2 = Correct target answer or a reasonable alternative.
+
+    1 = Phonemic paraphasia, partial production, or related but off-target response.
+
+    0 = Incorrect, unreasonable, no response, or still incorrect after cueing.
+
+    After scoring the item, click the green check button to continue. When all items are completed, click Finish to generate the section report.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
   m_sharedMaterial: {fileID: -2009162042594335899, guid: 537eb1eef138da7489d2d0c861629654, type: 2}
@@ -11050,8 +11071,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 13
+  m_fontSizeBase: 13
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
