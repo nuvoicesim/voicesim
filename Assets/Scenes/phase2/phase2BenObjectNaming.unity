@@ -3003,6 +3003,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6759183651704806164, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8068719081323617958, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3078468546329590340, guid: f97aeaf62db66bc41ac02fa4dac34e2a, type: 3}
       propertyPath: m_Name
       value: Humano_Aphasia_Combined
@@ -3084,14 +3092,6 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6812791134989268121, guid: f97aeaf62db66bc41ac02fa4dac34e2a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6759183651704806164, guid: 09509ccab988643d0a79edb8ad5134be, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8068719081323617958, guid: f0ef46ccae5094dc3b7e8164524207b2, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
@@ -10572,6 +10572,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5762155589844725413, guid: 3ecc5f247cd3673469eededdc3139777, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 303031027296512246, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
       propertyPath: cameraController
       value: 
@@ -10664,6 +10668,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6108270532449669598, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
+      propertyPath: imageBorder
+      value: 
+      objectReference: {fileID: 7077735478562793276}
     - target: {fileID: 7127015508950301482, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -10672,15 +10680,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5762155589844725413, guid: 3ecc5f247cd3673469eededdc3139777, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
+--- !u!114 &7077735478562793276 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5875597394049924305, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
+  m_PrefabInstance: {fileID: 7077735478562793275}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &8636892183183631160 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 504747835400658237, guid: c148848264dc0bc4d8c5be1312159087, type: 3}
