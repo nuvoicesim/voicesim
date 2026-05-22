@@ -34,6 +34,23 @@ public class ScoreManager : MonoBehaviour
             Destroy(gameObject);
     }
 
+    private void OnDestroy()
+    {
+        // Clear the static singleton when this instance is destroyed (most
+        // commonly during scene unload). Without this, Instance retains a
+        // reference to a destroyed Unity object across scene transitions.
+        // The C# null-conditional operator (?.) performs a CLR null check
+        // and does NOT invoke Unity's overloaded ==, so callers using
+        // `ScoreManager.Instance?.Method()` would otherwise dereference a
+        // destroyed wrapper and throw MissingReferenceException. Guard with
+        // `Instance == this` so a later-loaded instance that already
+        // reassigned the singleton is not accidentally cleared.
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
     void Start()
     {
         // The outer ReportPanel's initial hidden state is already owned by
