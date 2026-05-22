@@ -212,7 +212,7 @@ public class StudyCompletionChecklistManager : MonoBehaviour
             if (completedOverlay != null)
                 completedOverlay.SetActive(true);
 
-            ScoreManager.Instance?.SubmitEvaluation();
+            InvokePhase2ScoreSubmission();
         }
         else if (cameraClipboardController != null)
         {
@@ -242,6 +242,66 @@ public class StudyCompletionChecklistManager : MonoBehaviour
         {
             return false;
         }
+    }
+
+    // Resolves a usable ScoreManager for the Phase 2 Finish path and invokes
+    // SubmitEvaluation. The Phase 1 path normally activates the ScoreManager
+    // hierarchy through CameraClipboardController.TriggerClipboardView before
+    // calling SubmitEvaluation; Phase 2 deliberately bypasses that camera UI,
+    // so we have to do the discovery + activation here.
+    //
+    // Why this is needed in two parts:
+    //
+    //  1. ScoreManager.Instance may point to a destroyed Unity object after a
+    //     previous task scene unloaded (e.g. Object Naming → Return → Sentence
+    //     Completion). The `?.` operator does NOT invoke Unity's overloaded ==
+    //     so a destroyed wrapper still calls through and throws
+    //     MissingReferenceException. Use an explicit `!= null` comparison
+    //     instead, which honors Unity's overload.
+    //
+    //  2. In Phase 2 Sentence Completion scenes, the ScoreManager lives under
+    //     ReportUIController whose m_IsActive is 0 at scene load, so its
+    //     Awake never runs and Instance never gets assigned. Fall back to a
+    //     scene-wide search that includes inactive objects, then walk the
+    //     transform parents and SetActive(true) so StartCoroutine inside
+    //     SubmitEvaluation can run.
+    private void InvokePhase2ScoreSubmission()
+    {
+        ScoreManager sm = ScoreManager.Instance;
+        if (sm == null)
+        {
+            // Resources.FindObjectsOfTypeAll returns scene + asset/prefab
+            // instances; filter to scene objects by checking the GameObject
+            // has a valid scene reference (assets have an empty scene).
+            ScoreManager[] candidates = Resources.FindObjectsOfTypeAll<ScoreManager>();
+            for (int i = 0; i < candidates.Length; ++i)
+            {
+                ScoreManager candidate = candidates[i];
+                if (candidate == null) continue;
+                if (!candidate.gameObject.scene.IsValid()) continue;
+                sm = candidate;
+                break;
+            }
+        }
+
+        if (sm == null)
+        {
+            Debug.LogWarning("[StudyCompletionChecklistManager] Phase 2 Finish: no ScoreManager found in scene; /llm-scoring + task-progress PUT will not fire.");
+            return;
+        }
+
+        if (!sm.gameObject.activeInHierarchy)
+        {
+            Transform t = sm.transform;
+            while (t != null)
+            {
+                if (!t.gameObject.activeSelf)
+                    t.gameObject.SetActive(true);
+                t = t.parent;
+            }
+        }
+
+        sm.SubmitEvaluation();
     }
 
     private void ResetStudyResultBufferForCurrentTask()
