@@ -192,13 +192,27 @@ public class StudyCompletionChecklistManager : MonoBehaviour
         // change removed the narrative report) and instead reveal a small
         // scene-level overlay carrying the "Task Completed" label + Return
         // button. Non-Phase-2 flows preserve the legacy TriggerClipboardView
-        // path exactly. /llm-scoring + task-progress PUT submissions still
-        // fire — they are kicked off by separate code paths and are
-        // unaffected by this UI branch.
+        // path exactly.
+        //
+        // Phase 2 must still hit the existing backend evidence + task-progress
+        // chain, otherwise the SceneCatalog requiredTaskKeys never get marked
+        // complete and the SimulationSession/StudentItemProgress never
+        // auto-complete. The Phase 1 path achieves this implicitly through
+        // CameraClipboardController.TriggerClipboardView() → ScoreManager. For
+        // Phase 2 we deliberately bypass the clipboard view (no rubric UI),
+        // so call ScoreManager.SubmitEvaluation() directly here. ScoreManager
+        // already detects Phase 2 internally (zero-turn guard at
+        // SubmitEvaluation, "no legacy report wrapper" branch in
+        // ProcessAIResponse) and the task-progress PUT is gated by
+        // IsStudyFlow() which already covers Phase 2 — so the Phase 1 rubric
+        // UI is never rendered and Phase 2 evidence is persisted via the
+        // /llm-scoring Phase 2 envelope.
         if (IsPhase2StudyFlow())
         {
             if (completedOverlay != null)
                 completedOverlay.SetActive(true);
+
+            ScoreManager.Instance?.SubmitEvaluation();
         }
         else if (cameraClipboardController != null)
         {
