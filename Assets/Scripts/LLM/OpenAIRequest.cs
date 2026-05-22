@@ -58,6 +58,14 @@ public class OpenAIRequest : MonoBehaviour
     private bool hasReportedUserSpeechEndForCurrentTurn;
     private string sessionId = "";
     private int turnIndex = 0;
+    // Unity-side per-task turn counter that mirrors the persisted
+    // SessionTurn.clientTurnIndex column for research analysis. Independent
+    // from turnIndex so that the backend-resolved server-authoritative global
+    // index (which overwrites turnIndex via TryApplyResolvedTurnIndex on the
+    // /llm-dialogue response) does not contaminate the task-local counter.
+    // Resets at the same sites where turnIndex resets (per-scene OpenAIRequest
+    // instance lifecycle), increments at the same site as turnIndex++.
+    private int localTaskTurnIndex = 0;
     private ScoreManager cachedScoreManager;
     private IStudyItemMetadataProvider studyItemMetadataProvider;
 
@@ -80,8 +88,29 @@ public class OpenAIRequest : MonoBehaviour
     private class DialogueMetadata
     {
         public int turnIndex;
+        // Explicit per-task counter that mirrors the persisted SessionTurn.clientTurnIndex
+        // column on the backend. Sent alongside the legacy turnIndex (which the
+        // server treats as advisory because Unity's OpenAIRequest is scene-local
+        // and resets when the student transitions between sections/task scenes).
+        // The persisted SessionTurn.turnIndex is now server-authoritative (global
+        // within the session).
+        public int? clientTurnIndex;
         public string client;
         public string userSpeechStartAt;
+        // Research-grade transcript task metadata. All fields are OPTIONAL on
+        // the backend SessionTurn schema; NullValueHandling.Ignore on the
+        // JsonConvert.SerializeObject call below drops null entries so legacy
+        // / non-study sessions continue to send a lean payload identical in
+        // shape to the previous wire format.
+        public string assignmentId;
+        public string phaseId;
+        public string taskId;
+        public string sectionId;
+        public string taskType;
+        public string progressKey;
+        public string itemId;
+        public string itemLabel;
+        public string patientPersonaId;
     }
 
     [Serializable]
@@ -245,6 +274,7 @@ public class OpenAIRequest : MonoBehaviour
         if (string.IsNullOrWhiteSpace(currentScenario))
             currentScenario = "assignment-runtime";
         turnIndex = 0;
+        localTaskTurnIndex = 0;
         InitializeChat();
 
         ScoreManager scoreManager = TryResolveScoreManager(includeInactive: true);
@@ -328,6 +358,14 @@ public class OpenAIRequest : MonoBehaviour
         }
         else
         {
+            // Only consume a clientTurnIndex slot when we actually POST
+            // /llm-dialogue and the backend will persist a SessionTurn row.
+            // The fast-speech fallback above short-circuits to a local
+            // patient response without hitting the backend, so it must NOT
+            // increment localTaskTurnIndex — otherwise the per-task counter
+            // would skip a number relative to what's persisted, breaking
+            // research-grade ordering of clientTurnIndex on SessionTurn rows.
+            localTaskTurnIndex++;
             BeginProcessingPresentation();
             StartCoroutine(PostDialogueRequest());
         }
@@ -433,14 +471,62 @@ public class OpenAIRequest : MonoBehaviour
             })
             .ToList();
 
+        // Resolve task context fresh PER REQUEST (no caching) so a transition
+        // from Section A to Section B, or from Object Naming to Sentence
+        // Completion, never carries stale metadata into the next /llm-dialogue
+        // payload. Static accessors return whatever the current scene's
+        // checklist / metadata provider has populated; if nothing is set
+        // (legacy / non-study flow) the fields fall through to null and are
+        // dropped from the wire by NullValueHandling.Ignore.
+        StudyTaskContext taskContext = StudyTaskResultBuffer.TaskContext;
+        StudyItemMetadata activeItem = StudyActiveItemTracker.ActiveItemMetadata;
+
+        string assignmentId = NullIfEmpty(RuntimeSessionContext.AssignmentId);
+        string phaseId = NullIfEmpty(taskContext?.phaseId);
+        string taskId = NullIfEmpty(taskContext?.taskId);
+        string sectionId = NullIfEmpty(taskContext?.sectionId);
+        string taskType = NullIfEmpty(taskContext?.taskType);
+        string patientPersonaId = NullIfEmpty(taskContext?.patientId);
+        string itemId = NullIfEmpty(activeItem?.itemId);
+        string itemLabel = NullIfEmpty(activeItem?.targetAnswer);
+
+        // progressKey uses the SAME semantic formula as SessionTaskProgressClient
+        // (phaseId + "#" + taskOrSectionId). Only send it when BOTH halves are
+        // present, otherwise leave it null so the backend can ignore it instead
+        // of receiving a malformed key.
+        string taskOrSectionId = taskId ?? sectionId;
+        string progressKey = (phaseId != null && taskOrSectionId != null)
+            ? phaseId + "#" + taskOrSectionId
+            : null;
+
         var payload = new DialogueRequestPayload
         {
             messages = filteredMessages,
             metadata = new DialogueMetadata
             {
+                // Legacy field — preserved exactly so the response-side
+                // TryApplyResolvedTurnIndex path and the timing-update flow
+                // (PUT /sessions/{sid}/turns/{turnIndex}) continue to work
+                // unchanged.
                 turnIndex = turnIndex,
+                // clientTurnIndex is sourced from localTaskTurnIndex, NOT
+                // turnIndex, because turnIndex is overwritten by the
+                // server-resolved global index via TryApplyResolvedTurnIndex
+                // on each /llm-dialogue response. localTaskTurnIndex is the
+                // independent Unity-side per-task counter that stays clean
+                // for research analysis.
+                clientTurnIndex = localTaskTurnIndex > 0 ? (int?)localTaskTurnIndex : null,
                 client = "unity-webgl",
-                userSpeechStartAt = activeUserSpeechStartAt
+                userSpeechStartAt = activeUserSpeechStartAt,
+                assignmentId = assignmentId,
+                phaseId = phaseId,
+                taskId = taskId,
+                sectionId = sectionId,
+                taskType = taskType,
+                progressKey = progressKey,
+                itemId = itemId,
+                itemLabel = itemLabel,
+                patientPersonaId = patientPersonaId,
             }
         };
 
@@ -450,6 +536,11 @@ public class OpenAIRequest : MonoBehaviour
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
+    }
+
+    private static string NullIfEmpty(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
     private bool TryExtractDialogueResponse(string responseBody, out string responseText, out int emotionCode, out int motionCode)
@@ -769,6 +860,7 @@ public class OpenAIRequest : MonoBehaviour
         if (needsInitialization)
         {
             turnIndex = 0;
+            localTaskTurnIndex = 0;
             InitializeChat();
             ScoreManager scoreManager = TryResolveScoreManager(includeInactive: true);
             if (scoreManager != null)
