@@ -124,6 +124,70 @@ public class ScoreManager : MonoBehaviour
             System.StringComparison.OrdinalIgnoreCase);
     }
 
+    // Phase 1 (May 19): when the active study flow is Phase 1, the report
+    // panel must NOT show rubric / item-level / narrative content. The
+    // panel is kept visible (the existing X-close + completion + course
+    // unlock chain depend on it), but its content is replaced with a
+    // neutral processing/saved-data message. See the call sites in
+    // CreateNoConversationReport, ProcessEvaluationResult (rubric branch),
+    // DisplayEvaluationToUI (legacy `report` wrapper), and
+    // DisplayErrorReport.
+    //
+    // `internal` so CameraClipboardController.PrepareStudyFeedbackView can
+    // skip the legacy "Rubric-Based Assessment Feedback" /
+    // "AI Interaction Feedback" waiting-state UI for Phase 1 and show the
+    // processing message from the moment the panel becomes visible.
+    internal static bool IsPhase1StudyFlow()
+    {
+        StudyTaskResultPayload payload = TryBuildStudyTaskPayload();
+        return string.Equals(
+            payload?.taskContext?.phaseId,
+            StudyDataDefaults.Phase1,
+            System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Title shown above the body in every Phase 1 report-panel state.
+    // `internal` so CameraClipboardController can paint the same title
+    // during the pre-/llm-scoring waiting state.
+    internal const string Phase1ProcessingTitle = "AI is Processing Your Interaction";
+
+    // Body shown when /llm-scoring runs (normal interaction + legacy
+    // `report` wrapper + HTTP error). Wording acknowledges the AI
+    // processing because /llm-scoring has fired by the time this body
+    // renders. Also reused by CameraClipboardController for the
+    // pre-/llm-scoring waiting state so students never see the legacy
+    // rubric waiting placeholder.
+    internal const string Phase1ProcessingBodyNormal =
+        "Thank you for completing this VOICE activity and supporting the virtual patient interaction.\n\n"
+        + "Your responses and session data have been saved. Our AI system is processing the interaction in the background to support the study workflow.\n\n"
+        + "You may close this window when you are ready to continue.";
+
+    // Body shown when the zero-turn guard in SubmitEvaluation
+    // short-circuits BEFORE /llm-scoring runs (Phase 1 only — Phase 2 is
+    // filtered out by IsPhase2StudyFlow upstream). Wording deliberately
+    // avoids "AI is processing the interaction" because no /llm-scoring
+    // request was sent on this path.
+    private const string Phase1ProcessingBodyNoConversation =
+        "No conversation was recorded during this activity.\n\n"
+        + "Your session data has been saved for the study workflow.\n\n"
+        + "You may close this window when you are ready to continue.";
+
+    // Routes the Phase 1 message to every StudyFeedbackPresenter in the
+    // scene. Mirrors the FindObjectsByType pattern already used by
+    // ApplyRubricAssessment.
+    private static void ShowPhase1ProcessingMessage(string title, string body)
+    {
+        StudyFeedbackPresenter[] presenters = FindObjectsByType<StudyFeedbackPresenter>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+        foreach (StudyFeedbackPresenter presenter in presenters)
+        {
+            if (presenter == null)
+                continue;
+            presenter.ShowAiProcessingMessage(title, body);
+        }
+    }
+
     // Returns true when the active flow is a Phase 1 or Phase 2 study task.
     // Used to gate the post-/llm-scoring task-progress PUT so legacy non-study
     // callers do not trigger task-progress completion side effects.
@@ -169,6 +233,19 @@ public class ScoreManager : MonoBehaviour
         if (evaluationCanvas != null)
             evaluationCanvas.gameObject.SetActive(true);
 
+        // Phase 1: hide the legacy "Evaluation Report / No Conversation
+        // Recorded / start a new conversation" copy and show the neutral
+        // saved-data message instead. Uses the no-conversation body
+        // variant because /llm-scoring has NOT been called on this path
+        // (the zero-turn guard in SubmitEvaluation returns early).
+        if (IsPhase1StudyFlow())
+        {
+            ShowPhase1ProcessingMessage(Phase1ProcessingTitle, Phase1ProcessingBodyNoConversation);
+            StartCoroutine(RefreshScrollViewLayout());
+            Debug.Log("[ScoreManager] Phase 1 no-conversation: showing AI processing message.");
+            return;
+        }
+
         StringBuilder reportContent = new StringBuilder();
         reportContent.AppendLine("Evaluation Report\n");
         reportContent.AppendLine("No Conversation Recorded\n");
@@ -208,6 +285,17 @@ public class ScoreManager : MonoBehaviour
 
         if (evaluationCanvas != null)
             evaluationCanvas.gameObject.SetActive(true);
+
+        // Phase 1: never surface "Evaluation Report" or technical error
+        // wording to students. Show the same neutral processing copy as
+        // the success path. The backend error has already been logged
+        // above; backend retry / network logic is untouched.
+        if (IsPhase1StudyFlow())
+        {
+            ShowPhase1ProcessingMessage(Phase1ProcessingTitle, Phase1ProcessingBodyNormal);
+            StartCoroutine(RefreshScrollViewLayout());
+            return;
+        }
 
         if (reportText != null)
         {
@@ -382,8 +470,15 @@ public class ScoreManager : MonoBehaviour
             // rubric apply step is skipped, preserving the prior behavior.
             if (reportToken == null)
             {
+                // Phase 1 returns the flat rubricAssessment envelope but
+                // we no longer render rubric/item-level detail to
+                // students. Skip ApplyRubricAssessment for Phase 1 and
+                // show the neutral processing message. Phase 2 keeps the
+                // existing no-op behavior (its envelope has neither
+                // `report` nor `rubricAssessment`).
+                bool isPhase1 = IsPhase1StudyFlow();
                 JToken rubricToken = jsonResponse["rubricAssessment"];
-                if (rubricToken != null)
+                if (rubricToken != null && !isPhase1)
                 {
                     RubricAssessmentResult rubricAssessment = rubricToken.ToObject<RubricAssessmentResult>();
                     if (rubricAssessment != null)
@@ -393,6 +488,11 @@ public class ScoreManager : MonoBehaviour
                             rubricAssessment = rubricAssessment
                         }, hideAiInteractionBlock: true);
                     }
+                }
+
+                if (isPhase1)
+                {
+                    ShowPhase1ProcessingMessage(Phase1ProcessingTitle, Phase1ProcessingBodyNormal);
                 }
 
                 Debug.Log("[ScoreManager] /llm-scoring response did not include a legacy `report` wrapper; treating as accepted (Phase 1 rubric / Phase 2 evidence envelope). Skipping legacy narrative rendering.");
@@ -439,6 +539,20 @@ public class ScoreManager : MonoBehaviour
 
         if (evaluationCanvas != null)
             evaluationCanvas.gameObject.SetActive(true);
+
+        // Defensive Phase 1 short-circuit. The current sandbox backend
+        // returns the flat rubricAssessment envelope (no `report`
+        // wrapper) for Phase 1, so this branch is not reached for
+        // Phase 1 today. If a future backend change reintroduces the
+        // legacy `report` wrapper, Phase 1 students must still see only
+        // the processing message — never the formatter's narrative or
+        // the rubric detail.
+        if (IsPhase1StudyFlow())
+        {
+            ShowPhase1ProcessingMessage(Phase1ProcessingTitle, Phase1ProcessingBodyNormal);
+            StartCoroutine(RefreshScrollViewLayout());
+            return;
+        }
 
         MedicalReportFormatter formatter = reportText.GetComponent<MedicalReportFormatter>();
         if (formatter != null)

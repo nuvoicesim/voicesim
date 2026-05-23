@@ -145,6 +145,38 @@ public class StudyFeedbackPresenter : MonoBehaviour
         RebuildLayout();
     }
 
+    // Phase 1 (May 19): replace the rubric / AI-Interaction stack with a
+    // single neutral processing message. Hides the rubric block, keeps the
+    // AI Interaction block visible because the ScoreManager-owned report
+    // TextMeshPro is reparented inside that block (EnsureAiInteractionBlock
+    // sets SetParent at line ~230), and overrides the block's header +
+    // body strings with the supplied title and body. RebuildLayout is
+    // forced so the panel collapses to its new natural height with no
+    // orphan empty section under the message.
+    //
+    // This is a Phase 1-only entry point. Non-Phase-1 callers continue to
+    // use SetRubricFeedback / SetRubricBlockVisible /
+    // SetAiInteractionBlockVisible, all of which remain unchanged.
+    public void ShowAiProcessingMessage(string title, string body)
+    {
+        if (rubricBlock == null || aiInteractionBlock == null)
+            EnsureDefaultStructure();
+
+        if (rubricBlock != null)
+            rubricBlock.SetActive(false);
+
+        if (aiInteractionBlock != null)
+            aiInteractionBlock.SetActive(true);
+
+        if (aiInteractionHeaderText != null)
+            aiInteractionHeaderText.text = title ?? string.Empty;
+
+        if (aiInteractionReportText != null)
+            aiInteractionReportText.text = body ?? string.Empty;
+
+        RebuildLayout();
+    }
+
     private RectTransform ResolveContentRoot()
     {
         if (contentRoot != null)
