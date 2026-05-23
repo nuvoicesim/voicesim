@@ -11,6 +11,7 @@ public class StudyCompletionChecklistManager : MonoBehaviour
     private const float CompletionToggleMinWidth = 180f;
     private const float CompletionLabelMinWidth = 140f;
     private const float CompletionLabelLeftOffset = 50f;
+    private const float Phase2BackButtonDelaySeconds = 3.5f;
 
     [Header("References")]
     [SerializeField] private Transform contentParent;
@@ -40,6 +41,7 @@ public class StudyCompletionChecklistManager : MonoBehaviour
     private readonly Dictionary<string, int> itemIdToRowIndex = new Dictionary<string, int>();
     private bool[] completed;
     private IStudyItemMetadataProvider metadataProvider;
+    private Coroutine backButtonDelayCoroutine;
 
     public int ItemCount => completed != null ? completed.Length : 0;
 
@@ -219,8 +221,38 @@ public class StudyCompletionChecklistManager : MonoBehaviour
             cameraClipboardController.TriggerClipboardView();
         }
 
+        ShowBackButtonAfterOptionalDelay();
+    }
+
+    // Phase 2 flows kick off /llm-scoring + task-progress PUT asynchronously
+    // from OnFinishClicked; the Back button is purely navigation, so delaying
+    // its appearance gives those async requests time to land before the
+    // scene can be unloaded via ReturnToScenarioSelect. Non-Phase-2 flows
+    // (and any future Phase 1 attachment of this manager) preserve the
+    // existing immediate-show behavior.
+    private void ShowBackButtonAfterOptionalDelay()
+    {
+        if (backButton == null)
+            return;
+
+        bool isPhase2 = IsPhase2StudyFlow();
+        if (!isPhase2)
+        {
+            backButton.gameObject.SetActive(true);
+            return;
+        }
+
+        if (backButtonDelayCoroutine != null)
+            StopCoroutine(backButtonDelayCoroutine);
+        backButtonDelayCoroutine = StartCoroutine(ShowBackButtonAfterDelay(Phase2BackButtonDelaySeconds));
+    }
+
+    private System.Collections.IEnumerator ShowBackButtonAfterDelay(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
         if (backButton != null)
             backButton.gameObject.SetActive(true);
+        backButtonDelayCoroutine = null;
     }
 
     // Returns true when the active flow is a Phase 2 study task. Reads from
