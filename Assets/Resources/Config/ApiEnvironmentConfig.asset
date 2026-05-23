@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24358d2bfb04346edba1211ec268865e, type: 3}
   m_Name: ApiEnvironmentConfig
   m_EditorClassIdentifier: Assembly-CSharp::ApiEnvironmentConfig
-  backendBaseUrl: 'https://bhyalmu7i1.execute-api.us-east-1.amazonaws.com/prod '
+  backendBaseUrl: https://bhyalmu7i1.execute-api.us-east-1.amazonaws.com/prod
