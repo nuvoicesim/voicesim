@@ -231,7 +231,7 @@
       "semanticKeywords": ["number", "week", "days", "count"],
       "phonemicKeywords": ["sev", "se", "svn", "sven"],
       "studentHints": {
-        "Semantic": "It is the number of days in a week.",
+        "Semantic": "Think about the number of days from Monday through Sunday.",
         "Phonemic": "It starts with 'S' like 'sun'.",
         "Model": "Say 'seven'."
       }
