@@ -115,6 +115,16 @@ public class SimuCaseChecklistManager : MonoBehaviour
                 });
             }
         }
+
+        // Phase 1 (May 19): rewrite the visible Label text on each rubric
+        // score toggle so students see a short meaning hint ("3 Correct" /
+        // "1 Cued" / etc.) instead of a bare digit. The numeric score value
+        // is resolved from the Toggle GameObject name ("Score0".."Score3")
+        // by TryResolveScoreValue, so the label rewrite is purely cosmetic
+        // and never participates in score capture, /llm-scoring payload
+        // construction, or task-progress PUT. Section B and unknown scenes
+        // are no-ops.
+        ApplyScoreLabels();
     }
 
     // ── Panel ────────────────────────────────────────────────────────────────
@@ -416,5 +426,168 @@ public class SimuCaseChecklistManager : MonoBehaviour
 
         string trailingNumber = text.Substring(start + 1, end - start);
         return int.TryParse(trailingNumber, out score);
+    }
+
+    // ── Score-label display (Phase 1 May 19) ─────────────────────────────────
+    //
+    // Visible score labels on each Score toggle are a UnityEngine.UI.Text
+    // (legacy uGUI Text) component on a child GameObject named "Label", e.g.:
+    //   QuestionItem → ScoreRow → Score3 → Label → UnityEngine.UI.Text
+    //
+    // These are NOT TextMeshPro. A prior attempt that used
+    // GetComponentInChildren<TMP_Text> silently no-op'd. The implementation
+    // below targets UnityEngine.UI.Text first and falls back to TMP_Text
+    // only if a future scene/prefab migrates to TMP.
+    //
+    // The numeric score value is still resolved from the Toggle GameObject
+    // name ("Score0" / "Score1" / "Score2" / "Score3") via the existing
+    // TryResolveScoreValue path. Nothing in this label-rewrite block
+    // touches Toggle.isOn, Toggle.group, listeners, selectedScores, or
+    // GameObject names.
+
+    // Maps the active scene name to a section identifier ("A"/"B"/"C"/"D"),
+    // mirroring the same scene-name heuristic MarkCurrentSectionCompleted
+    // already trusts. Returns the empty string for non-section scenes.
+    private string ResolveSectionIdFromSceneName()
+    {
+        string sceneName = SceneManager.GetActiveScene().name ?? "";
+        string lower = sceneName.ToLowerInvariant();
+        if (lower.Contains("sectiona")) return "A";
+        if (lower.Contains("sectionb")) return "B";
+        if (lower.Contains("sectionc")) return "C";
+        if (lower.Contains("sectiond")) return "D";
+        return "";
+    }
+
+    // Returns the labeled string for a given (sectionId, score) pair, or
+    // null when the section has no labeled rubric (Section B) or the score
+    // is outside the section's option set. Returning null at the call site
+    // means "leave the existing Label text alone".
+    private static string BuildScoreLabel(string sectionId, int score)
+    {
+        // Two-line format: number on top, short meaning word below. Words
+        // were finalized after a manual visual pass — keep them exact.
+        if (string.Equals(sectionId, "A", System.StringComparison.Ordinal))
+        {
+            switch (score)
+            {
+                case 3: return "3\nRight";
+                case 2: return "2\nClose";
+                case 1: return "1\nCue";
+                case 0: return "0\nWrong";
+                default: return null;
+            }
+        }
+
+        if (string.Equals(sectionId, "C", System.StringComparison.Ordinal)
+            || string.Equals(sectionId, "D", System.StringComparison.Ordinal))
+        {
+            switch (score)
+            {
+                case 2: return "2\nRight";
+                case 1: return "1\nPartial";
+                case 0: return "0\nWrong";
+                default: return null;
+            }
+        }
+
+        return null;
+    }
+
+    // Fixed font size shared by every rewritten Score label across all
+    // rows and sections. Hardcoding a single value here is intentional:
+    // legacy uGUI Best Fit was causing per-label drift (each toggle's
+    // text shrank independently, producing visually mismatched sizes
+    // across a single row). 15 fits the longest word ("Partial",
+    // Section C/D) inside the prefab/scene-authored Label rect on two
+    // lines without overflow or clipping at the sandbox resolutions
+    // tested, and is consistent for Section A's 4-toggle row + the
+    // 3-toggle rows in Sections C and D. Bumped from 14 → 15 after a
+    // manual visual pass; nudge in 1-step increments if needed.
+    private const int Phase1ScoreLabelFontSize = 15;
+
+    private void ApplyScoreLabels()
+    {
+        string sectionId = ResolveSectionIdFromSceneName();
+        if (string.IsNullOrEmpty(sectionId) || string.Equals(sectionId, "B", System.StringComparison.Ordinal))
+            return;
+
+        foreach (Transform item in questionItemRows)
+        {
+            if (item == null)
+                continue;
+
+            foreach (Toggle toggle in item.GetComponentsInChildren<Toggle>(true))
+            {
+                if (toggle == null)
+                    continue;
+
+                // TryResolveScoreValue resolves via the Toggle GameObject
+                // name first ("Score3" / "Score2" / etc.), so the captured
+                // value is independent of the Label text we're about to
+                // overwrite. If we can't resolve a numeric score, skip the
+                // toggle (it isn't a rubric option).
+                if (!TryResolveScoreValue(toggle, out int score))
+                    continue;
+
+                string newLabel = BuildScoreLabel(sectionId, score);
+                if (string.IsNullOrEmpty(newLabel))
+                    continue;
+
+                // Per the Codex finding, the visible label lives on a
+                // direct child GameObject named "Label" carrying a legacy
+                // UnityEngine.UI.Text. Use Transform.Find for the direct
+                // child lookup; fall back to a recursive search if a future
+                // prefab restructure breaks that assumption.
+                Transform labelTransform = toggle.transform.Find("Label");
+
+                UnityEngine.UI.Text legacy = null;
+                if (labelTransform != null)
+                    legacy = labelTransform.GetComponent<UnityEngine.UI.Text>();
+                if (legacy == null)
+                    legacy = toggle.GetComponentInChildren<UnityEngine.UI.Text>(true);
+
+                if (legacy != null)
+                {
+                    legacy.text = newLabel;
+
+                    // Pin a consistent font size for every rewritten
+                    // Score label. Best Fit is explicitly disabled
+                    // because it was shrinking each label independently
+                    // — labels in the same row ended up at visually
+                    // different sizes depending on word length. Center
+                    // alignment keeps the two-line "digit + word"
+                    // visually balanced inside the existing Label rect.
+                    // Font, color, RectTransform, and the GameObject
+                    // hierarchy are preserved.
+                    legacy.resizeTextForBestFit = false;
+                    legacy.fontSize = Phase1ScoreLabelFontSize;
+                    legacy.alignment = TextAnchor.MiddleCenter;
+                    continue;
+                }
+
+                // Optional TMP fallback. Not expected to fire in the
+                // current sandbox (all known score Labels are legacy
+                // UnityEngine.UI.Text), but keeps the helper resilient
+                // if a future scene migrates a row to TextMeshPro.
+                TMP_Text tmp = null;
+                if (labelTransform != null)
+                    tmp = labelTransform.GetComponent<TMP_Text>();
+                if (tmp == null)
+                    tmp = toggle.GetComponentInChildren<TMP_Text>(true);
+
+                if (tmp != null)
+                {
+                    tmp.text = newLabel;
+                    // Mirror the legacy path: fixed size, autosize off,
+                    // centered. Keeps the two paths visually consistent
+                    // if a future migration mixes Text + TMP in the
+                    // same checklist.
+                    tmp.enableAutoSizing = false;
+                    tmp.fontSize = Phase1ScoreLabelFontSize;
+                    tmp.alignment = TextAlignmentOptions.Center;
+                }
+            }
+        }
     }
 }
