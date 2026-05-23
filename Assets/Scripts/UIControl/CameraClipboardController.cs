@@ -339,6 +339,25 @@ public class CameraClipboardController : MonoBehaviour
             return;
 
         presenter.EnsureDefaultStructure(ResolveAiInteractionReportText());
+
+        // Phase 1 (May 19): the rubric waiting state ("Rubric-Based
+        // Assessment Feedback" + "Your rubric-based feedback is being
+        // generated. Please wait..." + the "AI Interaction Feedback"
+        // header) must never appear to students. Paint the same
+        // processing message ScoreManager uses post-/llm-scoring so the
+        // panel is visually identical from the moment it becomes visible
+        // through the eventual ScoreManager render. The no-conversation
+        // path still overrides the body to the saved-data variant inside
+        // ScoreManager.CreateNoConversationReport, so we use the normal
+        // interaction copy here.
+        if (ScoreManager.IsPhase1StudyFlow())
+        {
+            presenter.ShowAiProcessingMessage(
+                ScoreManager.Phase1ProcessingTitle,
+                ScoreManager.Phase1ProcessingBodyNormal);
+            return;
+        }
+
         if (showRubricFeedbackBlock)
             presenter.ShowRubricWaitingState();
         else
