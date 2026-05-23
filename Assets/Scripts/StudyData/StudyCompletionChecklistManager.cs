@@ -12,6 +12,7 @@ public class StudyCompletionChecklistManager : MonoBehaviour
     private const float CompletionLabelMinWidth = 140f;
     private const float CompletionLabelLeftOffset = 50f;
     private const float Phase2BackButtonDelaySeconds = 3.5f;
+    private const int Phase2ObjectNamingChecklistLabelFontSize = 28;
 
     [Header("References")]
     [SerializeField] private Transform contentParent;
@@ -269,6 +270,30 @@ public class StudyCompletionChecklistManager : MonoBehaviour
                 payload?.taskContext?.phaseId,
                 StudyDataDefaults.Phase2,
                 System.StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // Narrow guard for the Phase 2 Object Naming readability bump: only this
+    // task type gets the larger row-label font. Sentence Completion (the other
+    // Phase 2 task using this manager) is intentionally excluded, and Phase 1
+    // never attaches this manager at all.
+    private static bool IsPhase2ObjectNamingFlow()
+    {
+        try
+        {
+            StudyTaskResultPayload payload = StudyTaskResultBuffer.BuildPayload(StudyDataDefaults.StatusCompleted);
+            return string.Equals(
+                       payload?.taskContext?.phaseId,
+                       StudyDataDefaults.Phase2,
+                       System.StringComparison.OrdinalIgnoreCase)
+                   && string.Equals(
+                       payload?.taskContext?.taskType,
+                       StudyDataDefaults.TaskTypeObjectNamingWithCueing,
+                       System.StringComparison.OrdinalIgnoreCase);
         }
         catch
         {
@@ -552,6 +577,8 @@ public class StudyCompletionChecklistManager : MonoBehaviour
             AlignCompletionLabelRect(text.rectTransform);
         }
 
+        bool applyObjectNamingFontSize = IsPhase2ObjectNamingFlow();
+
         Text[] legacyLabels = toggle.GetComponentsInChildren<Text>(true);
         foreach (Text text in legacyLabels)
         {
@@ -561,6 +588,8 @@ public class StudyCompletionChecklistManager : MonoBehaviour
             text.text = label;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.verticalOverflow = VerticalWrapMode.Overflow;
+            if (applyObjectNamingFontSize)
+                text.fontSize = Phase2ObjectNamingChecklistLabelFontSize;
             AlignCompletionLabelRect(text.rectTransform);
         }
     }
