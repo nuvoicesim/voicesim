@@ -256,6 +256,7 @@ public class CameraClipboardController : MonoBehaviour
         if (clipboardReport != null)
         {
             PrepareStudyFeedbackView();
+            BeginPhase1ProcessingCloseDelay();
             clipboardReport.SetActive(true);
             Debug.Log("激活clipboard区域");
         }
@@ -362,6 +363,16 @@ public class CameraClipboardController : MonoBehaviour
             presenter.ShowRubricWaitingState();
         else
             presenter.SetRubricBlockVisible(false);
+    }
+
+    private void BeginPhase1ProcessingCloseDelay()
+    {
+        if (!ScoreManager.IsPhase1StudyFlow())
+            return;
+
+        ScoreManager scoreManager = ResolveScoreManagerForReport();
+        if (scoreManager != null)
+            scoreManager.BeginPhase1ProcessingCloseDelay();
     }
 
     private StudyFeedbackPresenter ResolveStudyFeedbackPresenter()
