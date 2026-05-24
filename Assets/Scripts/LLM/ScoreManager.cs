@@ -24,7 +24,10 @@ public class ScoreManager : MonoBehaviour
     private string currentScenario = "";
     private List<ConversationTurn> conversationTurns = new List<ConversationTurn>();
     private const string ScoringPath = "/llm-scoring";
+    private const float Phase1ProcessingCloseButtonDelaySeconds = 5f;
     [SerializeField] private int scoringTimeoutSeconds = 60;
+    private Coroutine phase1CloseButtonDelayCoroutine;
+    private bool phase1CloseButtonDelayPending;
 
     void Awake()
     {
@@ -49,6 +52,16 @@ public class ScoreManager : MonoBehaviour
         {
             Instance = null;
         }
+    }
+
+    private void OnEnable()
+    {
+        TryStartPhase1CloseButtonDelayCoroutine();
+    }
+
+    private void OnDisable()
+    {
+        StopPhase1CloseButtonDelayCoroutine();
     }
 
     void Start()
@@ -90,6 +103,9 @@ public class ScoreManager : MonoBehaviour
 
     public void SubmitEvaluation()
     {
+        if (IsPhase1StudyFlow())
+            BeginPhase1ProcessingCloseDelay();
+
         // Phase 2 evidence persistence is valid with zero conversation turns
         // (e.g. Phase 2 Object Naming has no SLP-student dialogue). The legacy
         // CreateNoConversationReport() activates evaluationCanvas and returns
@@ -151,26 +167,64 @@ public class ScoreManager : MonoBehaviour
     // during the pre-/llm-scoring waiting state.
     internal const string Phase1ProcessingTitle = "AI is Processing Your Interaction";
 
-    // Body shown when /llm-scoring runs (normal interaction + legacy
-    // `report` wrapper + HTTP error). Wording acknowledges the AI
-    // processing because /llm-scoring has fired by the time this body
-    // renders. Also reused by CameraClipboardController for the
-    // pre-/llm-scoring waiting state so students never see the legacy
-    // rubric waiting placeholder.
+    // Body shown for the normal interaction, legacy `report` wrapper, HTTP
+    // error, and pre-/llm-scoring waiting states so students know to wait
+    // briefly before closing while save/progress work continues.
     internal const string Phase1ProcessingBodyNormal =
-        "Thank you for completing this VOICE activity and supporting the virtual patient interaction.\n\n"
-        + "Your responses and session data have been saved. Our AI system is processing the interaction in the background to support the study workflow.\n\n"
-        + "You may close this window when you are ready to continue.";
+        "Please wait about 5 seconds before closing this panel.\n\n"
+        + "We are saving your session data and section progress. Closing too quickly may prevent your progress from being recorded.\n\n"
+        + "After a few seconds, you may close this window and continue.";
 
-    // Body shown when the zero-turn guard in SubmitEvaluation
-    // short-circuits BEFORE /llm-scoring runs (Phase 1 only — Phase 2 is
-    // filtered out by IsPhase2StudyFlow upstream). Wording deliberately
-    // avoids "AI is processing the interaction" because no /llm-scoring
-    // request was sent on this path.
+    // Body shown when the zero-turn guard in SubmitEvaluation short-circuits
+    // BEFORE /llm-scoring runs (Phase 1 only; Phase 2 is filtered out by
+    // IsPhase2StudyFlow upstream). Keep the same close-delay instruction.
     private const string Phase1ProcessingBodyNoConversation =
-        "No conversation was recorded during this activity.\n\n"
-        + "Your session data has been saved for the study workflow.\n\n"
-        + "You may close this window when you are ready to continue.";
+        "Please wait about 5 seconds before closing this panel.\n\n"
+        + "We are saving your session data and section progress. Closing too quickly may prevent your progress from being recorded.\n\n"
+        + "After a few seconds, you may close this window and continue.";
+
+    internal void BeginPhase1ProcessingCloseDelay()
+    {
+        if (!IsPhase1StudyFlow())
+            return;
+
+        StopPhase1CloseButtonDelayCoroutine();
+        phase1CloseButtonDelayPending = true;
+        SetCloseButtonInteractable(false);
+        TryStartPhase1CloseButtonDelayCoroutine();
+    }
+
+    private void TryStartPhase1CloseButtonDelayCoroutine()
+    {
+        if (!phase1CloseButtonDelayPending || closeButton == null || !isActiveAndEnabled)
+            return;
+
+        phase1CloseButtonDelayCoroutine = StartCoroutine(EnablePhase1CloseButtonAfterDelay());
+    }
+
+    private IEnumerator EnablePhase1CloseButtonAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(Phase1ProcessingCloseButtonDelaySeconds);
+
+        SetCloseButtonInteractable(true);
+        phase1CloseButtonDelayPending = false;
+        phase1CloseButtonDelayCoroutine = null;
+    }
+
+    private void StopPhase1CloseButtonDelayCoroutine()
+    {
+        if (phase1CloseButtonDelayCoroutine == null)
+            return;
+
+        StopCoroutine(phase1CloseButtonDelayCoroutine);
+        phase1CloseButtonDelayCoroutine = null;
+    }
+
+    private void SetCloseButtonInteractable(bool interactable)
+    {
+        if (closeButton != null)
+            closeButton.interactable = interactable;
+    }
 
     // Routes the Phase 1 message to every StudyFeedbackPresenter in the
     // scene. Mirrors the FindObjectsByType pattern already used by
