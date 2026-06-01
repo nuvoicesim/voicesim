@@ -874,6 +874,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3107218147411016029}
   - component: {fileID: 2947295086104516225}
+  - component: {fileID: 2947295086104516999}
   m_Layer: 5
   m_Name: CueController
   m_TagString: Untagged
@@ -958,6 +959,20 @@ MonoBehaviour:
     image: {fileID: 21300000, guid: f15eacce789a94e11a30a10bcc684ef5, type: 3}
   - targetWord: Tired
     image: {fileID: 21300000, guid: 85d4c97cd09c4443587063f1b6b666e4, type: 3}
+--- !u!114 &2947295086104516999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5605633128736920730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0e7e10ec0e7e10ec0e7e10ec0e7e10e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  cueController: {fileID: 2947295086104516225}
+  studyItemMetadataProviderBehaviour: {fileID: 0}
 --- !u!1 &6931711439939928852
 GameObject:
   m_ObjectHideFlags: 0
