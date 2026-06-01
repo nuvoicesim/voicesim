@@ -1678,6 +1678,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5628695631374167484}
   - component: {fileID: 4756977097104604561}
+  - component: {fileID: 4756977097104604999}
   m_Layer: 5
   m_Name: CueController
   m_TagString: Untagged
@@ -1742,6 +1743,20 @@ MonoBehaviour:
   includePromptInTargetText: 1
   targetLabelPrefix: 'Target:'
   targetImages: []
+--- !u!114 &4756977097104604999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667385876023647523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0e7e10ec0e7e10ec0e7e10ec0e7e10e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  cueController: {fileID: 4756977097104604561}
+  studyItemMetadataProviderBehaviour: {fileID: 0}
 --- !u!1 &1702909059657314061
 GameObject:
   m_ObjectHideFlags: 0

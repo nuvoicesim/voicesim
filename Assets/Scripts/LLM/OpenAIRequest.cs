@@ -769,11 +769,52 @@ public class OpenAIRequest : MonoBehaviour
 
     private SimuCaseTargetButtonUI TryResolveSimuCaseTargetButtonUI()
     {
+        // Both the cached-field path and the FindObjectOfType fallback must
+        // gate on isActiveAndEnabled. Without the fallback check, the resolver
+        // could return a disabled SimuCaseTargetButtonUI — most notably in
+        // Section B, where the SimuCaseTargetButtonUI MonoBehaviour has
+        // m_Enabled:0 (set by sectionB.unity's PrefabInstance override) on an
+        // otherwise-active GameObject. FindObjectOfType<T>() does not filter
+        // by component-level m_Enabled, only by GameObject active state, so a
+        // disabled component on an active GameObject would slip through.
+        //
+        // A disabled provider exposes the prefab default startingScriptNumber
+        // (11), which Phase1StudyItemMetadataResolver maps to Section C's
+        // range -> itemId="C-01", taskId="phase1-section-c". If OpenAIRequest
+        // uses that bogus metadata to call StudyActiveItemTracker
+        // .RecordStudentUtterance / RecordPatientResponse during Section B
+        // (dialogue paths fire because Phase1SessionInputGate.IsEnabled is
+        // true for the 60-second word-fluency timer), the tracker's
+        // activeItemMetadata is overwritten from B-01 to C-01 via BeginItem,
+        // wiping any cue evidence the CueController bridge already recorded.
+        // The Section B Finish snapshot then fails IsSnapshotForItem(., "B-01")
+        // and cueUsed/cueLevel/cue_pressed are dropped from the /llm-scoring
+        // payload while B-01 + studentSelectedScore (set directly from the
+        // finalize argument) remain. Returning null here makes Section B fall
+        // through to the FindObjectsByType<MonoBehaviour>(FindObjectsInactive
+        // .Exclude, ...) scan, which already filters by isActiveAndEnabled
+        // and finds no provider in Section B (correct outcome — Section B has
+        // no per-item provider; the task is owned by Phase1SectionBChecklist
+        // Manager and the cue bridge writes B-01 directly).
+        //
+        // A/C/D are unaffected (their SimuCaseTargetButtonUI has no m_Enabled
+        // override and stays enabled). Phase 2 ON has no SimuCaseTargetButton
+        // UI in scene. Phase 2 SC has a disabled stripped leftover but is
+        // inspector-wired to Phase2SentenceCompletionMetadataProvider via the
+        // configured-behaviour branch above this fallback, so the fallback is
+        // never reached.
         if (simuCaseTargetButtonUI != null && simuCaseTargetButtonUI.isActiveAndEnabled)
             return simuCaseTargetButtonUI;
 
-        simuCaseTargetButtonUI = FindObjectOfType<SimuCaseTargetButtonUI>();
-        return simuCaseTargetButtonUI;
+        SimuCaseTargetButtonUI found = FindObjectOfType<SimuCaseTargetButtonUI>();
+        if (found != null && found.isActiveAndEnabled)
+        {
+            simuCaseTargetButtonUI = found;
+            return simuCaseTargetButtonUI;
+        }
+
+        simuCaseTargetButtonUI = null;
+        return null;
     }
 
     private TargetButtonUI TryResolveLegacyTargetButtonUI()

@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
@@ -424,6 +425,71 @@ namespace UI.Cues
         public void OnCueButtonPressed(CueLevel pressedCue)
         {
             ShowHint(pressedCue);
+
+            // Section B-only direct cue evidence bridge.
+            //
+            // Section B has no IStudyItemMetadataProvider (SimuCaseTargetButtonUI
+            // is m_Enabled:0 in sectionB.unity) and no SLP↔patient dialogue, so
+            // StudyActiveItemTracker.ActiveItemMetadata never becomes B-01 on
+            // its own. The generic CueEvidenceRecorder skips sectionB (see
+            // CueEvidenceRecorder.HandleCuePressed) to prevent duplicates with
+            // this bridge. Recording here, at the exact same call site that
+            // already runs ShowHint reliably (verified in Editor), guarantees
+            // one cue_pressed StudyInteractionEvent per inner Semantic /
+            // Phonemic / Model click, attributed to the synthetic B-01 item
+            // Section B finalize uses.
+            //
+            // Sections A / C / D and Phase 2 are unaffected: scene name guard
+            // skips this block, and they continue to use CueEvidenceRecorder
+            // with its IStudyItemMetadataProvider-first resolution chain.
+            //
+            // Outer Q / hintButton presses do NOT call OnCueButtonPressed
+            // (the hintButton listener is ToggleCuePanel), so opening the
+            // panel never produces cue_pressed evidence. Only inner cue
+            // option clicks reach this code.
+            //
+            // Safe-fail: any failure inside the bridge is caught and logged
+            // as a warning; the cue UI and the existing CuePressedEvent
+            // invocation continue unchanged so the student flow is never
+            // blocked by a recorder bug.
+            if (pressedCue != CueLevel.None)
+            {
+                try
+                {
+                    // Guard on scriptNum == 26 instead of
+                    // SceneManager.GetActiveScene().name == "sectionB". scriptNum
+                    // is set by sectionB.unity's PrefabInstance override at
+                    // scene-deserialization time (before any code runs) and is
+                    // provably unique to Section B across all Phase 1 sections,
+                    // every scene file, every prefab default, every JSON content
+                    // file, and every Phase 2 runtime script range (A=21..25,
+                    // C=11..15, D=16..20, Phase 2 ObjectNaming=1..5, Phase 2
+                    // SentenceCompletion=201..210). Using scriptNum removes the
+                    // dependency on Unity's active-scene-name reporting, which
+                    // was the only static link in the bridge that could explain
+                    // the observed WebGL failure (B-01 reaches the payload via
+                    // finalize but cue evidence does not).
+                    if (scriptNum == 26)
+                    {
+                        if (Phase1StudyItemMetadataResolver.TryResolve(
+                                26,
+                                0,
+                                null,
+                                null,
+                                SceneManager.GetActiveScene().name,
+                                out StudyItemMetadata metadata) &&
+                            metadata != null)
+                        {
+                            StudyActiveItemTracker.RecordCueEvent(metadata, pressedCue.ToString());
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[CueController] Section B cue record failed: {ex.Message}");
+                }
+            }
+
             CuePressedEvent?.Invoke(pressedCue);
         }
 
